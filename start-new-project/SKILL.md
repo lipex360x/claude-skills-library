@@ -74,7 +74,9 @@ gh api repos/{owner}/{repo}/milestones -f title="<milestone name>" -f descriptio
 
 Good milestone names: the project name itself ("Project X MVP"), a version ("v1.0"), or a phase ("Phase 1: Core").
 
-For single-issue projects, a milestone is optional. Always offer a "Backlog" milestone (no due date) for future work items when the user mentions scope beyond the current plan.
+For single-issue projects, a project milestone is optional.
+
+**Backlog milestone** — always create a "Backlog" milestone (no due date) for every new project. This is a permanent bucket for future ideas, improvements, and low-priority items. It stays open indefinitely and gives the user a place to park ideas without losing them. When an item gets prioritized, move it from Backlog to an active milestone.
 
 ### 5. Create the GitHub issue
 
