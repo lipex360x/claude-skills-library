@@ -30,21 +30,21 @@ A markdown code block with a ready-to-paste prompt covering:
 ```
 Branch `feature/foo` (issue #N). Working tree dirty/clean — N files modified.
 
-## What was done
+## O que foi feito
 - ...
 
-## Where we left off
+## Onde paramos
 - ...
 
-## Context
+## Contexto
 - ...
 ```
 
 ## Guidelines
 
-- **Context, not instructions.** The prompt gives situational awareness so the next session can continue naturally. Avoid imperative language like "commit X" or "run Y" — describe what exists and what the user was working toward. The reason: imperative prompts cause the next session to act without confirming, which surprises the user.
+- **Context, not instructions.** The prompt gives situational awareness so the next session can continue naturally. Avoid imperative language like "commitar X" or "rodar Y" — describe what exists and what the user was working toward. The reason: imperative prompts cause the next session to act without confirming, which surprises the user.
 
-- **Match the user's language** — write in whatever language the user has been using in the conversation.
+- **Portuguese (PT-BR)**, matching the user's communication style. Direct and brief.
 
 - After generating, copy to clipboard via `pbcopy` and confirm to the user.
 

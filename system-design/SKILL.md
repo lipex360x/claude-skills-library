@@ -35,21 +35,26 @@ Show it to the user and **wait for approval** before proceeding.
 
 After approval, compile a **Design Spec** — a structured, self-contained reference for subagents. Read `templates/design-spec.md` for the template structure. The spec is passed verbatim to every agent prompt so they can start writing HTML immediately without re-analyzing the image.
 
-### 3. Launch agents + setup in ONE single response
+### 3. Setup first, then launch agents
 
-Subagents take several seconds to initialize. They MUST be launched **at the same time** as the setup tools, NOT after.
+The build is a **two-phase sequence**. Setup must complete before agents start, so the user sees shimmer cards on the hub and can watch agents progressively replace them while the robot blinks.
 
-**CRITICAL**: Your response must contain ALL of the following tool calls in a **single message** — agents AND setup tools together. Do NOT wait for setup to finish before launching agents. Do NOT send agents in a separate follow-up response.
+#### Phase A — Setup (single response, all in parallel)
 
-The single response must include these tool calls (order in the message doesn't matter — they run in parallel):
-
-- **N × Agent** (`run_in_background: true`) — one per artboard. Each receives the Design Spec and calls `mcp__design-canvas__write_artboard`. Read `references/agent-prompt.md` for prompt requirements and quality standards.
 - **1 × `create_project`** — create the project
 - **1 × Write** — write `tokens.css` (read template first in step 2)
 - **1 × `navigate`** — open the project hub
-- **1 × `create_artboards`** — batch create with skeleton HTML (shimmer cards)
+- **1 × `create_artboards`** — batch create with skeleton HTML (shimmer cards appear)
 
-This ensures agents start initializing (which takes seconds) while the project setup happens. By the time setup is done and shimmer cards appear, agents are already generating HTML. The robot indicator blinks throughout the process and stops only when all agents finish.
+Wait for all setup calls to complete before proceeding.
+
+#### Phase B — Launch agents (follow-up response)
+
+- **N × Agent** (`run_in_background: true`) — one per artboard, all in a **single message**. Each receives the Design Spec and writes via `curl` to the HTTP API. Read `references/agent-prompt.md` for prompt requirements, the curl template, and quality standards.
+
+**Why sequential?** `create_artboards` populates the manifest and creates shimmer files. Agents call the HTTP API (`POST /api/write-artboard`) which overwrites the shimmer HTML and emits `artboard-ready` via WebSocket. The client tracks `pendingArtboards` (added by `create_artboards`, removed by `artboard-ready`) — the robot badge blinks the **entire time** and only stops when ALL agents finish. If agents run before setup, they race against `create_artboards` and may fail or produce an empty manifest.
+
+**Why curl, not MCP?** Subagents do not reliably inherit MCP tools from the parent process. The HTTP API is the same endpoint the MCP tool calls internally — `curl` cuts the intermediary and works 100% of the time.
 
 ### 4. Plan the artboards
 
@@ -69,7 +74,7 @@ These exist because AI-generated designs tend to fall into specific traps. Under
 
 - **Stay on the hub** during the build. The user watches thumbnails appear progressively — navigating to the editor would break the visual feedback loop.
 
-- **Agents use `write_artboard` MCP**, which writes the file and notifies the browser in one call. `write_html` requires an open editor (wrong context), and `Write` doesn't notify the browser (no thumbnail update).
+- **Agents write via `curl` to the HTTP API** (`POST /api/write-artboard`), which writes the file and notifies the browser in one call. Agents MUST NOT use the `Write` tool to touch artboard files directly — it doesn't notify the browser (no thumbnail update, robot keeps blinking). MCP tools are not available to subagents.
 
 - **Batch creation** via `create_artboards` — one MCP call, not one per artboard. This shows all shimmer cards at once, giving the user immediate visual feedback of what's coming.
 

@@ -6,15 +6,39 @@
 2. Which specific artboard + sections to write (e.g., "Foundations: Color Palette, Typography, Spacing")
 3. The complete HTML template structure (doctype, head with tokens.css + fonts, artboard container)
 4. The lorem ipsum rule (agents don't inherit parent context, so repeat it explicitly)
-5. Instruction to call `mcp__design-canvas__write_artboard` with slug, file, and the complete HTML string
-6. Instruction to use only `write_artboard` — no other tools
-7. The quality standards below
+5. Instruction to write via HTTP API using Bash + curl (see below)
+6. The quality standards below
 
-## Why only `write_artboard`
+## How agents write artboards
 
-- `write_html` injects into a live editor DOM via WebSocket — requires an open editor, which doesn't exist during hub-centric builds
-- `write_artboard` writes the file to disk AND broadcasts `artboard-ready` to the hub in one call
-- `Write` (filesystem) works but doesn't notify the browser, so thumbnails won't update
+Subagents MUST write artboards via the HTTP API using Bash + curl. They do NOT have access to MCP tools and MUST NOT use the `Write` tool to touch artboard files directly.
+
+**Why:**
+- `curl` → HTTP API → writes file + emits `artboard-ready` via WebSocket → hub updates thumbnail + robot stops blinking
+- `Write` tool → writes file but does NOT notify the browser → no thumbnail update, robot blinks forever
+
+**Include this exact block in every agent prompt:**
+
+```
+## How to write your artboard
+
+Use Bash with curl to write the artboard. Do NOT use the Write tool or any MCP tool.
+
+Write your HTML to a shell variable, then POST it:
+
+```bash
+HTML='your complete HTML string here'
+curl -s -X POST http://localhost:3001/api/write-artboard \
+  -H 'Content-Type: application/json' \
+  -d "$(jq -n --arg slug "PROJECT_SLUG" --arg file "FILENAME" --arg html "$HTML" '{slug:$slug,file:$file,html:$html}')"
+```
+
+IMPORTANT:
+- Use jq to safely escape the HTML into JSON (handles quotes, newlines, special chars)
+- Do NOT use the Write tool to write artboard files — it breaks the notification flow
+- Do NOT use MCP tools — they are not available to subagents
+- If curl fails, report the error. Do NOT fall back to Write.
+```
 
 ## Quality standards
 
