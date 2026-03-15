@@ -94,7 +94,25 @@ If a milestone was created in step 4, assign the issue to it:
 gh issue edit <number> --milestone "<milestone name>"
 ```
 
-### 6. Create the feature branch
+### 6. Project board (for large projects)
+
+If the project generates **3+ issues**, offer to create a GitHub Project board for visual tracking:
+
+```bash
+# Create the project
+gh project create --title "<project name>" --owner "@me"
+
+# Add issues to the project
+gh project item-add <project-number> --owner "@me" --url <issue-url>
+```
+
+GitHub Projects V2 creates "Todo", "In Progress", and "Done" columns by default — no extra setup needed.
+
+**This step is optional and user-controlled.** Ask: "This project has N issues — want me to create a project board to track them visually?" If the user declines, skip silently.
+
+For projects with 1-2 issues, skip this step entirely — milestones already provide enough tracking.
+
+### 7. Create the feature branch
 
 ```bash
 git checkout main
@@ -105,11 +123,12 @@ git push -u origin feature/<slug>
 
 The slug comes from step 1. If the issue number is known, optionally prefix: `feature/<number>-<slug>`.
 
-### 7. Summary
+### 8. Summary
 
 Present:
-- Issue URL (linked)
+- Issue URL(s) (linked)
 - Milestone (if created) with link
+- Project board (if created) with link
 - Branch name
 - Total steps and checkboxes count
 - Remind: use `closes #N` in PR descriptions to auto-close issues on merge

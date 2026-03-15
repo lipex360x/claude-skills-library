@@ -115,6 +115,12 @@ Project (board)         ← visual overview of all work (optional for solo dev)
 - Use the project name or version: "Project X MVP", "v1.0", "Phase 1: Core"
 - Avoid generic names like "Sprint 1" unless the user follows sprint methodology
 
+### When to use project boards
+
+- **3+ issues:** offer a project board. Multiple issues benefit from a visual kanban view (Todo / In Progress / Done) to track overall progress between sessions.
+- **1-2 issues:** skip. Milestones already provide enough tracking.
+- **Always optional:** ask the user, never force. Solo devs may prefer the simplicity of just milestones + issues.
+
 ### Labels as metadata
 
 Labels answer "what type?" and "what priority?" — they complement milestones, not replace them.
