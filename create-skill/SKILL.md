@@ -73,6 +73,23 @@ Read `references/subagent-patterns.md` for practical patterns, race conditions t
 
 Read `references/review-checklist.md` and validate every item. Present the results to the user before finalizing.
 
+### 8. Generate README.md
+
+After the skill passes review, generate a `README.md` in the skill's root directory. This is the public-facing documentation — it tells users what the skill does and how to install it.
+
+1. Read `templates/skill-readme.md` for the README format.
+2. Fill in every placeholder using data from the skill:
+   - `{skill-name}` — from the frontmatter `name` field
+   - `{One-line description}` — a concise summary derived from the frontmatter `description` (not the full description — distill it to one sentence)
+   - **Trigger phrases** — extract from the description: the `/command` invocation plus 2-3 natural language phrases that would activate the skill
+   - **How it works** — summarize the major phases from the SKILL.md process steps
+   - **Usage** — show the `/skill-name` invocation with any arguments, plus a brief example scenario
+   - **Directory structure** — reflect the actual directories and files created for this skill (not the template's generic structure)
+   - **Installation** — use the format `npx skills add <repo-url> --skill <skill-name>`
+3. Write the README.md to the skill's root directory.
+
+Keep the README concise — it's a quick reference, not a duplicate of SKILL.md.
+
 ## Frontmatter reference
 
 ```yaml

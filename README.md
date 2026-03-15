@@ -25,3 +25,9 @@ npx skills add lipex360x/claude-skills-library -s create-skill
 | [system-design](./system-design/) | Extract design systems from reference images into artboards |
 | [start-new-project](./start-new-project/) | Plan and scaffold projects with structured GitHub issues |
 | [push](./push/) | Commit, push, and auto-update issue checkboxes |
+
+Each skill has its own [README.md](./create-skill/README.md) with trigger phrases, how it works, usage examples, and installation instructions. Click any skill link above to see its documentation.
+
+## Skill documentation
+
+Every skill in this library includes a `README.md` in its directory. New skills created with the `create-skill` skill automatically generate a README following the standard [template](./templates/skill-readme.md).

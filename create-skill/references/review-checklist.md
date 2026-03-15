@@ -35,3 +35,4 @@ Validate every item before finalizing a skill. Present results to the user.
 - [ ] References are one level deep (no reference chains)?
 - [ ] Large references (>300 lines) have a table of contents?
 - [ ] Skill is fully self-contained (no cross-skill dependencies)?
+- [ ] README.md generated from `templates/skill-readme.md` with all placeholders filled?
