@@ -181,7 +181,7 @@ Lead: shared packages (sequential)
 
 - **2-4 teammates** is the sweet spot. More creates coordination overhead.
 - **5-6 steps per teammate** keeps them productive without context switching.
-- **Use Sonnet for teammates** — cheaper, fast enough for focused work. Lead stays on the user's model.
+- **Teammates inherit the user's model by default.** Suggest Sonnet only if the user wants to optimize for speed or cost.
 - **Avoid same-file edits** — two teammates editing the same file causes conflicts. Split by layer/module, not by feature.
 
 ### Anti-patterns

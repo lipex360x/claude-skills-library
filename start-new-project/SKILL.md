@@ -71,7 +71,7 @@ Rules for the parallel plan:
 - **Identify the sequential prefix** — steps that must run first because everything depends on them (e.g., scaffolding, schema). These stay with the lead.
 - **Group independent steps by layer** — backend, frontend, infra, tests. Each group becomes a teammate.
 - **Mark blocked teammates** — if a teammate depends on another's output, note it explicitly (e.g., "blocked until backend completes").
-- **Suggest Sonnet for teammates** — cheaper and fast enough for focused, scoped work. Lead stays on the user's current model.
+- **Teammates inherit the user's model by default.** Optionally suggest Sonnet for teammates if the user wants to optimize for speed or cost. Don't default to a cheaper model — let the user decide.
 - **Keep it practical** — 2-4 teammates max. More creates coordination overhead that outweighs the parallelism benefit.
 
 If Agent Teams is not enabled, skip this section entirely.

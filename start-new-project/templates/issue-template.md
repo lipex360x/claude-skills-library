@@ -52,9 +52,9 @@ Use this structure when composing the GitHub issue body. Adapt sections to the p
 > Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`. Remove this section if not using Agent Teams.
 
 After Step [N] ([last sequential step]), spawn teammates:
-- `[teammate-name]` (Sonnet): Steps [X-Y] — [what this teammate owns]
-- `[teammate-name]` (Sonnet): Steps [W-Z] — [what this teammate owns]
-- `[teammate-name]` (Sonnet): Steps [A-B] — blocked until `[dependency-teammate]` completes
+- `[teammate-name]`: Steps [X-Y] — [what this teammate owns]
+- `[teammate-name]`: Steps [W-Z] — [what this teammate owns]
+- `[teammate-name]`: Steps [A-B] — blocked until `[dependency-teammate]` completes
 ```
 
 ## Section notes
@@ -95,5 +95,5 @@ After Step [N] ([last sequential step]), spawn teammates:
 - Identify the sequential prefix (steps that must complete before parallelism starts)
 - Group independent steps by layer/module — each group becomes a teammate
 - Mark dependencies between teammates explicitly
-- Suggest Sonnet for teammates (cost-effective for focused work)
+- Teammates inherit the user's model by default — suggest Sonnet only if optimizing for speed/cost
 - Keep to 2-4 teammates max
