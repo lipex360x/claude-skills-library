@@ -21,3 +21,5 @@ npx skills add lipex360x/claude-skills-library -s skill-authoring-guide
 | Skill | Description |
 |-------|-------------|
 | [skill-authoring-guide](./skill-authoring-guide/) | Best practices for writing high-quality Claude Code skills |
+| [prompt-continue](./prompt-continue/) | Generate continuation prompts for seamless session handoffs |
+| [system-design](./system-design/) | Extract design systems from reference images into artboards |
