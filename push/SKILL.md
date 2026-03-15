@@ -1,6 +1,6 @@
 ---
 name: push
-description: Commit, push, and update GitHub issue checkboxes in one command. Analyzes changes, drafts a conventional commit message, stages, commits (with husky management), pushes, then reviews and updates the open issue for the current branch. Supports -nh flag to skip husky entirely. Use when the user says "push", "commit and push", "ship it", "/push", or wants to finalize work and sync issue tracking — even if they don't explicitly mention the issue.
+description: Commit, push, and update GitHub issue checkboxes in one command. Analyzes changes, drafts a conventional commit message, stages, commits (with husky management), pushes, then reviews and updates the open issue for the current branch. Supports -y flag to auto-approve commit message and -nh flag to skip husky. Use when the user says "push", "commit and push", "ship it", "/push", or wants to finalize work and sync issue tracking — even if they don't explicitly mention the issue.
 user-invocable: true
 ---
 
@@ -10,7 +10,10 @@ Stage, commit, push, and update the related GitHub issue — all in one command.
 
 ## Flags
 
+- **`-y`** — auto-approve the commit message. Skip the confirmation gate — draft the message and commit immediately. Useful for small, obvious changes where review adds no value.
 - **`-nh`** — skip husky entirely (uses `--no-verify` on the commit). Without this flag, the default behavior is: husky runs on the first commit of the session, `--no-verify` on subsequent commits.
+
+Flags can be combined: `/push -y -nh`
 
 ## Steps
 
@@ -28,17 +31,18 @@ git branch -vv
 
 If the working tree is clean (no staged or unstaged changes, no untracked files to stage), inform the user and stop. Nothing to push.
 
-### 2. Draft commit message
+### 2. Analyze and group changes
 
-Analyze all changes (staged + unstaged) to understand what was done and why.
+Analyze all changes (staged + unstaged) and group them by concern. If changes touch unrelated topics (e.g., a new feature + a rename + a cleanup), create **separate commits** for each — one commit per concern. This applies even with `-y`.
 
-Draft a **Conventional Commits** message in English:
+For each group, draft a **Conventional Commits** message in English:
 - Prefixes: `feat:`, `fix:`, `refactor:`, `chore:`, `test:`, `docs:`, `style:`
 - Focus on **why**, not **what** — the diff shows what changed
 - One line subject (under 72 chars), optional body for complex changes
-- Footer: `Co-Authored-By: Claude <model> <noreply@anthropic.com>` (use the actual model name)
 
-Present the message to the user and **wait for approval**. This is the only confirmation gate. The user may edit or reject it.
+**If `-y` flag is set** → proceed directly to step 3 with the drafted messages. No confirmation needed.
+
+**Otherwise** → present the commit plan (which files go in which commit) to the user and **wait for approval**. This is the only confirmation gate. The user may edit or reject it.
 
 ### 3. Stage and commit
 
@@ -55,8 +59,6 @@ Present the message to the user and **wait for approval**. This is the only conf
   ```bash
   git commit -m "$(cat <<'EOF'
   feat: add user authentication
-
-  Co-Authored-By: Claude <model> <noreply@anthropic.com>
   EOF
   )"
   ```
@@ -109,6 +111,6 @@ Present concisely:
 
 - **Never stage secrets.** The scan in step 3 catches common patterns. If something slips through, the user's pre-commit hooks are the second line of defense.
 
-- **Single gate.** The commit message (step 2) is the only point where the user must approve. Everything else — staging, pushing, issue updates — is automated. This keeps the flow fast while maintaining control over what goes into the commit log.
+- **Single gate.** The commit message (step 2) is the only point where the user must approve — unless `-y` is passed, which skips it entirely. Everything else — staging, pushing, issue updates — is automated. This keeps the flow fast while maintaining control over what goes into the commit log.
 
 - **Graceful degradation.** If `gh` is not available, skip the issue update step. If the branch has no issue, skip it. If the issue body can't be parsed, skip it. The core job (commit + push) always completes.
