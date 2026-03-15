@@ -42,7 +42,7 @@ Read `references/description-patterns.md` for examples and the "pushy" technique
 
 Keep it under 500 lines. These principles produce measurably better results:
 
-- **Imperative form.** "Extract the palette", "Read the template". Not "You should extract..." or "The skill will...".
+- **Imperative form.** "Parse the config", "Read the template", "Launch the agents". Not "You should parse..." or "The skill will...".
 - **Explain the why.** Reasoning beats rigid rules. Instead of "NEVER do X", write "Avoid X because Y — this causes Z". LLMs handle edge cases better when they understand the reasoning behind a constraint.
 - **Numbered steps.** Give the model a clear execution path. Headers for major phases, numbers for sequential steps within each phase.
 - **Explicit output formats.** When the skill produces structured output (a brief, a spec, a report), show the expected format with an example — the model follows concrete shapes better than abstract descriptions.

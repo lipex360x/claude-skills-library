@@ -19,7 +19,7 @@ Skills load in three tiers. This design keeps token costs low and context focuse
 Use natural language instructions, not special syntax:
 
 ```markdown
-Read `references/artboard-guidelines.md` for the standard artboard structure.
+Read `references/api-patterns.md` for the full endpoint conventions.
 ```
 
 The agent reads it with the Read tool when it reaches that instruction. Keep file references one level deep — avoid chains where one reference points to another, because it's easy to lose the agent in a reference maze.

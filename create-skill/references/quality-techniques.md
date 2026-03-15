@@ -14,23 +14,22 @@ Explicitly name the specific failure modes to avoid. Generic instructions ("make
 
 ```markdown
 **Avoid these specific traps:**
-- Generic gradients (especially purple-to-blue on white)
-- Uniform spacing everywhere — vary rhythm intentionally
-- Placeholder images as plain gray boxes — use colored rectangles with subtle gradients
-- Oversized elements that waste space
-- Tiny text that's unreadable at thumbnail scale
+- Boilerplate structure that looks like every other AI-generated output
+- Inconsistent naming conventions across related files
+- Overly verbose comments that restate what the code already says
+- Missing edge case handling at system boundaries
 ```
 
-The specificity matters. "Avoid generic gradients" is actionable. "Make it look professional" is not.
+The specificity matters. "Avoid boilerplate structure" is actionable. "Make it professional" is not. Tailor the anti-patterns list to your skill's domain — visual skills have different traps than code generation skills.
 
 ## Containment rules
 
-For visual or spatial skills, explicitly state boundary rules with the reasoning. AI-generated compositions commonly have elements that bleed off edges or overlap:
+For skills that produce bounded output (visual layouts, file structures, API responses), explicitly state boundary constraints with reasoning:
 
 ```markdown
-Nothing falls off the artboard. Nothing overlaps unintentionally. Every element has
-breathing room from its neighbors. This is the most common failure mode — elements
-bleed off edges or stack on top of each other when the model runs out of planning space.
+Every generated component must be self-contained. No external dependencies beyond
+what's declared. No implicit state shared between components. This is the most common
+failure mode — components that look independent but silently depend on each other.
 ```
 
 ## Refinement over addition
@@ -48,17 +47,16 @@ Frame it as a guiding question in the instructions:
 When a skill produces structured output, show the expected format. The model follows concrete shapes better than abstract descriptions:
 
 ```markdown
-## Design Brief
+## Analysis Report
 
-### Tokens
-| Token | Hex | Role |
-|-------|-----|------|
-| --color-primary | #2563EB | Main brand color |
+### Summary
+| Item | Status | Notes |
+|------|--------|-------|
+| Auth module | Needs refactor | Circular dependency with user module |
 
-### Artboard Plan
-| Artboard | File | Content | Agent |
-|----------|------|---------|-------|
-| Foundations | foundations.html | Color palette, typography scale | Agent 1 |
+### Recommended actions
+1. Extract shared types to a common package
+2. ...
 
-**Total: 5 artboards, 5 agents in parallel**
+**Total: 3 modules analyzed, 2 need changes**
 ```

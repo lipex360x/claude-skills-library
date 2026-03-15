@@ -8,12 +8,12 @@ Claude tends to **undertrigger** — it won't use a skill unless the match is ob
 
 **Weak:**
 ```yaml
-description: Create a design system from a reference image.
+description: Run database migrations.
 ```
 
 **Strong:**
 ```yaml
-description: Analyze a design image and create a full design system project with separated artboards. Use this skill whenever the user provides a reference image, screenshot, or mockup and wants to extract a design system, create artboards, build a component library, or reverse-engineer visual patterns — even if they don't explicitly say "design system."
+description: Run, create, and manage database migrations safely. Use this skill when the user mentions "migrate", "schema change", "add a column", "create a table", or wants to modify the database structure — even if they don't explicitly say "migration."
 ```
 
 The **"even if they don't explicitly say X"** pattern is particularly effective. It tells Claude to look for intent, not just keywords.
@@ -26,12 +26,17 @@ The description should answer two questions:
 
 ## More examples
 
-**A push skill:**
+**A code review skill:**
 ```yaml
-description: Commit, push changes, and auto-update related GitHub issue checkboxes. Use this when the user says "push", "send it", "ship it", or after completing a task that has an open issue.
+description: Review pull requests for code quality, security issues, and architectural consistency. Use this when the user says "review this PR", "check my code", shares a PR link, or asks for feedback on changes — even if they just say "take a look."
+```
+
+**A deployment skill:**
+```yaml
+description: Build, validate, and deploy the application to staging or production. Use this when the user says "deploy", "ship it", "push to prod", or after completing a feature that's ready to go live.
 ```
 
 **A project scaffolding skill:**
 ```yaml
-description: Plan and scaffold new projects with structured GitHub issues and phased implementation. Use this when the user wants to start a new project, plan phases, create a project structure, or set up a new repo — even if they just say "let's start something new."
+description: Plan and scaffold new projects with structured issues and phased implementation. Use this when the user wants to start a new project, plan phases, create a project structure, or set up a new repo — even if they just say "let's start something new."
 ```
