@@ -92,6 +92,39 @@ The first part should be detailed (you know what to build). Later parts can be h
 ### Ignoring existing patterns
 In an existing codebase, the first step should be "study existing patterns" — read reference files, understand conventions, then follow them. Greenfield freedom doesn't apply when adding to an established project.
 
+## GitHub hierarchy
+
+When structuring a project, the full GitHub hierarchy (from broadest to narrowest) is:
+
+```
+Project (board)         ← visual overview of all work (optional for solo dev)
+  └── Milestone         ← goal with optional deadline (e.g., "MVP", "v1.0")
+        └── Issue       ← unit of work (feature, bug, chore)
+              └── Tasks (checkboxes / sub-issues)
+                    └── Branch → PR → Merge
+```
+
+### When to use milestones
+
+- **Multi-issue projects (2+ issues):** always create a milestone. It provides automatic % progress and groups related issues.
+- **Single-issue projects:** optional. Skip unless the user wants to track future phases.
+- **Backlog milestone:** create one (no due date) when the user mentions scope beyond the current plan. This is the bucket for "later" items.
+
+### Milestone naming
+
+- Use the project name or version: "Project X MVP", "v1.0", "Phase 1: Core"
+- Avoid generic names like "Sprint 1" unless the user follows sprint methodology
+
+### Labels as metadata
+
+Labels answer "what type?" and "what priority?" — they complement milestones, not replace them.
+
+Minimum useful set for a new project:
+- **Priority:** P0 (critical), P1 (high), P2 (medium), P3 (low)
+- **Type:** feature, bug, chore, docs
+
+Don't create labels the repo already has. Adapt to existing schemes.
+
 ## Phase ordering principles
 
 1. **Dependencies first** — if B needs A, A goes first. Obvious but often violated.

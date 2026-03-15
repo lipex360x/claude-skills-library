@@ -56,7 +56,27 @@ Sizing guidelines:
 
 **Wait for the user's approval before proceeding.** This is the second (and final) approval gate. The user may request changes — iterate until they approve.
 
-### 4. Create the GitHub issue
+### 4. Repo scaffolding (labels + milestone)
+
+Before creating issues, ensure the repo has basic organizational primitives.
+
+**Labels** — check with `gh label list`. If priority labels don't exist, offer to create them:
+- `P0` (critical), `P1` (high), `P2` (medium), `P3` (low)
+- Type labels (`feature`, `bug`, `chore`, `docs`) — only if missing
+
+Don't force labels on repos that already have a custom scheme. Adapt to what's there.
+
+**Milestone** — if the project generates 2+ issues, create a milestone to group them:
+
+```bash
+gh api repos/{owner}/{repo}/milestones -f title="<milestone name>" -f description="<one-line goal>" [-f due_on="<YYYY-MM-DDT00:00:00Z>"]
+```
+
+Good milestone names: the project name itself ("Project X MVP"), a version ("v1.0"), or a phase ("Phase 1: Core").
+
+For single-issue projects, a milestone is optional. Always offer a "Backlog" milestone (no due date) for future work items when the user mentions scope beyond the current plan.
+
+### 5. Create the GitHub issue
 
 After approval, create the issue:
 
@@ -64,9 +84,15 @@ After approval, create the issue:
 gh issue create --title "<concise title>" --body "<approved body>"
 ```
 
-Apply labels if the repo uses them (check with `gh label list`). Common: `enhancement`, `feature`, `phase-N`.
+Apply labels if the repo uses them. Common: `enhancement`, `feature`, `phase-N`, plus a priority label.
 
-### 5. Create the feature branch
+If a milestone was created in step 4, assign the issue to it:
+
+```bash
+gh issue edit <number> --milestone "<milestone name>"
+```
+
+### 6. Create the feature branch
 
 ```bash
 git checkout main
@@ -77,12 +103,14 @@ git push -u origin feature/<slug>
 
 The slug comes from step 1. If the issue number is known, optionally prefix: `feature/<number>-<slug>`.
 
-### 6. Summary
+### 7. Summary
 
 Present:
 - Issue URL (linked)
+- Milestone (if created) with link
 - Branch name
 - Total steps and checkboxes count
+- Remind: use `closes #N` in PR descriptions to auto-close issues on merge
 - Suggest starting with Step 1
 
 ## Guidelines
@@ -98,3 +126,7 @@ Present:
 - **Don't over-plan.** Later phases can be less detailed than early ones. The first part should have precise checkboxes; the last part can be higher-level. The user will refine as they go.
 
 - **One issue per milestone.** If the project has distinct milestones (e.g., "backend API" then "frontend"), create separate issues. Each issue should be independently completable and verifiable.
+
+- **Milestones for multi-issue projects.** When a project spans 2+ issues, group them under a GitHub milestone. This gives automatic progress tracking (% complete) and a clear finish line. For single-issue projects, milestones are optional.
+
+- **`closes #N` in PRs.** Always remind the user to include `closes #N` in PR descriptions. This auto-closes the linked issue on merge and updates milestone progress automatically.
