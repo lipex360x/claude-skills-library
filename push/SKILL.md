@@ -112,5 +112,3 @@ Present concisely:
 - **Single gate.** The commit message (step 2) is the only point where the user must approve. Everything else — staging, pushing, issue updates — is automated. This keeps the flow fast while maintaining control over what goes into the commit log.
 
 - **Graceful degradation.** If `gh` is not available, skip the issue update step. If the branch has no issue, skip it. If the issue body can't be parsed, skip it. The core job (commit + push) always completes.
-
-- **Respect task-visibility.** If `behavior.config.json` has `task-visibility.always-open: true`, use TaskCreate/TaskUpdate to track progress through the steps.

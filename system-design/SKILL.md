@@ -10,7 +10,7 @@ Extract a design system from a reference image and create a complete project wit
 
 ## Usage
 
-The user places reference images in the `design/` folder. If an argument is provided (e.g. `/system-design invena`), use it as the project slug. Otherwise, infer from the image filename or ask.
+The user places reference images in the `design/` folder. If an argument is provided (e.g. `/system-design my-project`), use it as the project slug. Otherwise, infer from the image filename or ask.
 
 ## Steps
 
@@ -24,25 +24,31 @@ Read all images. Analyze as a **design reference** — the goal is to reverse-en
 
 Extract: color palette (exact hex), typography (families, weight scale, size hierarchy), spacing rhythm, components (buttons, cards, badges, nav, forms), sections, and a one-sentence visual direction.
 
+### 2. Plan the artboards
+
+Read `references/artboard-guidelines.md` for the standard artboard structure and per-artboard content guidelines. Typical split: Foundations, Components, Hero & Navigation, Content Sections, Footer & CTA. Aim for 3-6 artboards depending on the reference complexity.
+
+### 3. Present the Design Brief
+
 Write a **Design Brief** with:
 - All extracted design tokens
 - The **artboard plan** — table with artboard name, file, content, and agent count per artboard
 - A **total agent count** summary (e.g. "5 artboards, 5 agents in parallel")
 
-Show it to the user and **wait for approval** before proceeding.
+Show it to the user and **wait for approval** before proceeding. Use `AskUserQuestion` with approve/adjust options for a cleaner flow.
 
-### 2. Build the Design Spec
+### 4. Build the Design Spec
 
 After approval, compile a **Design Spec** — a structured, self-contained reference for subagents. Read `templates/design-spec.md` for the template structure. The spec is passed verbatim to every agent prompt so they can start writing HTML immediately without re-analyzing the image.
 
-### 3. Setup first, then launch agents
+### 5. Setup first, then launch agents
 
-The build is a **two-phase sequence**. Setup must complete before agents start, so the user sees shimmer cards on the hub and can watch agents progressively replace them while the robot blinks.
+The build is a **two-phase sequence**. Setup must complete before agents start — otherwise agents race against infrastructure creation and may write to a manifest that doesn't exist yet.
 
 #### Phase A — Setup (single response, all in parallel)
 
 - **1 × `create_project`** — create the project
-- **1 × Write** — write `tokens.css` (read template first in step 2)
+- **1 × Write** — write `tokens.css` (read template first in step 4)
 - **1 × `navigate`** — open the project hub
 - **1 × `create_artboards`** — batch create with skeleton HTML (shimmer cards appear)
 
@@ -50,17 +56,13 @@ Wait for all setup calls to complete before proceeding.
 
 #### Phase B — Launch agents (follow-up response)
 
-- **N × Agent** (`run_in_background: true`) — one per artboard, all in a **single message**. Each receives the Design Spec and writes via `curl` to the HTTP API. Read `references/agent-prompt.md` for prompt requirements, the curl template, and quality standards.
+- **N × Agent** — one per artboard, all in a **single message** (foreground so the user can watch progress). Each receives the Design Spec and writes via `curl` to the HTTP API. Read `references/agent-prompt.md` for prompt requirements, the curl template, and quality standards.
 
-**Why sequential?** `create_artboards` populates the manifest and creates shimmer files. Agents call the HTTP API (`POST /api/write-artboard`) which overwrites the shimmer HTML and emits `artboard-ready` via WebSocket. The client tracks `pendingArtboards` (added by `create_artboards`, removed by `artboard-ready`) — the robot badge blinks the **entire time** and only stops when ALL agents finish. If agents run before setup, they race against `create_artboards` and may fail or produce an empty manifest.
+**Why two phases?** `create_artboards` populates the manifest and creates shimmer files. Agents call the HTTP API (`POST /api/write-artboard`) which overwrites the shimmer HTML and emits `artboard-ready` via WebSocket. The client tracks `pendingArtboards` — the robot badge blinks the entire time and only stops when all agents finish. If agents run before setup, they race against `create_artboards` and produce an empty manifest.
 
-**Why curl, not MCP?** Subagents do not reliably inherit MCP tools from the parent process. The HTTP API is the same endpoint the MCP tool calls internally — `curl` cuts the intermediary and works 100% of the time.
+**Why curl, not MCP?** Subagents don't reliably inherit MCP tools from the parent process. The HTTP API is the same endpoint the MCP tool calls internally — `curl` cuts the intermediary and works 100% of the time.
 
-### 4. Plan the artboards
-
-Read `references/artboard-guidelines.md` for the standard artboard structure and per-artboard content guidelines. Typical split: Foundations, Components, Hero & Navigation, Content Sections, Footer & CTA. Aim for 3-6 artboards depending on the reference complexity.
-
-### 5. Final verification
+### 6. Final verification
 
 After all agents complete:
 1. All thumbnails should be visible on the hub
@@ -74,7 +76,7 @@ These exist because AI-generated designs tend to fall into specific traps. Under
 
 - **Stay on the hub** during the build. The user watches thumbnails appear progressively — navigating to the editor would break the visual feedback loop.
 
-- **Agents write via `curl` to the HTTP API** (`POST /api/write-artboard`), which writes the file and notifies the browser in one call. Agents MUST NOT use the `Write` tool to touch artboard files directly — it doesn't notify the browser (no thumbnail update, robot keeps blinking). MCP tools are not available to subagents.
+- **Agents write via `curl` to the HTTP API** (`POST /api/write-artboard`), which writes the file and notifies the browser in one call. Using the `Write` tool directly doesn't notify the browser — no thumbnail update, robot keeps blinking. MCP tools are not available to subagents.
 
 - **Batch creation** via `create_artboards` — one MCP call, not one per artboard. This shows all shimmer cards at once, giving the user immediate visual feedback of what's coming.
 
