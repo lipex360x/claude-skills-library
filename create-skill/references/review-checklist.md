@@ -35,4 +35,3 @@ Validate every item before finalizing a skill. Present results to the user.
 - [ ] References are one level deep (no reference chains)?
 - [ ] Large references (>300 lines) have a table of contents?
 - [ ] Skill is fully self-contained (no cross-skill dependencies)?
-- [ ] If installed globally in `.brain/`, is `STRUCTURE.md` updated with the new skill entry?
