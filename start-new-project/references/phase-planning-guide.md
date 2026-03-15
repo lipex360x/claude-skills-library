@@ -137,3 +137,56 @@ Don't create labels the repo already has. Adapt to existing schemes.
 2. **Highest risk first** — uncertain or technically challenging work early. If it fails, you want to know before building everything else.
 3. **Value early** — deliver something usable as soon as possible. Even if it's incomplete, seeing results maintains motivation and surfaces design issues.
 4. **Tests alongside** — don't defer all testing to the end. Each step should include its own tests.
+
+## Agent Teams parallelism
+
+When `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is active, steps can be distributed across teammates for parallel execution. The key is identifying the **dependency graph** between steps.
+
+### Parallelism patterns by project type
+
+**Web apps:**
+```
+Lead: scaffolding + schema (sequential)
+  ├─ Teammate "backend-auth": auth routes, middleware
+  ├─ Teammate "backend-api": CRUD routes, business logic
+  └─ Teammate "frontend": pages, components (blocked until API exists)
+       └─ Teammate "polish": error handling, responsive, docs
+```
+
+**CLI tools:**
+```
+Lead: core logic (sequential)
+  ├─ Teammate "commands": CLI parser, subcommands, flags
+  └─ Teammate "output": formatting, colors, progress bars
+       └─ Teammate "dist": packaging, publishing
+```
+
+**Libraries:**
+```
+Lead: core API + types (sequential)
+  ├─ Teammate "edge-cases": validation, error handling
+  ├─ Teammate "tests": unit + integration tests
+  └─ Teammate "docs": README, API docs, examples
+```
+
+**Monorepos:**
+```
+Lead: shared packages (sequential)
+  ├─ Teammate "app-1": first app
+  ├─ Teammate "app-2": second app
+  └─ Teammate "ci": build scripts, CI pipelines
+```
+
+### Sizing teammates
+
+- **2-4 teammates** is the sweet spot. More creates coordination overhead.
+- **5-6 steps per teammate** keeps them productive without context switching.
+- **Use Sonnet for teammates** — cheaper, fast enough for focused work. Lead stays on the user's model.
+- **Avoid same-file edits** — two teammates editing the same file causes conflicts. Split by layer/module, not by feature.
+
+### Anti-patterns
+
+- **Too many teammates**: 5+ teammates = high token cost + coordination overhead > parallelism benefit.
+- **Same-file conflicts**: two teammates editing `schema.prisma` simultaneously = merge hell.
+- **Premature parallelism**: spawning teammates before the sequential prefix is done = wasted work on wrong assumptions.
+- **No dependency tracking**: teammates that block each other without explicit ordering = race conditions.
