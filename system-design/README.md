@@ -40,5 +40,5 @@ system-design/
 ## Installation
 
 ```bash
-npx @anthropic-ai/claude-code-skills install lipex360x/claude-skills-library/system-design --copy
+npx skills add https://github.com/lipex360x/claude-skills-library --skill system-design
 ```

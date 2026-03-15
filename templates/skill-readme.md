@@ -37,5 +37,5 @@
 ## Installation
 
 ```bash
-npx @anthropic-ai/claude-code-skills install {repo-url}/{skill-name} --copy
+npx skills add {repo-url} --skill {skill-name}
 ```

@@ -42,5 +42,5 @@ start-new-project/
 ## Installation
 
 ```bash
-npx @anthropic-ai/claude-code-skills install lipex360x/claude-skills-library/start-new-project --copy
+npx skills add https://github.com/lipex360x/claude-skills-library --skill start-new-project
 ```

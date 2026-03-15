@@ -36,5 +36,5 @@ prompt-continue/
 ## Installation
 
 ```bash
-npx @anthropic-ai/claude-code-skills install lipex360x/claude-skills-library/prompt-continue --copy
+npx skills add https://github.com/lipex360x/claude-skills-library --skill prompt-continue
 ```
