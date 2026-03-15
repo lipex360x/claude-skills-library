@@ -85,7 +85,7 @@ After the skill passes review, generate a `README.md` in the skill's root direct
    - **How it works** — summarize the major phases from the SKILL.md process steps
    - **Usage** — show the `/skill-name` invocation with any arguments, plus a brief example scenario
    - **Directory structure** — reflect the actual directories and files created for this skill (not the template's generic structure)
-   - **Installation** — use the repo URL for the project this skill belongs to, followed by the skill directory name
+   - **Installation** — use the format `npx skills add <repo-url> --skill <skill-name>`
 3. Write the README.md to the skill's root directory.
 
 Keep the README concise — it's a quick reference, not a duplicate of SKILL.md.
