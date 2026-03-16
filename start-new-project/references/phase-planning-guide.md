@@ -137,7 +137,7 @@ Don't create labels the repo already has. Adapt to existing schemes.
 2. **Highest risk first** — uncertain or technically challenging work early. If it fails, you want to know before building everything else.
 3. **Value early** — deliver something usable as soon as possible. Even if it's incomplete, seeing results maintains motivation and surfaces design issues.
 4. **TDD — tests first, not alongside.** Write the test before the implementation in every step that introduces new behavior. This is not optional. TDD surfaces design flaws early, prevents untestable code, and guarantees coverage by construction. Structure each step as: define the expected behavior in a test, watch it fail, then implement until it passes.
-5. **Test isolation — no shared state with production.** Configure the test environment early in the project: separate database (`:memory:`, test schema, or dedicated instance), temporary directories for file output, and `.env.test` for test-specific configuration. Tests that pollute production data are a liability, not an asset.
+5. **Test isolation — no shared state with production.** Configure the test environment early in the project: separate database (`:memory:`, test schema, or dedicated instance), temporary directories for file output, and `.env.test` for test-specific configuration. For cloud services (Supabase, Firebase, PlanetScale), run local Docker instances for tests — they replicate the cloud environment with zero latency and no risk of data pollution. Tests that leak into production are a liability, not an asset.
 
 ## Agent Teams parallelism
 
