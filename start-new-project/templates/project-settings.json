@@ -1,0 +1,16 @@
+{
+  "_comment": "Template: CDP project settings (JSON) | Version: 1.0 | Created: 2026-03-16 | Method: Adapted from claude-design-canvas production setup",
+  "chrome": {
+    "cdp": "http://localhost:9222",
+    "launchCommand": ".claude/start-chrome.sh",
+    "baseUrl": "http://localhost:3000",
+    "tabs": {
+      "app": "http://localhost:3000"
+    },
+    "pages": {
+      "home": "/",
+      "login": "/login",
+      "dashboard": "/dashboard"
+    }
+  }
+}

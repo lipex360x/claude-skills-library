@@ -8,16 +8,17 @@ Heuristics for decomposing projects into parts and steps. These are starting poi
 
 Typical part progression:
 
-1. **Data layer** — database schema, models, migrations, seed data
-2. **Backend / API** — routes, controllers, middleware, auth
-3. **Frontend** — pages, components, state management, forms
-4. **Integration** — connect frontend to API, error handling, loading states
-5. **Polish & Deploy** — responsive design, performance, CI/CD, hosting
+1. **Scaffolding & CDP setup** — project structure, dependencies, `.claude/start-chrome.sh` + `.claude/project-settings.json` for browser automation. CDP must be ready before any frontend step so Claude can navigate and screenshot to verify UI. Use the skill templates as source files, adapting `baseUrl`, `tabs`, and `pages` to the project
+2. **Data layer** — database schema, models, migrations, seed data
+3. **Backend / API** — routes, controllers, middleware, auth
+4. **Frontend** — pages, components, state management, forms. Verification checkboxes should use CDP: "Navigate to [page] via CDP and screenshot to verify"
+5. **Integration** — connect frontend to API, error handling, loading states
+6. **Polish & Deploy** — responsive design, performance, CI/CD, hosting
 
 Variations:
-- **Fullstack frameworks** (Next.js, Remix, SvelteKit): combine backend + frontend parts since they're co-located
-- **API-only**: skip frontend parts, add documentation and SDK/client generation
-- **Existing frontend**: start from integration, not data layer
+- **Fullstack frameworks** (Next.js, Remix, SvelteKit): combine backend + frontend parts since they're co-located. CDP setup still goes in scaffolding
+- **API-only**: skip frontend and CDP parts, add documentation and SDK/client generation
+- **Existing frontend**: start from integration, not data layer. CDP setup goes in the first step to enable visual verification of existing UI
 
 ### CLI tools
 

@@ -181,3 +181,13 @@ Present:
 - **Milestones for multi-issue projects.** When a project spans 2+ issues, group them under a GitHub milestone. This gives automatic progress tracking (% complete) and a clear finish line. For single-issue projects, milestones are optional.
 
 - **`closes #N` in PRs.** Always remind the user to include `closes #N` in PR descriptions. This auto-closes the linked issue on merge and updates milestone progress automatically.
+
+- **Visual verification via CDP (mandatory for web projects).** For every web application project (web apps, fullstack frameworks, frontends), include Chrome DevTools Protocol setup as a step in the first Part — before any frontend implementation. CDP enables Claude to connect to the user's browser, navigate as a user (visible in real-time), and take screenshots to evaluate the UI. The setup consists of two files created from skill templates:
+  - `.claude/start-chrome.sh` — launches Chrome with `--remote-debugging-port=9222`, detects the Chrome binary cross-platform, reads tabs from `project-settings.json`. Use `templates/start-chrome.sh` as the source.
+  - `.claude/project-settings.json` — declarative CDP configuration. Use `templates/project-settings.json` as the source, adapting `baseUrl`, `tabs`, and `pages` to the project's routes.
+  - **`baseUrl`** — the app's root URL (e.g., `http://localhost:3000`). Resolves relative page paths.
+  - **`tabs`** — URLs to open when Chrome launches. Typically just the app's main URL.
+  - **`pages`** — a route map declaring every page Claude can navigate to. Claude uses this to browse the app, take screenshots, and validate flows without hardcoded procedural steps. Adapt to the project's actual routes.
+  - Playwright connects via `playwright.chromium.connectOverCDP('http://localhost:9222')` — the user sees everything happening in their browser in real-time.
+  - Verification checkboxes in later steps should use the pattern: "Navigate to [page] via CDP and take screenshot to verify [expected state]".
+  - This is not optional for web projects. Without CDP, visual bugs go undetected until manual review. The cost of setup (two files, one step) is negligible compared to the cost of shipping broken UI.

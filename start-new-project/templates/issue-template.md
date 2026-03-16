@@ -74,6 +74,7 @@ After Step [N] ([last sequential step]), spawn teammates:
 - Start with a verb: "Create", "Add", "Configure", "Implement", "Set up"
 - Include a verification checkbox as the last item when the step has observable output
 - For projects with databases or file I/O, include a test environment setup step early (Part A). Create a `docker-compose.test.yml` (or `test` profile) to orchestrate the test stack — database, cloud service emulators, and any other dependencies. Configure `.env.test` pointing at local containers. This must exist before any test checkbox can run
+- For web projects, include a CDP setup step early (Part A) — create `.claude/start-chrome.sh` and `.claude/project-settings.json` from skill templates. Configure `baseUrl`, `tabs` (what opens on launch), and `pages` (route map for navigation). This must exist before any visual verification checkbox can run
 
 ### Checkboxes
 - One action per checkbox — avoid "X and Y" (split into two)
@@ -91,6 +92,7 @@ After Step [N] ([last sequential step]), spawn teammates:
 ### Verification
 - Describe how to confirm the entire phase works, not individual steps
 - Include the actual commands or actions: "Run `bun test` — all pass", "Open http://localhost:3000 — dashboard loads"
+- For web projects, include CDP-based visual verification: "Navigate to [page] via CDP and take screenshot — verify [expected state]". This catches layout issues, missing elements, and visual regressions that unit tests miss
 - Cover the happy path first, then edge cases
 
 ### Parallel execution plan
