@@ -73,7 +73,7 @@ After Step [N] ([last sequential step]), spawn teammates:
 - Each step = a work session (30 min to 2 hours of focused work)
 - Start with a verb: "Create", "Add", "Configure", "Implement", "Set up"
 - Include a verification checkbox as the last item when the step has observable output
-- For projects with databases or file I/O, include a test environment setup step early (Part A). Configure isolated test database, `.env.test`, and temp directories before any test checkbox can run. For cloud services, prefer local Docker instances (e.g., `supabase start`, `firebase emulators:start`) over testing against the remote environment
+- For projects with databases or file I/O, include a test environment setup step early (Part A). Create a `docker-compose.test.yml` (or `test` profile) to orchestrate the test stack — database, cloud service emulators, and any other dependencies. Configure `.env.test` pointing at local containers. This must exist before any test checkbox can run
 
 ### Checkboxes
 - One action per checkbox — avoid "X and Y" (split into two)
