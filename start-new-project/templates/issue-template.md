@@ -73,6 +73,7 @@ After Step [N] ([last sequential step]), spawn teammates:
 - Each step = a work session (30 min to 2 hours of focused work)
 - Start with a verb: "Create", "Add", "Configure", "Implement", "Set up"
 - Include a verification checkbox as the last item when the step has observable output
+- For projects with databases or file I/O, include a test environment setup step early (Part A). Configure isolated test database, `.env.test`, and temp directories before any test checkbox can run
 
 ### Checkboxes
 - One action per checkbox — avoid "X and Y" (split into two)
