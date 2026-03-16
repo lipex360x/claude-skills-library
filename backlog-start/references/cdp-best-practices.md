@@ -2,32 +2,38 @@
 
 Hard-won rules from production CDP testing. Each one exists because the alternative caused real debugging time.
 
-## 1. Context isolation (critical)
+## 1. Headless by default, CDP for manual debugging
 
-`browser.contexts()[0]` reuses the existing Chrome context, which carries cookies from all user sessions. Auth cookies get lost or conflict.
+Verification scripts have two modes:
 
-**Always create a fresh context:**
+- **Automated verification (default):** `chromium.launch({ headless: true })` — no window, no focus stealing, same rendering. Use for agent-driven screenshot checks.
+- **Manual inspection:** `chromium.connectOverCDP('http://localhost:9222')` — connects to a visible Chrome the user launched via `start-chrome.sh`. Use only when the user wants to watch the browser in real-time.
+
+**Default to headless** unless the user explicitly asks for visible browser or manual debugging. Headless gives identical screenshots with zero disruption — no windows opening, no focus stealing on macOS.
 
 ```ts
-// WRONG — reuses dirty browser context with leftover cookies
-const context = browser.contexts()[0] ?? await browser.newContext();
-
-// RIGHT — isolated context, no previous cookies, controlled viewport
+// DEFAULT — headless for automated verification
+const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({
   viewport: { width: 375, height: 812 },
 });
 const page = await context.newPage();
+
+// MANUAL ONLY — when user wants to watch
+const browser = await chromium.connectOverCDP("http://localhost:9222");
+const context = await browser.newContext({ /* ... */ });
 ```
 
-Use one page per context, navigate within it, then close the context (not the page). This keeps the browser clean — one tab per test run, automatically removed on `context.close()`.
+When using `connectOverCDP`, never reuse existing contexts (`browser.contexts()[0]`) — they carry cookies from user sessions. Always `browser.newContext()`.
 
-**Always wrap in `try/finally`** — `context.close()` must run even on error:
+**Always wrap in `try/finally`** — cleanup must run even on error:
 
 ```ts
 try {
   // ... login, navigate, verify, screenshot ...
 } finally {
   await context.close();
+  await browser.close(); // headless — close browser entirely
   log("Done.");
 }
 ```
@@ -40,24 +46,33 @@ The dev server (e.g., port 3000) typically uses `.env.local` which points to rem
 
 The `testPort` is declared in `.claude/project-settings.json` so both the skill and CDP scripts reference the same value.
 
-## 3. Server startup is the user's responsibility
+## 3. Server startup and immediate cleanup
 
-Never auto-start servers with `nohup` or `run_in_background` — both create orphan processes that block ports and accumulate open shells.
+Never auto-start servers with `nohup` — it creates orphan processes that block ports and accumulate open shells.
 
-**Before running any CDP script, run the pre-flight checklist:**
+**Before running any verification script, run the pre-flight checklist:**
 
 ```bash
-# 1. Chrome CDP available?
-curl -s localhost:9222/json/version | head -1
-
-# 2. Local DB/services running?
+# 1. Local DB/services running?
 # (framework-specific: supabase status, docker compose ps, etc.)
 
-# 3. Test server running on test port?
+# 2. Test server running on test port?
 curl -s -o /dev/null -w "%{http_code}" localhost:<test-port>
+
+# 3. Chrome CDP available? (only if using manual/visible mode)
+curl -s localhost:9222/json/version | head -1
 ```
 
-If the test server isn't running, **ask the user** rather than auto-starting. If the user confirms auto-start, document that cleanup is manual afterward (see section 8).
+If the test server isn't running, **ask the user** rather than auto-starting. If the user confirms auto-start, **kill the server immediately after verification completes** — never leave background servers running.
+
+**Cleanup after every verification:**
+
+```bash
+# Kill the test server immediately after screenshots are taken
+lsof -ti:<test-port> | xargs kill -9 2>/dev/null
+```
+
+Orphaned servers are invisible clutter — they occupy ports (blocking future runs), generate confusing task failure notifications (exit 137 = SIGKILL), and signal sloppy resource management. Clean up after yourself.
 
 ## 4. Observability over blind timeouts
 
@@ -110,16 +125,14 @@ await page.waitForURL(
 );
 ```
 
-## 8. Process cleanup after CDP sessions
+## 8. Framework-specific cleanup
 
-After running CDP verifications, always clean up potential orphans:
+After killing the test server (see section 3), also remove framework lock files if the server died dirty:
 
 ```bash
-# Kill anything on the test port
-lsof -i :<test-port> -t | xargs kill 2>/dev/null
-
-# Remove framework-specific lock files if server died dirty
-# (e.g., .next/dev/lock for Next.js, .nuxt/dev/lock for Nuxt)
+# Framework-specific lock files
+rm -f .next/dev/lock    # Next.js
+rm -f .nuxt/dev/lock    # Nuxt
 ```
 
 ## 9. Never `run_in_background` for CDP scripts
@@ -163,17 +176,19 @@ Unit tests with mocks can pass while the database schema is broken. CDP screensh
 
 | Rule | Why |
 |---|---|
-| `browser.newContext()` always — never reuse existing context | Cookies from personal browser pollute and break auth |
-| `context.close()` in `finally` block — always | Removes tab even on error, prevents orphan contexts |
+| Headless by default (`chromium.launch`) | No window stealing focus; same rendering; zero disruption |
+| CDP (`connectOverCDP`) only for manual debugging | User explicitly wants to watch the browser |
+| `browser.newContext()` when using CDP — never reuse | Cookies from personal browser pollute and break auth |
+| `context.close()` + `browser.close()` in `finally` | Removes contexts and closes headless browser cleanly |
 | Test server on dedicated port with local env | Dev server uses production env; test users only exist locally |
+| Kill test server immediately after verification | Orphaned servers block ports and generate stale notifications |
 | `waitUntil: "networkidle"` on every `goto` | Prevents interacting before hydration |
 | `log()` with timestamp on each step | Identifies where script hangs |
 | `page.on("pageerror")` always active | Catches silent JS errors |
 | Short timeouts (5-10s) with `.catch()` | Fail fast instead of hanging 30s |
 | Generic login redirect (`!includes("/login")`) | Works regardless of redirect destination |
-| Never `run_in_background` for CDP | Orphans processes, blocks ports |
+| Never `run_in_background` for verification | Orphans processes, blocks ports |
 | Match project language extension | `.ts` for TS, `.mjs` for JS |
-| Server startup = user's responsibility | `nohup` creates orphans; ask or pre-flight check |
-| Cleanup after CDP sessions | Kill port orphans, remove lock files |
+| Cleanup framework lock files after kill | `.next/dev/lock`, `.nuxt/dev/lock` prevent restart |
 | State changes via UI, not direct DB | Framework caching invalidates only through mutation paths |
 | "Full test" = unit + lint + E2E | Each layer catches different classes of bugs |

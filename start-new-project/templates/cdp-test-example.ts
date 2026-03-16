@@ -1,11 +1,10 @@
-// Template: CDP verification script | Adapt to project language (.ts or .mjs)
+// Template: Headless verification script | Adapt to project language (.ts or .mjs)
 // Location: e2e/cdp/verify-<page>.ts
 // Run: npx tsx e2e/cdp/verify-<page>.ts (TS) or node e2e/cdp/verify-<page>.mjs (JS)
-// Requires: Chrome with --remote-debugging-port=9222, test server on dedicated port
+// Requires: test server on dedicated port (started before running)
 //
 // Rules (see references/cdp-best-practices.md):
-// - ALWAYS browser.newContext() — never reuse existing context (cookie isolation)
-// - ALWAYS context.close() in finally — removes tab even on error
+// - Default to headless — no window stealing focus, same rendering
 // - Test server on dedicated port with local env — never hit dev server
 // - waitUntil: "networkidle" on every goto — prevent interacting before hydration
 // - log() with timestamps — identify where scripts hang
@@ -14,10 +13,10 @@
 // - Generic login redirect — waitForURL(url => !url.pathname.includes("/login"))
 // - Never run_in_background — run inline with Bash tool timeout (30-60s)
 // - Screenshots go to test-results/cdp/screenshots/
+// - Kill test server immediately after verification
 
 import { chromium } from "playwright";
 
-const CDP_ENDPOINT = process.env.CDP_ENDPOINT || "http://localhost:9222";
 const BASE = process.env.BASE_URL || "http://localhost:3100"; // test port, never dev port
 
 function log(msg: string) {
@@ -25,10 +24,9 @@ function log(msg: string) {
 }
 
 async function main() {
-  log("Connecting to Chrome via CDP...");
-  const browser = await chromium.connectOverCDP(CDP_ENDPOINT);
+  log("Launching headless browser...");
+  const browser = await chromium.launch({ headless: true });
 
-  // ALWAYS fresh context — never browser.contexts()[0]
   const context = await browser.newContext({
     viewport: { width: 375, height: 812 }, // mobile-first
   });
@@ -83,7 +81,8 @@ async function main() {
     log("Failure screenshot saved");
     process.exit(1);
   } finally {
-    await context.close(); // close context, not page — removes the tab cleanly
+    await context.close();
+    await browser.close(); // headless — close the browser entirely
   }
 }
 
