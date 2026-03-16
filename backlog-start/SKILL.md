@@ -57,10 +57,10 @@ Transform the high-level acceptance criteria into a detailed plan with **Steps**
 
 **Apply CDP detection result from Step 2:**
 
-- **CDP already configured** (`.claude/project-settings.json` exists): use the `pages` map to write verification checkboxes with the pattern "Navigate to [page] via CDP and take screenshot to verify [expected state]". No setup Step needed.
+- **CDP already configured** (`.claude/project-settings.json` exists): use the `pages` map to write verification checkboxes with the pattern "Navigate to [page] via CDP and take screenshot to verify [expected state]". No setup Step needed — but if this issue introduces new routes, include a checkbox to update the `pages` map in `project-settings.json`.
 - **Web project without CDP**: include a **Step 1 — Configure CDP for visual verification** before all other Steps. Checkboxes:
   - `Create .claude/start-chrome.sh` from the start-new-project skill template (cross-platform Chrome launcher with `--remote-debugging-port=9222`)
-  - `Create .claude/project-settings.json` with `baseUrl` pointing to the dev server, `tabs` with the app URL, and `pages` mapping all known routes
+  - `Create .claude/project-settings.json` with `baseUrl` pointing to the dev server, `tabs` with the app URL, and `pages` mapping all known routes. This file is a living document — whenever a Step creates new routes or pages, include a checkbox to update the `pages` map
   - `Verify CDP connection — run .claude/start-chrome.sh and confirm Playwright can connect via connectOverCDP`
   - Subsequent Steps should use CDP verification checkboxes for any UI-facing changes.
 - **Not a web project**: skip CDP entirely.

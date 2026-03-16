@@ -187,7 +187,7 @@ Present:
   - `.claude/project-settings.json` — declarative CDP configuration. Use `templates/project-settings.json` as the source, adapting `baseUrl`, `tabs`, and `pages` to the project's routes.
   - **`baseUrl`** — the app's root URL (e.g., `http://localhost:3000`). Resolves relative page paths.
   - **`tabs`** — URLs to open when Chrome launches. Typically just the app's main URL.
-  - **`pages`** — a route map declaring every page Claude can navigate to. Claude uses this to browse the app, take screenshots, and validate flows without hardcoded procedural steps. Adapt to the project's actual routes.
+  - **`pages`** — a route map declaring every page Claude can navigate to. Claude uses this to browse the app, take screenshots, and validate flows without hardcoded procedural steps. Adapt to the project's actual routes. **This is a living document** — every step that creates a new route or page must include a checkbox to add it to `pages` in `project-settings.json`. An outdated `pages` map means Claude can't verify new UI.
   - Playwright connects via `playwright.chromium.connectOverCDP('http://localhost:9222')` — the user sees everything happening in their browser in real-time.
   - Verification checkboxes in later steps should use the pattern: "Navigate to [page] via CDP and take screenshot to verify [expected state]".
   - This is not optional for web projects. Without CDP, visual bugs go undetected until manual review. The cost of setup (two files, one step) is negligible compared to the cost of shipping broken UI.
