@@ -1,6 +1,6 @@
 # Claude Skills Library
 
-Curated collection of Claude Code skills.
+> Production-ready skills for Claude Code — workflow automation, project scaffolding, design systems, and more.
 
 ## Installation
 
@@ -13,21 +13,22 @@ npx skills add lipex360x/claude-skills-library --all
 Install a specific skill:
 
 ```bash
-npx skills add lipex360x/claude-skills-library -s create-skill
+npx skills add lipex360x/claude-skills-library --skill create-skill
 ```
 
 ## Available Skills
 
-| Skill | Description |
-|-------|-------------|
-| [create-skill](./create-skill/) | Guide for creating, reviewing, and improving Claude Code skills |
-| [prompt-continue](./prompt-continue/) | Generate continuation prompts for seamless session handoffs |
-| [system-design](./system-design/) | Extract design systems from reference images into artboards |
-| [start-new-project](./start-new-project/) | Plan and scaffold projects with structured GitHub issues |
-| [push](./push/) | Commit, push, and auto-update issue checkboxes |
+| Skill | Command | Description |
+|-------|---------|-------------|
+| [create-skill](./create-skill/) | `/create-skill` | Guide for creating, reviewing, and improving Claude Code skills |
+| [start-new-project](./start-new-project/) | `/start-new-project` | Plan and scaffold projects with structured GitHub issues |
+| [push](./push/) | `/push` | Commit, push, and auto-update issue checkboxes |
+| [prompt-continue](./prompt-continue/) | `/prompt-continue` | Generate continuation prompts for seamless session handoffs |
+| [system-design](./system-design/) | `/system-design` | Extract design systems from reference images into artboards |
 
-Each skill has its own [README.md](./create-skill/README.md) with trigger phrases, how it works, usage examples, and installation instructions. Click any skill link above to see its documentation.
+> [!TIP]
+> Each skill has its own README with trigger phrases, workflow details, and usage examples. Click any skill link above to learn more.
 
-## Skill documentation
+## Adding new skills
 
-Every skill in this library includes a `README.md` in its directory. New skills created with the `create-skill` skill automatically generate a README following the standard [template](./templates/skill-readme.md).
+New skills created with `/create-skill` automatically generate a README following the standard [template](./templates/skill-readme.md).
