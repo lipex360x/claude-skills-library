@@ -1,0 +1,38 @@
+{
+  "_comment": "Template: CDP test manifest (JSON) | Version: 2.0 | Created: 2026-03-16 | IMPORTANT: This is a living document — update whenever CDP test scripts are added, modified, or removed",
+  "cdpPort": 9222,
+  "cdpEndpoint": "http://localhost:9222",
+  "testPort": 3100,
+  "baseUrl": "http://localhost:3100",
+  "devPort": 3000,
+  "testsDir": ".claude/cdp-tests",
+  "screenshotsDir": ".claude/cdp-tests/screenshots",
+  "preflight": {
+    "chrome": "curl -s http://localhost:9222/json/version | head -1",
+    "localServices": "supabase status",
+    "seed": "supabase db reset",
+    "testServer": "curl -s http://localhost:3100 -o /dev/null -w '%{http_code}'"
+  },
+  "rules": {
+    "freshContext": true,
+    "networkIdle": true,
+    "observability": true,
+    "shortTimeouts": "5-10s"
+  },
+  "tests": [
+    {
+      "script": "verify-login.mjs",
+      "page": "/login",
+      "verifies": "Login form renders with email/password fields and submit button",
+      "viewport": "375x812",
+      "requiresAuth": false
+    },
+    {
+      "script": "verify-dashboard.mjs",
+      "page": "/",
+      "verifies": "Dashboard loads with summary cards and navigation",
+      "viewport": "375x812",
+      "requiresAuth": true
+    }
+  ]
+}
