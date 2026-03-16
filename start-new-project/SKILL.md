@@ -166,6 +166,8 @@ Present:
   - **High ports.** Bind all test services to high ports (e.g., 54321, 54322, 9090) in docker-compose to avoid collisions with dev servers and system services running on standard ports. Define these ports in `.env.test` so they're easy to change if a port is already taken.
   - **Full teardown.** Include a `global-teardown.ts` (or equivalent) that stops all test containers and processes when the suite finishes — success or failure. Use `docker compose down` to remove containers, networks, and volumes created during the run. Tests that leave orphaned containers waste resources and cause port conflicts on the next run.
 
+- **Seed data quick-reference file.** When a project includes seed data with test credentials (users, API keys, tokens), include a checkbox to create a `TEST_USERS.md` (or `TEST_CREDENTIALS.md`) at the project root with all seeded credentials in a readable format (table with email, password, role, relevant attributes). Add this file to `.gitignore` — it contains local test data that shouldn't be committed. This file is a living document: whenever seed data changes (new users, updated roles, new test accounts), update it. Without this, developers waste time digging through SQL files to find login credentials. The checkbox should go in the same Step that creates the seed file (e.g., `seed.sql`).
+
 - **Project-agnostic.** This skill works for any kind of project — web apps, CLIs, libraries, APIs, mobile, data pipelines, infrastructure. The questions and structure adapt to the domain.
 
 - **English for all issue content.** Issues, checkboxes, and branch names are always in English. Communication with the user follows their language preference.

@@ -9,7 +9,7 @@ Heuristics for decomposing projects into parts and steps. These are starting poi
 Typical part progression:
 
 1. **Scaffolding & CDP setup** — project structure, dependencies, `.claude/start-chrome.sh` + `.claude/project-settings.json` for browser automation. CDP must be ready before any frontend step so Claude can navigate and screenshot to verify UI. Use the skill templates as source files, adapting `baseUrl`, `tabs`, and `pages` to the project
-2. **Data layer** — database schema, models, migrations, seed data
+2. **Data layer** — database schema, models, migrations, seed data. When seed includes test credentials, create a gitignored `TEST_USERS.md` with all seeded emails/passwords/roles in a table for quick reference
 3. **Backend / API** — routes, controllers, middleware, auth
 4. **Frontend** — pages, components, state management, forms. Verification checkboxes should use CDP: "Navigate to [page] via CDP and screenshot to verify"
 5. **Integration** — connect frontend to API, error handling, loading states
