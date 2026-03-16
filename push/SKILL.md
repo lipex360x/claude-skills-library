@@ -11,7 +11,7 @@ Stage, commit, push, and update the related GitHub issue — all in one command.
 ## Flags
 
 - **`-y`** — auto-approve the commit message. Skip the confirmation gate — draft the message and commit immediately. Useful for small, obvious changes where review adds no value.
-- **`-nh`** — skip husky entirely (uses `--no-verify` on the commit). Without this flag, the default behavior is: husky runs on the first commit of the session, `--no-verify` on subsequent commits.
+- **`-nh`** — skip husky entirely (uses `--no-verify` on every commit). Without this flag, the default behavior is: husky runs on the first commit of each `/push` invocation, `--no-verify` on subsequent commits within the same push (if multiple commits are grouped by concern).
 
 Flags can be combined: `/push -y -nh`
 
@@ -63,7 +63,7 @@ For each group, draft a **Conventional Commits** message in English:
   )"
   ```
 - **`-nh` flag provided** → always use `--no-verify`
-- **No `-nh` flag** → husky runs on the first commit of the session. If this isn't the first commit, use `--no-verify` to skip redundant hook runs
+- **No `-nh` flag** → when a single `/push` produces multiple commits (grouped by concern), run husky on the first commit. If the hook passes, subsequent commits **in the same push** use `--no-verify` to skip redundant runs. If there's only one commit, husky always runs. Previous `/push` invocations in the conversation do not count — each `/push` resets the hook state
 - **If the hook fails** → fix the issue, re-stage, create a **new** commit. Never amend — amending after a hook failure would modify the previous commit, potentially losing work
 
 ### 4. Push
