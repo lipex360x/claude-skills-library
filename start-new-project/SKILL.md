@@ -209,7 +209,7 @@ Present:
     - **No `run_in_background`:** run CDP scripts inline with Bash tool `timeout: 30000`. Background execution orphans processes.
     - **Server is user's responsibility:** pre-flight check before running. Never auto-start with `nohup`.
     - **Generic login redirect:** `waitForURL(url => !url.pathname.includes("/login"))` — never hardcode destination.
-    - **Cleanup after CDP sessions:** kill orphans on test port, remove framework lock files.
+    - **Cleanup after CDP sessions:** `TaskStop` the server task (never `lsof kill` — user may have own servers), remove framework lock files.
   - Verification checkboxes in later steps should use the pattern: "Navigate to [page] via CDP and take screenshot to verify [expected state]".
   - **Persistent CDP test scripts.** Every visual verification performed via CDP must be saved as a reusable script in `e2e/cdp/verify-<page>.ts` (match project language — `.ts` for TypeScript, `.mjs` for plain JS). Screenshots go to `test-results/cdp/screenshots/` (gitignored via Playwright's default config). See `templates/cdp-test-example.ts` for the pattern. Before writing a new script, check `e2e/cdp/` for an existing one that covers the same page — run it first, only create a new one if the verification is different. When a step modifies existing UI, update the corresponding script. Include checkboxes: "Save CDP test script to `e2e/cdp/verify-[page].ts`".
   - This is not optional for web projects. Without CDP, visual bugs go undetected until manual review. The cost of setup (two files, one step) is negligible compared to the cost of shipping broken UI.

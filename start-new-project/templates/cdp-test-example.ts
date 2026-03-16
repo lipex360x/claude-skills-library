@@ -13,7 +13,7 @@
 // - Generic login redirect — waitForURL(url => !url.pathname.includes("/login"))
 // - Never run_in_background — run inline with Bash tool timeout (30-60s)
 // - Screenshots go to test-results/cdp/screenshots/
-// - Kill test server immediately after verification
+// - After verification, TaskStop the server task (never lsof kill — user may have own servers)
 
 import { chromium } from "playwright";
 

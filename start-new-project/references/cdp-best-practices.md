@@ -63,16 +63,21 @@ curl -s -o /dev/null -w "%{http_code}" localhost:<test-port>
 curl -s localhost:9222/json/version | head -1
 ```
 
-If the test server isn't running, **ask the user** rather than auto-starting. If the user confirms auto-start, **kill the server immediately after verification completes** — never leave background servers running.
+If the test server isn't running, **ask the user** rather than auto-starting. If the user confirms auto-start and the agent launches it with `run_in_background`, **note the returned task ID** and `TaskStop` it immediately after verification completes — never leave background servers running.
 
 **Cleanup after every verification:**
 
-```bash
-# Kill the test server immediately after screenshots are taken
-lsof -ti:<test-port> | xargs kill -9 2>/dev/null
+```
+# If agent started the server → TaskStop with the task ID
+TaskStop(task_id)
+
+# If server was already running before the agent → do NOT kill it
+# The user manages their own servers
 ```
 
-Orphaned servers are invisible clutter — they occupy ports (blocking future runs), generate confusing task failure notifications (exit 137 = SIGKILL), and signal sloppy resource management. Clean up after yourself.
+**Critical: only stop tasks the agent created.** Never blindly `lsof -ti:PORT | xargs kill` — the user may have their own servers running on that port. Always use `TaskStop` with the specific task ID returned by `run_in_background`.
+
+Orphaned background tasks are invisible clutter — they occupy ports (blocking future runs), show as "N active shells" in the status bar, generate confusing task failure notifications (exit 137 = SIGKILL), and signal sloppy resource management. Clean up after yourself.
 
 ## 4. Observability over blind timeouts
 
@@ -139,6 +144,8 @@ rm -f .nuxt/dev/lock    # Nuxt
 
 Run CDP scripts inline with the Bash tool using `timeout: 30000` (30s is enough for most verifications). Background execution via `run_in_background` orphans the process — `TaskOutput` with timeout consumes the output but does NOT kill the process. This causes "open bashes" accumulation, blocked ports, and stale lock files.
 
+**`run_in_background` is valid for servers** (e.g., test server on port 3100) but requires disciplined cleanup — see section 3. The rule is: CDP scripts run inline, servers run in background with a mandatory `TaskStop` after use.
+
 ## 10. Match project language extension
 
 CDP scripts must match the project's language:
@@ -172,6 +179,18 @@ When generating verification checkboxes that say "run full test suite", always e
 
 Unit tests with mocks can pass while the database schema is broken. CDP screenshots catch UI issues but don't verify data persistence. Only E2E tests with real database writes confirm the entire stack works. Skipping E2E gives false confidence.
 
+## 14. Every `run_in_background` must have a matching `TaskStop`
+
+This is the general principle behind sections 3 and 9. When the agent launches any background task — test servers, build watchers, database containers — it must:
+
+1. **Note the task ID** returned by `run_in_background`
+2. **`TaskStop` the task** as soon as the work that needed it is done
+3. **Self-check before responding** — if there are background tasks that are no longer needed, stop them before moving on to the next user interaction
+
+There is no built-in "finally" block for background tasks — cleanup is the agent's responsibility. Without it, orphaned shells accumulate over a session: ports stay occupied, the status bar shows "N active shells", and eventually the system kills them with SIGKILL (exit 137), generating confusing notifications.
+
+**The fix is trivial — just call `TaskStop` — but it needs to be a habit, not an afterthought.**
+
 ## Rules summary
 
 | Rule | Why |
@@ -181,7 +200,7 @@ Unit tests with mocks can pass while the database schema is broken. CDP screensh
 | `browser.newContext()` when using CDP — never reuse | Cookies from personal browser pollute and break auth |
 | `context.close()` + `browser.close()` in `finally` | Removes contexts and closes headless browser cleanly |
 | Test server on dedicated port with local env | Dev server uses production env; test users only exist locally |
-| Kill test server immediately after verification | Orphaned servers block ports and generate stale notifications |
+| `TaskStop` server after verification — never `lsof kill` | Only kill what the agent created; user may have own servers |
 | `waitUntil: "networkidle"` on every `goto` | Prevents interacting before hydration |
 | `log()` with timestamp on each step | Identifies where script hangs |
 | `page.on("pageerror")` always active | Catches silent JS errors |
@@ -191,4 +210,5 @@ Unit tests with mocks can pass while the database schema is broken. CDP screensh
 | Match project language extension | `.ts` for TS, `.mjs` for JS |
 | Cleanup framework lock files after kill | `.next/dev/lock`, `.nuxt/dev/lock` prevent restart |
 | State changes via UI, not direct DB | Framework caching invalidates only through mutation paths |
+| Every `run_in_background` needs a matching `TaskStop` | Orphaned shells accumulate ports, status bar clutter, exit 137 |
 | "Full test" = unit + lint + E2E | Each layer catches different classes of bugs |
