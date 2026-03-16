@@ -106,6 +106,8 @@ If Agent Teams is not enabled, skip this section entirely.
 
 **Before presenting the plan, confirm:** if Agent Teams is enabled (Step 2b), does the plan include a "Parallel execution plan" section? If not, add it now — this is mandatory when Agent Teams is active.
 
+Before presenting, review the plan with a critical eye: tighten vague checkboxes, remove redundancy, ensure TDD order, verify file paths are concrete. The question is "how can I make this plan more precise?" — not "what else can I add?"
+
 **Wait for the user's approval before proceeding.** This is the only approval gate. The user may request changes — iterate until they approve.
 
 ### 4. Update the issue (or create additional issues)
@@ -188,9 +190,9 @@ Present concisely:
 
 - **Acceptance criteria are success criteria, not the plan.** Keep the original acceptance criteria as top-level checkboxes. Steps are the implementation plan to achieve those criteria. Mark an acceptance criterion as done when all its related Steps are complete.
 
-- **English for all issue content.** Issues, checkboxes, and branch names are always in English. Communication with the user follows their language preference.
+- **English for all issue content.** Issues, checkboxes, and branch names are always in English because issue content is public, portable, and often read by collaborators or tools that expect English. Communication with the user follows their language preference.
 
-- **Don't over-plan.** Later Steps can be less detailed than early ones. The first Step should have precise checkboxes; the last can be higher-level. The user will refine as they go.
+- **Don't over-plan.** Later Steps can be less detailed than early ones because over-specifying Step 5 when Step 1 hasn't started wastes planning effort on assumptions that will change once early work is done. The first Step should have precise checkboxes; the last can be higher-level — the user will refine as they go.
 
 - **Steps are work sessions.** Each Step should represent a focused work session — something you can complete, commit, and verify before moving on. Too large = lost focus. Too small = overhead.
 
@@ -198,7 +200,7 @@ Present concisely:
 
 - **No local environment paths in issues.** Issue content is public and portable. Never reference local paths like `~/.brain/`, `~/.claude/`, or absolute user paths. Use paths relative to the project root (e.g., `create-skill/SKILL.md`, not `~/.brain/skills/skill-creator/SKILL.md`). This applies to checkboxes, descriptions, and any text written to the issue body.
 
-- **Visual verification via CDP (mandatory for web projects).** When the issue touches UI — new pages, component changes, layout fixes, styling — verification checkboxes must use CDP to confirm the result visually, not just functionally. The pattern: "Navigate to [page] via CDP and take screenshot to verify [expected state]". This catches layout breaks, missing elements, and visual regressions that unit tests and functional tests miss entirely. If CDP is not yet configured and the project is a web app with frontend, the first Step in the plan must set it up (`.claude/start-chrome.sh` + `.claude/project-settings.json`). If CDP is already configured, read the `pages` map from `project-settings.json` to reference routes by name in checkboxes. For non-web projects or backend-only issues, skip CDP entirely. Key CDP rules (see start-new-project's `references/cdp-best-practices.md` for the full set):
+- **Visual verification via CDP (mandatory for web projects).** When the issue touches UI — new pages, component changes, layout fixes, styling — verification checkboxes must use CDP to confirm the result visually, not just functionally. The pattern: "Navigate to [page] via CDP and take screenshot to verify [expected state]". This catches layout breaks, missing elements, and visual regressions that unit tests and functional tests miss entirely. If CDP is not yet configured and the project is a web app with frontend, the first Step in the plan must set it up (`.claude/start-chrome.sh` + `.claude/project-settings.json`). If CDP is already configured, read the `pages` map from `project-settings.json` to reference routes by name in checkboxes. For non-web projects or backend-only issues, skip CDP entirely. Key CDP rules (see `references/cdp-best-practices.md` for the full set):
   - **Fresh context:** always `browser.newContext()` — never `browser.contexts()[0]`. Always `context.close()` in a `finally` block.
   - **Dedicated test port:** hit the test server (declared as `testPort` in `project-settings.json`), never the dev server. Test/seed users only exist locally.
   - **No `run_in_background`:** run CDP scripts inline with Bash tool `timeout: 30000`. Background execution orphans processes.
@@ -206,7 +208,6 @@ Present concisely:
   - **Generic login redirect:** `waitForURL(url => !url.pathname.includes("/login"))` — never hardcode destination.
   - **Cleanup after CDP sessions:** kill orphans on test port, remove framework lock files.
   - **Persistent CDP test scripts:** every visual verification must be saved in `e2e/cdp/verify-<page>.ts` (match project language — `.ts` for TypeScript, `.mjs` for plain JS). Screenshots go to `test-results/cdp/screenshots/` (gitignored). Before writing a new script, check `e2e/cdp/` for an existing one — run it first, only create new if needed. When a Step modifies existing UI, update the corresponding script. Include checkboxes: "Save CDP test script to `e2e/cdp/verify-[page].ts`".
-  - **E2E state changes via UI:** when tests need to change app state, always go through the UI (forms, buttons), never direct DB writes. Fullstack frameworks cache server-side data — direct DB changes won't invalidate the cache. Direct DB is valid only for setup/teardown and assertions.
 
 - **Avoid these anti-patterns:**
   - Checkboxes without TDD order — implementation before test, or tests missing entirely. Always: test checkbox first, then implementation checkbox

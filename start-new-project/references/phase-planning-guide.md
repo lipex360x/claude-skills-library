@@ -2,6 +2,15 @@
 
 Heuristics for decomposing projects into phases and steps. These are starting points — adapt based on the specific project's needs, constraints, and the user's preferences.
 
+## Table of contents
+
+- [By project type](#by-project-type) — web apps, CLIs, libraries, monorepos, data pipelines, infra
+- [Sizing heuristics](#sizing-heuristics) — steps per phase, checkboxes per step, issues per project
+- [Common anti-patterns](#common-anti-patterns) — monolithic issues, mixed concerns, missing verification
+- [GitHub hierarchy](#github-hierarchy) — milestones, labels, project boards
+- [Phase ordering principles](#phase-ordering-principles) — dependencies, risk, TDD, test isolation
+- [Agent Teams parallelism](#agent-teams-parallelism) — patterns, sizing, anti-patterns
+
 ## By project type
 
 ### Web applications

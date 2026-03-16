@@ -77,6 +77,8 @@ Rules for the parallel plan:
 
 If Agent Teams is not enabled, skip this section entirely.
 
+Before presenting, review the plan with a critical eye: tighten vague checkboxes, remove redundancy, ensure TDD order, verify file paths are concrete. The question is "how can I make this plan more precise?" — not "what else can I add?"
+
 **Wait for the user's approval before proceeding.** This is the second (and final) approval gate. The user may request changes — iterate until they approve.
 
 ### 4. Repo scaffolding (labels + milestone)
@@ -179,13 +181,13 @@ Present:
 
 - **Project-agnostic.** This skill works for any kind of project — web apps, CLIs, libraries, APIs, mobile, data pipelines, infrastructure. The questions and structure adapt to the domain.
 
-- **English for all issue content.** Issues, checkboxes, and branch names are always in English. Communication with the user follows their language preference.
+- **English for all issue content.** Issues, checkboxes, and branch names are always in English because issue content is public, portable, and often read by collaborators or tools that expect English. Communication with the user follows their language preference.
 
 - **Checkboxes are verifiable actions.** Each checkbox should be completable in a single work session. "Implement the API" is too vague. "Create `src/routes/auth.ts` with login/logout endpoints" is concrete. For steps with new behavior, follow the TDD order: test checkbox first (`Add test for X in src/__tests__/x.test.ts — expect Y`), then implementation checkbox (`Implement X in src/x.ts`).
 
 - **File paths when structure is known.** If the project builds on an existing codebase, include file paths in checkboxes. For greenfield projects, include paths once the structure is defined in early steps.
 
-- **Don't over-plan.** Later phases can be less detailed than early ones. The first part should have precise checkboxes; the last part can be higher-level. The user will refine as they go.
+- **Don't over-plan.** Later phases can be less detailed than early ones because over-specifying Phase 3 when Phase 1 hasn't started wastes planning effort on assumptions that will change once early work is done. The first phase should have precise checkboxes; later phases can be higher-level — the user will refine as they go.
 
 - **Split large projects into multiple issues.** A single monolithic issue with 10+ steps buries progress and makes the milestone useless. When the mandatory split rule triggers (8+ steps), each Phase becomes its own issue, titled "Phase N: Theme Name". Each issue is independently completable, has its own verification section, and contributes to milestone progress (e.g., 4 issues = each closure moves the milestone 25%). This gives clear visibility into project progress — both for the developer and for anyone watching the repo.
 
@@ -211,3 +213,12 @@ Present:
   - Verification checkboxes in later steps should use the pattern: "Navigate to [page] via CDP and take screenshot to verify [expected state]".
   - **Persistent CDP test scripts.** Every visual verification performed via CDP must be saved as a reusable script in `e2e/cdp/verify-<page>.ts` (match project language — `.ts` for TypeScript, `.mjs` for plain JS). Screenshots go to `test-results/cdp/screenshots/` (gitignored via Playwright's default config). See `templates/cdp-test-example.ts` for the pattern. Before writing a new script, check `e2e/cdp/` for an existing one that covers the same page — run it first, only create a new one if the verification is different. When a step modifies existing UI, update the corresponding script. Include checkboxes: "Save CDP test script to `e2e/cdp/verify-[page].ts`".
   - This is not optional for web projects. Without CDP, visual bugs go undetected until manual review. The cost of setup (two files, one step) is negligible compared to the cost of shipping broken UI.
+
+- **Avoid these anti-patterns:**
+  - Checkboxes without TDD order — implementation before test, or tests missing entirely. Always: test checkbox first, then implementation checkbox
+  - Generic checkboxes without file paths ("Add tests" → "Add test for login in `src/__tests__/auth.test.ts` — expect 200 with valid credentials")
+  - Steps that mix concerns (backend + frontend in one Step)
+  - Missing verification checkboxes (how do you know the Step works?)
+  - Monolithic issues with 10+ steps when the mandatory split rule should have triggered
+  - Front-loading detail on later phases — Phase 1 should be precise, later phases can be higher-level
+  - Local/absolute paths in issue content (`~/.brain/`, `/Users/...`) — always use project-relative paths
