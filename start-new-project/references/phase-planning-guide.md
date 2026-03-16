@@ -136,7 +136,7 @@ Don't create labels the repo already has. Adapt to existing schemes.
 1. **Dependencies first** — if B needs A, A goes first. Obvious but often violated.
 2. **Highest risk first** — uncertain or technically challenging work early. If it fails, you want to know before building everything else.
 3. **Value early** — deliver something usable as soon as possible. Even if it's incomplete, seeing results maintains motivation and surfaces design issues.
-4. **Tests alongside** — don't defer all testing to the end. Each step should include its own tests.
+4. **TDD — tests first, not alongside.** Write the test before the implementation in every step that introduces new behavior. This is not optional. TDD surfaces design flaws early, prevents untestable code, and guarantees coverage by construction. Structure each step as: define the expected behavior in a test, watch it fail, then implement until it passes.
 
 ## Agent Teams parallelism
 

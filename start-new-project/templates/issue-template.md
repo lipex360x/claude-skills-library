@@ -77,7 +77,9 @@ After Step [N] ([last sequential step]), spawn teammates:
 ### Checkboxes
 - One action per checkbox — avoid "X and Y" (split into two)
 - Include file paths: `Create src/routes/auth.ts` not just `Create auth routes`
-- For test tasks: `Add tests for X in src/__tests__/x.test.ts`
+- **TDD order:** for steps with new behavior, place test checkboxes before implementation checkboxes. Example:
+  - `Add test for login endpoint in src/__tests__/auth.test.ts — expect 200 with valid credentials`
+  - `Implement login endpoint in src/routes/auth.ts`
 - For config tasks: `Configure Y in config-file.ext`
 
 ### Reference files

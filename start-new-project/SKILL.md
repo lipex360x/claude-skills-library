@@ -52,7 +52,7 @@ Sizing guidelines:
 - 1-3 issues per project (each issue = independent milestone)
 - 2-4 parts per issue
 - 3-8 steps per part
-- 2-6 checkboxes per step
+- 2-6 checkboxes per step (TDD steps naturally have more checkboxes — test + implementation pairs)
 
 If `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` is enabled (value `1`), append a **Parallel execution plan** section to the issue body. Analyze step dependencies and group independent steps into teammate assignments:
 
@@ -158,11 +158,13 @@ Present:
 
 ## Guidelines
 
+- **TDD by default.** Every step that introduces new behavior must include a test checkbox **before** the implementation checkbox. Write the test first, watch it fail, then implement. This applies to all project types — backend routes, CLI commands, library functions, UI components. TDD catches design issues early and produces code that is testable by construction, not by afterthought. When proposing the phase structure, ensure test checkboxes precede their corresponding implementation checkboxes within each step.
+
 - **Project-agnostic.** This skill works for any kind of project — web apps, CLIs, libraries, APIs, mobile, data pipelines, infrastructure. The questions and structure adapt to the domain.
 
 - **English for all issue content.** Issues, checkboxes, and branch names are always in English. Communication with the user follows their language preference.
 
-- **Checkboxes are verifiable actions.** Each checkbox should be completable in a single work session. "Implement the API" is too vague. "Create `src/routes/auth.ts` with login/logout endpoints" is concrete.
+- **Checkboxes are verifiable actions.** Each checkbox should be completable in a single work session. "Implement the API" is too vague. "Create `src/routes/auth.ts` with login/logout endpoints" is concrete. For steps with new behavior, follow the TDD order: test checkbox first (`Add test for X in src/__tests__/x.test.ts — expect Y`), then implementation checkbox (`Implement X in src/x.ts`).
 
 - **File paths when structure is known.** If the project builds on an existing codebase, include file paths in checkboxes. For greenfield projects, include paths once the structure is defined in early steps.
 
