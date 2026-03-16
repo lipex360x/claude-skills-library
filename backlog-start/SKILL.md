@@ -83,28 +83,31 @@ Sizing guidelines:
 
 **Mandatory split rule for backlog issues.** After drafting the plan, count the total steps. If the plan has **more than 8 steps**, it **MUST** be split into multiple smaller issues — all staying in the Backlog milestone. Backlog issues don't use Phases (they're standalone items, not parts of a larger project plan). Instead, split by logical grouping: each resulting issue should be independently completable with 3-8 steps and its own verification. Title each issue descriptively (no "Phase N" prefix). Create them sequentially, referencing related issues in the body (e.g., "Related: #12, #13"). The original issue becomes the first chunk (rewritten with its subset of steps), and new issues are created for the rest.
 
-If `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` is enabled (value `1`), also analyze the Steps for parallelism and append a **Parallel execution plan** section to the proposed issue body:
+If `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` is enabled (value `1`), also analyze the Steps for parallelism and add an **Execution mode** section **at the top of the proposed issue body** (before What/Why). This section must be the first thing the agent reads — placing it at the bottom causes the agent to default to isolated worktree agents instead of using `TeamCreate`.
 
 ```markdown
-## Parallel execution plan (Agent Teams)
+## Execution mode
 
-> Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`
+> **MUST use Agent Teams (`TeamCreate`).** Do NOT fall back to isolated worktree agents.
 
-After Step N (last sequential dependency), spawn teammates:
+After completing Step N (last sequential dependency):
 - `teammate-name`: Steps X-Y — description
 - `teammate-name`: Steps W-Z — description
-- `teammate-name`: Steps A-B — blocked until teammate-name completes
+
+_Remove this section entirely if Agent Teams is not enabled._
 ```
 
-Rules for the parallel plan:
+Also add an inline reminder in the first parallelizable step: `⚠️ This step runs in parallel via Agent Teams — see Execution mode above`.
+
+Rules for the execution plan:
 - **Identify the sequential prefix** — Steps that must run first because everything depends on them (e.g., template definition, shared types). These stay with the lead.
 - **Group independent Steps by layer** — each group becomes a teammate.
 - **Mark blocked teammates** — if a teammate depends on another's output, note it explicitly.
 - **Keep it practical** — 2-4 teammates max.
 
-If Agent Teams is not enabled, skip this section entirely.
+If Agent Teams is not enabled, skip the Execution mode section entirely — do not include it with a "not enabled" note.
 
-**Before presenting the plan, confirm:** if Agent Teams is enabled (Step 2b), does the plan include a "Parallel execution plan" section? If not, add it now — this is mandatory when Agent Teams is active.
+**Before presenting the plan, confirm:** if Agent Teams is enabled (Step 2b), does the plan include an "Execution mode" section at the top? If not, add it now — this is mandatory when Agent Teams is active.
 
 Before presenting, review the plan with a critical eye: tighten vague checkboxes, remove redundancy, ensure TDD order, verify file paths are concrete. The question is "how can I make this plan more precise?" — not "what else can I add?"
 
@@ -219,4 +222,5 @@ Present concisely:
   - Over-expanding simple issues into 10+ Steps when 3 would suffice
   - Checkboxes that duplicate the acceptance criteria verbatim instead of expanding them
   - Local/absolute paths in issue content (`~/.brain/`, `/Users/...`) — always use project-relative paths
-  - Proposing a plan without checking `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` first — if enabled, the parallel execution plan section is **mandatory**, not optional. Skipping it means the user loses the ability to parallelize work
+  - Proposing a plan without checking `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` first — if enabled, the Execution mode section at the top is **mandatory**, not optional. Skipping it means the user loses the ability to parallelize work
+  - Placing the Agent Teams section at the bottom of the issue — the agent reads top-down and will default to isolated worktree agents if it doesn't see the execution mode first

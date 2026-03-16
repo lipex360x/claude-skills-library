@@ -55,27 +55,31 @@ Sizing guidelines:
 
 **Mandatory split rule.** After drafting the full plan, count the total steps. If the plan has **more than 8 steps**, it **MUST** be split into multiple issues — one issue per Phase (or per logical group of Phases if some are small enough to merge). This is not a suggestion. A single issue with 10+ steps buries progress, makes milestone tracking useless, and overwhelms the developer. Each issue should have 3-8 steps, be independently completable, and have its own verification section. The Overview section is shared (copy it into each issue with a note: "This issue is Phase N of M"). Steps are renumbered starting from 1 within each issue. The Parallel execution plan (if applicable) goes in the first issue and references the other issues by number.
 
-If `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` is enabled (value `1`), append a **Parallel execution plan** section to the issue body. Analyze step dependencies and group independent steps into teammate assignments:
+If `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` is enabled (value `1`), add an **Execution mode** section **at the top of the issue body** (before Overview). This section must be the first thing the agent reads — placing it at the bottom causes the agent to default to isolated worktree agents instead of using `TeamCreate`.
 
 ```markdown
-## Parallel execution plan (Agent Teams)
+## Execution mode
 
-> Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`
+> **MUST use Agent Teams (`TeamCreate`).** Do NOT fall back to isolated worktree agents.
 
-After Step N (last sequential dependency), spawn teammates:
-- `teammate-name`: Steps X-Y (description)
-- `teammate-name`: Steps W-Z (description)
-- `teammate-name`: Steps A-B (blocked until teammate-name completes)
+After completing Step N (last sequential dependency):
+- `teammate-name`: Steps X-Y — description
+- `teammate-name`: Steps W-Z — description
+- `teammate-name`: Steps A-B — blocked until `teammate-name` completes
+
+_Remove this section entirely if Agent Teams is not enabled._
 ```
 
-Rules for the parallel plan:
+Also add an inline reminder in the first parallelizable step: `⚠️ This step runs in parallel via Agent Teams — see Execution mode above`.
+
+Rules for the execution plan:
 - **Identify the sequential prefix** — steps that must run first because everything depends on them (e.g., scaffolding, schema). These stay with the lead.
 - **Group independent steps by layer** — backend, frontend, infra, tests. Each group becomes a teammate.
 - **Mark blocked teammates** — if a teammate depends on another's output, note it explicitly (e.g., "blocked until backend completes").
 - **Teammates inherit the user's model by default.** Optionally suggest Sonnet for teammates if the user wants to optimize for speed or cost. Don't default to a cheaper model — let the user decide.
 - **Keep it practical** — 2-4 teammates max. More creates coordination overhead that outweighs the parallelism benefit.
 
-If Agent Teams is not enabled, skip this section entirely.
+If Agent Teams is not enabled, skip the Execution mode section entirely — do not include it with a "not enabled" note.
 
 Before presenting, review the plan with a critical eye: tighten vague checkboxes, remove redundancy, ensure TDD order, verify file paths are concrete. The question is "how can I make this plan more precise?" — not "what else can I add?"
 

@@ -5,6 +5,17 @@ Use this structure when composing the GitHub issue body. Adapt sections to the p
 ## Template
 
 ```markdown
+## Execution mode
+
+> **MUST use Agent Teams (`TeamCreate`).** Do NOT fall back to isolated worktree agents.
+
+After completing Step [N] ([last sequential step]):
+- `[teammate-name]`: Steps [X-Y] — [what this teammate owns]
+- `[teammate-name]`: Steps [W-Z] — [what this teammate owns]
+- `[teammate-name]`: Steps [A-B] — blocked until `[dependency-teammate]` completes
+
+_Remove this section entirely if Agent Teams is not enabled._
+
 ## Overview
 
 [One paragraph: what this project/phase does and why. Include architecture if relevant — a simple ASCII diagram or bullet list of components and how they connect.]
@@ -47,14 +58,6 @@ Use this structure when composing the GitHub issue body. Adapt sections to the p
 2. [Edge case or integration check]
 3. [Performance or security check if applicable]
 
-## Parallel execution plan (Agent Teams)
-
-> Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`. Remove this section if not using Agent Teams.
-
-After Step [N] ([last sequential step]), spawn teammates:
-- `[teammate-name]`: Steps [X-Y] — [what this teammate owns]
-- `[teammate-name]`: Steps [W-Z] — [what this teammate owns]
-- `[teammate-name]`: Steps [A-B] — blocked until `[dependency-teammate]` completes
 ```
 
 ## Section notes
@@ -97,10 +100,13 @@ After Step [N] ([last sequential step]), spawn teammates:
 - For web projects, include CDP-based visual verification: "Navigate to [page] via CDP and take screenshot — verify [expected state]". This catches layout issues, missing elements, and visual regressions that unit tests miss
 - Cover the happy path first, then edge cases
 
-### Parallel execution plan
-- Only include when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is active
+### Execution mode
+- Only include when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is active — remove entirely otherwise
+- **Placed at the top** (before Overview) so the agent sees it first and doesn't default to isolated worktree agents
+- Use directive language: "MUST use Agent Teams (`TeamCreate`)" — not descriptive "Parallel execution plan"
 - Identify the sequential prefix (steps that must complete before parallelism starts)
 - Group independent steps by layer/module — each group becomes a teammate
 - Mark dependencies between teammates explicitly
 - Teammates inherit the user's model by default — suggest Sonnet only if optimizing for speed/cost
 - Keep to 2-4 teammates max
+- Add inline reminders in the first parallelizable step: "⚠️ This step runs in parallel via Agent Teams — see Execution mode above"

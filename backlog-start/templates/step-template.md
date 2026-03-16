@@ -5,6 +5,16 @@ Use this structure when rewriting the issue body with a detailed plan. Adapt to 
 ## Template
 
 ```markdown
+## Execution mode
+
+> **MUST use Agent Teams (`TeamCreate`).** Do NOT fall back to isolated worktree agents.
+
+After completing Step [N] ([last sequential step]):
+- `[teammate-name]`: Steps [X-Y] — [what this teammate owns]
+- `[teammate-name]`: Steps [W-Z] — [what this teammate owns]
+
+_Remove this section entirely if Agent Teams is not enabled._
+
 ## What
 
 [Keep or slightly improve the original description]
@@ -36,13 +46,6 @@ Use this structure when rewriting the issue body with a detailed plan. Adapt to 
 - [ ] [Task]
 - [ ] [Verification]
 
-## Parallel execution plan (Agent Teams)
-
-> Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`. Remove this section if not using Agent Teams.
-
-After Step [N] ([last sequential step]), spawn teammates:
-- `[teammate-name]`: Steps [X-Y] — [what this teammate owns]
-- `[teammate-name]`: Steps [W-Z] — [what this teammate owns]
 ```
 
 ## Section notes
