@@ -37,7 +37,7 @@ Extract:
 - **What/Why** — context for planning
 - **Acceptance criteria** — the high-level checkboxes to expand into detailed steps
 
-Also analyze the **current codebase** to inform the plan. Read relevant files, understand existing patterns, identify where changes will land. This context is essential for writing concrete checkboxes with file paths.
+Also analyze the **current codebase** to inform the plan. **Start by checking for `ARCHITECTURE.md` at the project root.** If it exists, read it first — it contains stack, layers, patterns, schema, auth model, and routes, eliminating the need for expensive exploration (~2k tokens vs ~53k). Only spawn an exploration agent if ARCHITECTURE.md is missing, incomplete, or appears stale (e.g., routes in the file don't match `src/app/` directory). If ARCHITECTURE.md doesn't exist, read relevant files the traditional way to understand existing patterns and identify where changes will land. This context is essential for writing concrete checkboxes with file paths.
 
 **CDP detection (for web projects).** Check two things:
 
@@ -208,6 +208,8 @@ Present concisely:
   - **Generic login redirect:** `waitForURL(url => !url.pathname.includes("/login"))` — never hardcode destination.
   - **Cleanup after CDP sessions:** kill orphans on test port, remove framework lock files.
   - **Persistent CDP test scripts:** every visual verification must be saved in `e2e/cdp/verify-<page>.ts` (match project language — `.ts` for TypeScript, `.mjs` for plain JS). Screenshots go to `test-results/cdp/screenshots/` (gitignored). Before writing a new script, check `e2e/cdp/` for an existing one — run it first, only create new if needed. When a Step modifies existing UI, update the corresponding script. Include checkboxes: "Save CDP test script to `e2e/cdp/verify-[page].ts`".
+
+- **ARCHITECTURE.md maintenance.** Every Step that introduces a new pattern, route, table, or dependency must include a checkbox: "Update `ARCHITECTURE.md` with [specific addition]" — naming exactly what changed (e.g., "add billing query hook to Patterns section", "add `/billing` route to Routes section", "add `recharts` to Stack & dependencies"). This keeps the codebase knowledge cache current without a bulk "update everything" step at the end. If ARCHITECTURE.md doesn't exist and the project is a web app or has sufficient complexity, include a checkbox in Step 1 to generate it using the patterns discovered during codebase analysis.
 
 - **Avoid these anti-patterns:**
   - Checkboxes without TDD order — implementation before test, or tests missing entirely. Always: test checkbox first, then implementation checkbox

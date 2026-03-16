@@ -114,3 +114,5 @@ Present concisely:
 - **Single gate.** The commit message (step 2) is the only point where the user must approve — unless `-y` is passed, which skips it entirely. Everything else — staging, pushing, issue updates — is automated. This keeps the flow fast while maintaining control over what goes into the commit log.
 
 - **Graceful degradation.** If `gh` is not available, skip the issue update step. If the branch has no issue, skip it. If the issue body can't be parsed, skip it. The core job (commit + push) always completes.
+
+- **ARCHITECTURE.md drift detection.** Before committing, check if staged changes introduce patterns that should be reflected in `ARCHITECTURE.md` (if the file exists). Signals: new file in a location that doesn't match any documented pattern, new dependency in `package.json`, new migration file (schema change), new route (`page.tsx` in a new directory). If detected, add a reminder in the summary: "Note: `ARCHITECTURE.md` may need updating for [detected change]". Do NOT auto-edit the file or block the commit — this is a passive reminder to keep the knowledge cache current.
