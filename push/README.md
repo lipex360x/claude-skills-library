@@ -43,5 +43,5 @@ push/
 ## Installation
 
 ```bash
-npx skills add https://github.com/lipex360x/claude-skills-library --skill push
+npx skills add lipex360x/claude-skills-library --skill push
 ```

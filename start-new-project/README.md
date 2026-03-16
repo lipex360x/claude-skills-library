@@ -42,5 +42,5 @@ start-new-project/
 ## Installation
 
 ```bash
-npx skills add https://github.com/lipex360x/claude-skills-library --skill start-new-project
+npx skills add lipex360x/claude-skills-library --skill start-new-project
 ```

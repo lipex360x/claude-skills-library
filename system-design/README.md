@@ -32,13 +32,16 @@ Place reference images in the `design/` folder before running. The skill will an
 
 ```
 system-design/
-├── SKILL.md              # Core instructions and hub-centric build process
-├── references/           # Agent prompt template, artboard content guidelines
-└── templates/            # Design spec template
+├── SKILL.md                            # Core instructions and hub-centric build process
+├── references/
+│   ├── agent-prompt.md                 # Prompt template and curl instructions for subagents
+│   └── artboard-guidelines.md          # Standard artboard structure and content guidelines
+└── templates/
+    └── design-spec.md                  # Design spec template passed to every agent
 ```
 
 ## Installation
 
 ```bash
-npx skills add https://github.com/lipex360x/claude-skills-library --skill system-design
+npx skills add lipex360x/claude-skills-library --skill system-design
 ```

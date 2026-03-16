@@ -4,10 +4,10 @@ Generate a continuation prompt to paste into a new Claude Code conversation, so 
 
 ## Trigger phrases
 
-- "continue later"
+- "continue later" / "let's continue later"
 - "save context" / "continuation prompt"
 - "prepare a handoff"
-- Also activates when the user is hitting context limits or wants to switch to a fresh conversation window
+- Also activates when the user is hitting context limits, wants to switch sessions, or asks to hand off work to a fresh conversation window
 
 ## How it works
 
@@ -36,5 +36,5 @@ prompt-continue/
 ## Installation
 
 ```bash
-npx skills add https://github.com/lipex360x/claude-skills-library --skill prompt-continue
+npx skills add lipex360x/claude-skills-library --skill prompt-continue
 ```

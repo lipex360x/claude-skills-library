@@ -18,6 +18,7 @@ Guide the user through creating, reviewing, or improving Claude Code skills — 
 5. **Apply quality techniques** — Adds craftsmanship repetition, anti-patterns lists, and refinement-over-addition steps
 6. **Handle subagents** — If applicable, designs prompts and coordination for blank-context subagents
 7. **Review against checklist** — Validates every item in the review checklist and presents results before finalizing
+8. **Generate README.md** — Creates public-facing documentation using the README template with installation instructions
 
 ## Usage
 
@@ -39,5 +40,5 @@ create-skill/
 ## Installation
 
 ```bash
-npx skills add https://github.com/lipex360x/claude-skills-library --skill create-skill
+npx skills add lipex360x/claude-skills-library --skill create-skill
 ```
