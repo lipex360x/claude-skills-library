@@ -1,9 +1,10 @@
 {
-  "_comment": "Template: CDP project settings (JSON) | Version: 1.0 | Created: 2026-03-16 | Method: Adapted from claude-design-canvas production setup | IMPORTANT: This is a living document — update 'pages' whenever new routes are created so Claude can navigate and verify them via CDP",
+  "_comment": "Template: CDP project settings (JSON) | IMPORTANT: This is a living document — update 'pages' whenever new routes are created so Claude can navigate and verify them via CDP",
   "chrome": {
     "cdp": "http://localhost:9222",
     "launchCommand": ".claude/start-chrome.sh",
     "baseUrl": "http://localhost:3000",
+    "testPort": 3100,
     "tabs": {
       "app": "http://localhost:3000"
     },

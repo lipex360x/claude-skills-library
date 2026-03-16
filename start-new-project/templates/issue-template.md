@@ -75,7 +75,7 @@ After Step [N] ([last sequential step]), spawn teammates:
 - Start with a verb: "Create", "Add", "Configure", "Implement", "Set up"
 - Include a verification checkbox as the last item when the step has observable output
 - For projects with databases or file I/O, include a test environment setup step early (Phase 1). Create a `docker-compose.test.yml` (or `test` profile) to orchestrate the test stack — database, cloud service emulators, and any other dependencies. Configure `.env.test` pointing at local containers. This must exist before any test checkbox can run
-- For web projects, include a CDP setup step early (Phase 1) — create `.claude/start-chrome.sh` and `.claude/project-settings.json` from skill templates. Configure `baseUrl`, `tabs` (what opens on launch), and `pages` (route map for navigation). This must exist before any visual verification checkbox can run
+- For web projects, include a CDP setup step early (Phase 1) — create `.claude/start-chrome.sh` and `.claude/project-settings.json` from skill templates. Configure `baseUrl`, `testPort`, `tabs` (what opens on launch), and `pages` (route map for navigation). This must exist before any visual verification checkbox can run
 - When a step creates seed data with test credentials (users, API keys), include a checkbox to create/update a gitignored `TEST_USERS.md` at the project root with all credentials in a readable table. This is a living document — update it whenever seed data changes
 
 ### Checkboxes
