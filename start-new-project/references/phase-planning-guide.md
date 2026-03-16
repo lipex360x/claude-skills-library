@@ -1,12 +1,12 @@
 # Phase Planning Guide
 
-Heuristics for decomposing projects into parts and steps. These are starting points — adapt based on the specific project's needs, constraints, and the user's preferences.
+Heuristics for decomposing projects into phases and steps. These are starting points — adapt based on the specific project's needs, constraints, and the user's preferences.
 
 ## By project type
 
 ### Web applications
 
-Typical part progression:
+Typical phase progression:
 
 1. **Scaffolding & CDP setup** — project structure, dependencies, `.claude/start-chrome.sh` + `.claude/project-settings.json` for browser automation. CDP must be ready before any frontend step so Claude can navigate and screenshot to verify UI. Use the skill templates as source files, adapting `baseUrl`, `tabs`, and `pages` to the project
 2. **Data layer** — database schema, models, migrations, seed data. When seed includes test credentials, create a gitignored `TEST_USERS.md` with all seeded emails/passwords/roles in a table for quick reference
@@ -16,8 +16,8 @@ Typical part progression:
 6. **Polish & Deploy** — responsive design, performance, CI/CD, hosting
 
 Variations:
-- **Fullstack frameworks** (Next.js, Remix, SvelteKit): combine backend + frontend parts since they're co-located. CDP setup still goes in scaffolding
-- **API-only**: skip frontend and CDP parts, add documentation and SDK/client generation
+- **Fullstack frameworks** (Next.js, Remix, SvelteKit): combine backend + frontend phases since they're co-located. CDP setup still goes in scaffolding
+- **API-only**: skip frontend and CDP phases, add documentation and SDK/client generation
 - **Existing frontend**: start from integration, not data layer. CDP setup goes in the first step to enable visual verification of existing UI
 
 ### CLI tools
@@ -38,7 +38,7 @@ Variations:
 ### Monorepos
 
 1. **Shared packages** — types, utilities, configuration
-2. **Individual apps** — each app gets its own part or issue
+2. **Individual apps** — each app gets its own phase or issue
 3. **Build & CI** — workspace tooling, shared scripts, CI pipelines
 4. **Integration** — cross-package testing, version management
 
@@ -58,25 +58,32 @@ Variations:
 
 ## Sizing heuristics
 
-### Steps per part
-- **Too few** (1-2): the part is either too granular or the steps are too large. Split steps or merge the part into another.
+### Steps per phase
+- **Too few** (1-2): the phase is either too granular or the steps are too large. Split steps or merge the phase into another.
 - **Sweet spot** (3-8): each step is a focused work session.
-- **Too many** (9+): the part covers too much ground. Split into two parts.
+- **Too many** (9+): the phase covers too much ground. Split into two phases.
 
 ### Checkboxes per step
 - **Too few** (1): likely not a real step — merge into an adjacent step or expand.
 - **Sweet spot** (2-6): each checkbox is a single, verifiable action.
 - **Too many** (7+): the step is trying to do too much. Split into two steps.
 
+### Total steps per issue
+- **Sweet spot** (3-8): manageable scope, clear progress per issue.
+- **Too many** (9+): **mandatory split** — one issue per Phase. A 15-step issue buries progress and makes the milestone bar useless. Each Phase becomes its own issue with steps renumbered from 1.
+
 ### Issues per project
-- **Simple project** (1 issue): everything fits in one milestone — a weekend project, a single feature, a small tool.
-- **Medium project** (2-3 issues): distinct phases with clear handoff points — "backend" then "frontend", or "core" then "extensions".
-- **Large project** (3+ issues): each issue maps to a major milestone. Keep the first issue self-contained — it should deliver value on its own.
+- **Simple project** (1 issue): 8 steps or fewer — a weekend project, a single feature, a small tool.
+- **Medium project** (2-3 issues): distinct phases with clear handoff points — "backend" then "frontend", or "core" then "extensions". Each issue 3-8 steps.
+- **Large project** (4+ issues): each issue maps to a Phase. Keep the first issue self-contained — it should deliver value on its own. Milestone shows real progress (25%/50%/75%/100%).
 
 ## Common anti-patterns
 
+### Monolithic issue
+Dumping 15 steps into one issue because "it's all one project." The milestone shows 0% until the entire thing is done — zero visibility. Split into one issue per Phase. A project with 4 Phases = 4 issues = milestone shows 25% per issue closed. Each issue is a checkpoint.
+
 ### Steps too large
-"Implement the entire authentication system" — this is a part, not a step. Break it into: schema, routes, middleware, tests, frontend integration.
+"Implement the entire authentication system" — this is a phase, not a step. Break it into: schema, routes, middleware, tests, frontend integration.
 
 ### Steps too small
 "Create the `src/` directory" — this isn't meaningful on its own. Merge into the step that creates the first file inside it.
@@ -88,7 +95,7 @@ Variations:
 Steps without a way to confirm they work lead to integration surprises later. Add "Run X — expect Y" checkboxes or a verification section.
 
 ### Front-loading all detail
-The first part should be detailed (you know what to build). Later parts can be higher-level — they'll get refined when the user reaches them. Over-specifying part C when part A hasn't started yet wastes planning effort on assumptions.
+The first phase should be detailed (you know what to build). Later phases can be higher-level — they'll get refined when the user reaches them. Over-specifying Phase 3 when Phase 1 hasn't started yet wastes planning effort on assumptions.
 
 ### Ignoring existing patterns
 In an existing codebase, the first step should be "study existing patterns" — read reference files, understand conventions, then follow them. Greenfield freedom doesn't apply when adding to an established project.

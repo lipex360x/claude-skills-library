@@ -9,7 +9,7 @@ Use this structure when composing the GitHub issue body. Adapt sections to the p
 
 [One paragraph: what this project/phase does and why. Include architecture if relevant — a simple ASCII diagram or bullet list of components and how they connect.]
 
-## Part A — [Theme Name]
+## Phase 1 — [Theme Name]
 
 ### Step 1: [Concise title]
 - [ ] [Concrete task — include file path if known, e.g., `Create src/db/schema.ts with users table`]
@@ -20,7 +20,7 @@ Use this structure when composing the GitHub issue body. Adapt sections to the p
 - [ ] [Task]
 - [ ] [Task]
 
-## Part B — [Theme Name]
+## Phase 2 — [Theme Name]
 
 ### Step 3: [Concise title]
 - [ ] [Task]
@@ -29,7 +29,7 @@ Use this structure when composing the GitHub issue body. Adapt sections to the p
 ### Step 4: [Concise title]
 - [ ] [Task]
 
-## Part C — [Theme Name]
+## Phase 3 — [Theme Name]
 
 ### Step 5: [Concise title]
 - [ ] [Task]
@@ -64,17 +64,18 @@ After Step [N] ([last sequential step]), spawn teammates:
 - Architecture diagrams help when there are 3+ components interacting
 - Mention key decisions (e.g., "SQLite for local-first, no cloud dependency")
 
-### Parts
+### Phases
+- Number sequentially (Phase 1, 2, 3...) — not lettered (A, B, C)
 - Group by theme, not chronological order (though themes often map to phases)
 - Good themes: "Database & Models", "API Routes", "Frontend Components", "Testing & CI", "Deployment"
-- Each part should be a coherent unit of work
+- Each phase should be a coherent unit of work
 
 ### Steps
 - Each step = a work session (30 min to 2 hours of focused work)
 - Start with a verb: "Create", "Add", "Configure", "Implement", "Set up"
 - Include a verification checkbox as the last item when the step has observable output
-- For projects with databases or file I/O, include a test environment setup step early (Part A). Create a `docker-compose.test.yml` (or `test` profile) to orchestrate the test stack — database, cloud service emulators, and any other dependencies. Configure `.env.test` pointing at local containers. This must exist before any test checkbox can run
-- For web projects, include a CDP setup step early (Part A) — create `.claude/start-chrome.sh` and `.claude/project-settings.json` from skill templates. Configure `baseUrl`, `tabs` (what opens on launch), and `pages` (route map for navigation). This must exist before any visual verification checkbox can run
+- For projects with databases or file I/O, include a test environment setup step early (Phase 1). Create a `docker-compose.test.yml` (or `test` profile) to orchestrate the test stack — database, cloud service emulators, and any other dependencies. Configure `.env.test` pointing at local containers. This must exist before any test checkbox can run
+- For web projects, include a CDP setup step early (Phase 1) — create `.claude/start-chrome.sh` and `.claude/project-settings.json` from skill templates. Configure `baseUrl`, `tabs` (what opens on launch), and `pages` (route map for navigation). This must exist before any visual verification checkbox can run
 - When a step creates seed data with test credentials (users, API keys), include a checkbox to create/update a gitignored `TEST_USERS.md` at the project root with all credentials in a readable table. This is a living document — update it whenever seed data changes
 
 ### Checkboxes

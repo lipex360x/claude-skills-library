@@ -6,7 +6,7 @@ Turn a project idea into a well-structured GitHub issue with phased checkboxes, 
 
 1. **Parse the prompt** — Extracts project name, tech stack hints, scope, and domain from the user's input
 2. **Ask clarifying questions** — Generates 3-5 targeted questions to fill gaps (platform, stack, scope, key features, deployment). First approval gate
-3. **Propose the phase structure** — Decomposes the project into Parts (grouped by theme) and Steps (concrete milestones) with verifiable checkboxes. Second approval gate
+3. **Propose the phase structure** — Decomposes the project into Phases (numbered, grouped by theme) and Steps (concrete milestones) with verifiable checkboxes. Second approval gate
 4. **Repo scaffolding** — Creates labels (`P0`-`P3`, type labels) and milestones as needed, plus a permanent "Backlog" milestone for future ideas
 5. **Create GitHub issue** — Creates the issue with the approved structure, applies labels and milestone
 6. **Project board** — For 3+ issues, offers to create a GitHub Projects board for visual tracking

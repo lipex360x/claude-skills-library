@@ -58,7 +58,7 @@ Transform the high-level acceptance criteria into a detailed plan with **Steps**
 **Apply CDP detection result from Step 2:**
 
 - **CDP already configured** (`.claude/project-settings.json` exists): use the `pages` map to write verification checkboxes with the pattern "Navigate to [page] via CDP and take screenshot to verify [expected state]". No setup Step needed — but if this issue introduces new routes, include a checkbox to update the `pages` map in `project-settings.json`.
-- **Web project without CDP**: include a **Step 1 — Configure CDP for visual verification** before all other Steps. Checkboxes:
+- **Web project without CDP**: include a **Step 1 — Configure CDP for visual verification** before all other steps. Checkboxes:
   - `Create .claude/start-chrome.sh` from the start-new-project skill template (cross-platform Chrome launcher with `--remote-debugging-port=9222`)
   - `Create .claude/project-settings.json` with `baseUrl` pointing to the dev server, `tabs` with the app URL, and `pages` mapping all known routes. This file is a living document — whenever a Step creates new routes or pages, include a checkbox to update the `pages` map
   - `Verify CDP connection — run .claude/start-chrome.sh and confirm Playwright can connect via connectOverCDP`
@@ -80,6 +80,8 @@ Sizing guidelines:
 - 2-8 Steps total (depending on issue complexity)
 - 2-6 checkboxes per Step (TDD steps naturally have more checkboxes — test + implementation pairs)
 - Each checkbox = one focused action completable in a single work session
+
+**Mandatory split rule for backlog issues.** After drafting the plan, count the total steps. If the plan has **more than 8 steps**, it **MUST** be split into multiple smaller issues — all staying in the Backlog milestone. Backlog issues don't use Phases (they're standalone items, not parts of a larger project plan). Instead, split by logical grouping: each resulting issue should be independently completable with 3-8 steps and its own verification. Title each issue descriptively (no "Phase N" prefix). Create them sequentially, referencing related issues in the body (e.g., "Related: #12, #13"). The original issue becomes the first chunk (rewritten with its subset of steps), and new issues are created for the rest.
 
 If `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` is enabled (value `1`), also analyze the Steps for parallelism and append a **Parallel execution plan** section to the proposed issue body:
 
@@ -106,13 +108,21 @@ If Agent Teams is not enabled, skip this section entirely.
 
 **Wait for the user's approval before proceeding.** This is the only approval gate. The user may request changes — iterate until they approve.
 
-### 4. Update the issue
+### 4. Update the issue (or create additional issues)
 
 After approval, rewrite the issue body with the detailed plan:
 
 ```bash
 gh issue edit <number> --body "<approved body>"
 ```
+
+If the mandatory split rule triggered (8+ steps), create the additional issues:
+
+```bash
+gh issue create --title "<descriptive title>" --body "<body with steps subset>" --milestone "Backlog"
+```
+
+Add cross-references between related issues in each body (e.g., "Related: #12, #13"). Apply the same labels as the original issue.
 
 Preserve the original title and labels. The issue stays in the Backlog milestone — it will be moved to an active milestone if the project uses them.
 
@@ -180,9 +190,11 @@ Present concisely:
 
 - **Steps are work sessions.** Each Step should represent a focused work session — something you can complete, commit, and verify before moving on. Too large = lost focus. Too small = overhead.
 
+- **Backlog issues are standalone — no Phases.** Unlike project issues created by `start-new-project` (which use "Phase 1: Theme", "Phase 2: Theme"), backlog issues are self-contained items. They use Steps directly, never Phases. If a backlog item grows too large (8+ steps), split it into multiple independent backlog issues — each with a descriptive title, 3-8 steps, and its own verification. All split issues stay in the Backlog milestone and reference each other.
+
 - **No local environment paths in issues.** Issue content is public and portable. Never reference local paths like `~/.brain/`, `~/.claude/`, or absolute user paths. Use paths relative to the project root (e.g., `create-skill/SKILL.md`, not `~/.brain/skills/skill-creator/SKILL.md`). This applies to checkboxes, descriptions, and any text written to the issue body.
 
-- **Visual verification via CDP (mandatory for web projects).** When the issue touches UI — new pages, component changes, layout fixes, styling — verification checkboxes must use CDP to confirm the result visually, not just functionally. The pattern: "Navigate to [page] via CDP and take screenshot to verify [expected state]". This catches layout breaks, missing elements, and visual regressions that unit tests and functional tests miss entirely. If CDP is not yet configured and the project is a web app with frontend, the first Step in the plan must set it up (`.claude/start-chrome.sh` + `.claude/project-settings.json`). If CDP is already configured, read the `pages` map from `project-settings.json` to reference routes by name in checkboxes. For non-web projects or backend-only issues, skip CDP entirely.
+- **Visual verification via CDP (mandatory for web projects).** When the issue touches UI — new pages, component changes, layout fixes, styling — verification checkboxes must use CDP to confirm the result visually, not just functionally. The pattern: "Navigate to [page] via CDP and take screenshot to verify [expected state]". This catches layout breaks, missing elements, and visual regressions that unit tests and functional tests miss entirely. If CDP is not yet configured and the project is a web app with frontend, the first Step in the plan must set it up (`.claude/start-chrome.sh` + `.claude/project-settings.json`). If CDP is already configured, read the `pages` map from `project-settings.json` to reference routes by name in checkboxes. For non-web projects or backend-only issues, skip CDP entirely. **Fresh context rule:** CDP tests must always create `browser.newContext()` — never reuse `browser.contexts()[0]` which carries cookies from the user's browsing session. Create one page per context, navigate within it, `context.close()` when done. **Dedicated test port:** CDP tests must hit a test server on a dedicated port (e.g., 3100) with local env vars — never the dev server (3000) which points to production. Test/seed users only exist in the local Docker instance. **Essential practices:** `waitUntil: "networkidle"` on every `goto` (prevents interacting before hydration), `page.on("pageerror")` always active (catches silent JS errors), timestamps on every step (identifies hangs), short timeouts 5-10s (fail fast). **Persistent CDP test scripts:** every visual verification must be saved as a reusable `.mjs` script in `.claude/cdp-tests/` and registered in `.claude/cdp-tests/manifest.json` (includes `cdpPort`, `testPort`, `baseUrl`, pre-flight commands, and a `tests` array mapping script → page → what it verifies → whether auth is required). Before writing a new visual test, check the manifest for an existing script that covers the same page — run it first, only create a new one if the verification is different. When a Step modifies existing UI, update the corresponding script and manifest entry. Include checkboxes for both: "Save CDP test script to `.claude/cdp-tests/verify-[page].mjs` and update manifest".
 
 - **Avoid these anti-patterns:**
   - Checkboxes without TDD order — implementation before test, or tests missing entirely. Always: test checkbox first, then implementation checkbox
