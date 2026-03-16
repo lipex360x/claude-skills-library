@@ -206,6 +206,8 @@ Present:
   - **`testPort`** — dedicated port for the test server (e.g., 3100). CDP scripts hit this port, never the dev server.
   - **`tabs`** — URLs to open when Chrome launches. Typically just the app's main URL.
   - **`pages`** — a route map declaring every page Claude can navigate to. **This is a living document** — every step that creates a new route or page must include a checkbox to add it to `pages` in `project-settings.json`.
+  - **CDP runner and `test:cdp` script.** Include in the CDP setup step: create `e2e/cdp/run-all.ts` from `templates/cdp-run-all.ts` (auto-discovers all `verify-*.ts` files), and add `"test:cdp": "npx tsx e2e/cdp/run-all.ts"` plus `"test:cdp:server": "dotenv -e .env.test -- npx next start -p 3100"` (adapt framework) to `package.json`. The server script ensures env vars (Supabase URLs, API keys) are loaded — without them, CDP scripts timeout on auth.
+  - **CDP is not E2E.** When instructing teammates (Agent Teams), be explicit: "do NOT run Playwright E2E tests" but "DO create CDP verification scripts in `e2e/cdp/`". Teammates conflate the two and skip CDP when told to skip E2E.
   - Playwright connects via `playwright.chromium.connectOverCDP('http://localhost:9222')` — the user sees everything happening in their browser in real-time.
   - **Read `references/cdp-best-practices.md`** for all CDP rules. Key rules enforced in every CDP script:
     - **Fresh context:** always `browser.newContext()` — never `browser.contexts()[0]`. Always `context.close()` in a `finally` block.

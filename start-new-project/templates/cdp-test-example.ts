@@ -1,7 +1,8 @@
 // Template: Headless verification script | Adapt to project language (.ts or .mjs)
 // Location: e2e/cdp/verify-<page>.ts
 // Run: npx tsx e2e/cdp/verify-<page>.ts (TS) or node e2e/cdp/verify-<page>.mjs (JS)
-// Requires: test server on dedicated port (started before running)
+// Run all: bun run test:cdp (auto-discovers all verify-*.ts in e2e/cdp/)
+// Requires: test server on dedicated port with env vars (start via `bun run test:cdp:server`)
 //
 // Rules (see references/cdp-best-practices.md):
 // - Default to headless — no window stealing focus, same rendering

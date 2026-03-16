@@ -42,7 +42,9 @@ try {
 
 The dev server (e.g., port 3000) typically uses `.env.local` which points to remote/production services. Seed/test users only exist in the local Docker instance.
 
-**CDP verification with test users requires a dedicated test server on a separate port** (e.g., 3100) with local environment variables. These should come from the Playwright `webServer.env` config, `.env.test`, or be passed explicitly when starting the server. Never overwrite `.env.local` — it serves the developer's normal workflow.
+**CDP verification with test users requires a dedicated test server on a separate port** (e.g., 3100) with local environment variables. Use `.env.test` as the single source of truth for test env vars — the same file should feed both Playwright's `webServer.env` and the CDP test server (`test:cdp:server` script). Never overwrite `.env.local` — it serves the developer's normal workflow.
+
+**Common failure mode:** CDP scripts timeout on login because the test server was started without env vars (e.g., missing Supabase URLs). The server starts successfully but can't authenticate. Always start the test server via `test:cdp:server` (which loads `.env.test`) or verify env vars are present before running CDP scripts.
 
 The `testPort` is declared in `.claude/project-settings.json` so both the skill and CDP scripts reference the same value.
 
@@ -179,7 +181,32 @@ When generating verification checkboxes that say "run full test suite", always e
 
 Unit tests with mocks can pass while the database schema is broken. CDP screenshots catch UI issues but don't verify data persistence. Only E2E tests with real database writes confirm the entire stack works. Skipping E2E gives false confidence.
 
-## 14. Every `run_in_background` must have a matching `TaskStop`
+## 14. CDP runner and `test:cdp` script
+
+Every project with CDP verification should have a runner script and a `package.json` command to execute all CDP scripts at once.
+
+**Add to `package.json`:**
+
+```json
+{
+  "scripts": {
+    "test:cdp": "npx tsx e2e/cdp/run-all.ts",
+    "test:cdp:server": "dotenv -e .env.test -- npx next start -p 3100"
+  }
+}
+```
+
+**Runner pattern** (`e2e/cdp/run-all.ts`): auto-discovers all `verify-*.ts` files in the same directory, runs them sequentially, reports pass/fail counts, exits with code 1 if any fail. Adding a new CDP script doesn't require editing `package.json` or the runner — just create a new `verify-*.ts` file.
+
+**Why two scripts:**
+- `test:cdp` — runs all verification scripts (assumes server is already up)
+- `test:cdp:server` — starts the test server with the correct env vars. CDP scripts fail with auth timeouts when the server is started without env vars (e.g., Supabase URLs). The env vars must match what `playwright.config.ts` injects into `webServer.env` — use `.env.test` as the single source of truth via `dotenv-cli` (or framework equivalent)
+
+**Include the runner setup as a checkbox in the CDP setup step** (Phase 1). Every subsequent step that creates a new page must include a checkbox: "Create CDP script `e2e/cdp/verify-{page}.ts`".
+
+**CDP is not E2E.** When giving instructions to teammates (Agent Teams), be explicit: "do NOT run Playwright E2E tests" but "DO create CDP verification scripts in `e2e/cdp/`". Teammates conflate the two and skip CDP scripts when told to skip E2E.
+
+## 15. Every `run_in_background` must have a matching `TaskStop`
 
 This is the general principle behind sections 3 and 9. When the agent launches any background task — test servers, build watchers, database containers — it must:
 
@@ -211,4 +238,7 @@ There is no built-in "finally" block for background tasks — cleanup is the age
 | Cleanup framework lock files after kill | `.next/dev/lock`, `.nuxt/dev/lock` prevent restart |
 | State changes via UI, not direct DB | Framework caching invalidates only through mutation paths |
 | Every `run_in_background` needs a matching `TaskStop` | Orphaned shells accumulate ports, status bar clutter, exit 137 |
+| `test:cdp` runner auto-discovers `verify-*.ts` | No need to edit package.json when adding new CDP scripts |
+| `test:cdp:server` loads `.env.test` | CDP scripts timeout on auth without correct env vars |
+| CDP is not E2E — tell teammates explicitly | Teammates skip CDP scripts when told "don't run E2E" |
 | "Full test" = unit + lint + E2E | Each layer catches different classes of bugs |
