@@ -33,7 +33,7 @@ Common flags: `--copy` (no symlinks), `-a claude-code` (Claude Code only), `-y` 
 
 ## Plugins
 
-Skills are organized into **7 plugin groups** by domain. Each plugin is a namespace — invoke skills as `/plugin:skill-name` (e.g., `/workflow:push`). There are **29 skills** in total.
+Skills are organized into **7 plugin groups** by domain. Invoke any skill directly by name (e.g., `/push`, `/create-skill`). There are **29 skills** in total.
 
 ---
 
@@ -143,7 +143,7 @@ Skills are organized into **7 plugin groups** by domain. Each plugin is a namesp
 
 ## Adding new skills
 
-Use `/meta:create-skill` to scaffold a new skill with the standard template. It walks you through intent, triggers, structure, and generates the `SKILL.md` with correct frontmatter.
+Use `/create-skill` to scaffold a new skill with the standard template. It walks you through intent, triggers, structure, and generates the `SKILL.md` with correct frontmatter.
 
 > [!TIP]
 > Each skill directory contains a `SKILL.md` with full instructions, trigger phrases, and workflow details. Click any skill link above to explore.

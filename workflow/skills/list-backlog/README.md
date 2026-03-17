@@ -16,7 +16,7 @@ Fetches all open issues in the Backlog milestone and presents them as a numbered
 ## How it works
 
 1. **Fetch issues** — queries the Backlog milestone for open issues with labels
-2. **Present results** — displays a numbered list with issue numbers, titles, and labels; suggests `/workflow:start-backlog` to begin working on one
+2. **Present results** — displays a numbered list with issue numbers, titles, and labels; suggests `/start-backlog` to begin working on one
 
 ## Directory structure
 
