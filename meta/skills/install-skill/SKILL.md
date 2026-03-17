@@ -60,15 +60,15 @@ If a new group is needed:
 
 Move the skill directory from the project's `.claude/skills/<skill-name>/` to `~/www/claude/skills-library/<group>/skills/<skill-name>/`.
 
-### 3.5 Create symlink for discovery
+### 3.5 Register the skill
 
-Create a symlink in `~/.claude/skills/` pointing to the skill's new location:
+Run `setup.sh` to create the symlink in `~/.claude/skills/` and register the new skill for discovery:
 
 ```bash
-ln -s ~/www/claude/skills-library/<group>/skills/<skill-name> ~/.claude/skills/<skill-name>
+bash ~/.brain/scripts/setup.sh
 ```
 
-Verify the symlink resolves correctly (the SKILL.md is readable through it).
+This is idempotent — it scans all plugins, creates missing symlinks, and cleans stale ones. Without this step, the skill won't appear in `/` autocomplete in new sessions.
 
 ### 3.6 Clean up npx leftovers
 

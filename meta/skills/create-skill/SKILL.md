@@ -73,7 +73,17 @@ Read `references/subagent-patterns.md` for practical patterns, race conditions t
 
 Read `references/review-checklist.md` and validate every item. Present the results to the user before finalizing.
 
-### 8. Generate README.md
+### 8. Register the skill
+
+If the skill was created inside `skills-library/`, run `setup.sh` to create the symlink in `~/.claude/skills/` so Claude Code discovers it:
+
+```bash
+bash ~/.brain/scripts/setup.sh
+```
+
+Without this step, the skill won't appear in `/` autocomplete in new sessions.
+
+### 9. Generate README.md
 
 After the skill passes review, generate a `README.md` in the skill's root directory. This is the public-facing documentation — it tells users what the skill does and how to install it.
 
