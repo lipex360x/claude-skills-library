@@ -33,7 +33,7 @@ Common flags: `--copy` (no symlinks), `-a claude-code` (Claude Code only), `-y` 
 
 ## Plugins
 
-Skills are organized into **7 plugin groups** by domain. Invoke any skill directly by name (e.g., `/push`, `/create-skill`). There are **27 skills** in total.
+Skills are organized into **7 plugin groups** by domain. Invoke any skill directly by name (e.g., `/push`, `/create-skill`). There are **26 skills** in total.
 
 ---
 
@@ -89,7 +89,6 @@ Skills are organized into **7 plugin groups** by domain. Invoke any skill direct
 
 | Skill | Description |
 |-------|-------------|
-| [optimize-postgresql](./database/skills/optimize-postgresql/) | PostgreSQL-specific development assistant focusing on advanced data types, JSONB, full-text search, and extensions. |
 | [review-postgres](./database/skills/review-postgres/) | Postgres performance optimization and best practices from Supabase. |
 
 [Back to top](#claude-skills-library)
