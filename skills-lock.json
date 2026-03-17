@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "create-skill": {
+      "source": "lipex360x/claude-skills-library",
+      "sourceType": "github",
+      "computedHash": "554e4f1f6cb3b6e571eaa665111ad2466c161cb36e9ee330b9e6e9588000516c"
+    }
+  }
+}
