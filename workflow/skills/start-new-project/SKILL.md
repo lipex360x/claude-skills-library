@@ -107,7 +107,7 @@ Before presenting, review the plan with a critical eye: tighten vague checkboxes
 Before creating issues, ensure the repo has basic organizational primitives.
 
 **Labels** — check with `gh label list`. If priority labels don't exist, offer to create them:
-- `P0` (critical), `P1` (high), `P2` (medium), `P3` (low)
+- `P0` (critical), `P1` (high), `P2` (medium)
 - Type labels (`feature`, `bug`, `chore`, `docs`) — only if missing
 
 Don't force labels on repos that already have a custom scheme. Adapt to what's there.
@@ -144,17 +144,32 @@ For multi-issue projects, the milestone provides automatic progress tracking —
 
 ### 7. Create project board
 
-Always create a GitHub Project board for every new project — even with a single issue. Visual tracking provides a kanban view (Todo / In Progress / Done) that helps the user track progress across sessions.
+Always create a GitHub Project board for every new project — even with a single issue. Read `references/project-board-setup.md` for the full command reference.
 
-```bash
-# Create the project
-gh project create --title "<project name>" --owner "@me"
+**Board setup:**
 
-# Add issues to the project (including backlog issues if any)
-gh project item-add <project-number> --owner "@me" --url <issue-url>
+1. **Create the project** — `gh project create --title "<project name>" --owner "@me"`
+2. **Configure Status field** — replace the default 3 columns (Todo/In Progress/Done) with 6: **Backlog**, **Ready**, **In progress**, **In review**, **Ready to PR**, **Done**. Use the GraphQL mutation in the reference to update the Status field options with descriptions and colors.
+3. **Create Priority field** — single-select with options: `P0` (Critical), `P1` (High), `P2` (Medium)
+4. **Create Size field** — single-select with options: `XS`, `S`, `M`, `L`, `XL`
+5. **Add issues to the project** — `gh project item-add` for each issue
+6. **Set initial field values** — set status to "Backlog", priority and size based on the plan (infer from step count and complexity, or ask the user during the approval gate if uncertain)
+
+**Priority and Size assignment:** When creating issues (Step 6), determine priority and size for each:
+- **Priority** — P0 for blocking/foundational work (scaffolding, schema), P1 for core features, P2 for nice-to-haves and polish
+- **Size** — based on step count and complexity: 1-2 steps = S, 3-4 steps = M, 5-6 steps = L, 7+ steps = XL. Adjust for domain complexity
+
+**Blocks notation:** When issues have dependencies (e.g., Phase 2 depends on Phase 1), add to the issue body:
+
+```markdown
+> **Blocked by** #<number>
 ```
 
-GitHub Projects V2 creates "Todo", "In Progress", and "Done" columns by default — no extra setup needed.
+And in the blocking issue:
+
+```markdown
+> **Blocks** #<number>
+```
 
 ### 8. Create the feature branch
 
@@ -172,9 +187,10 @@ The slug comes from step 1. If the issue number is known, optionally prefix: `fe
 Present:
 - Issue URL(s) (linked)
 - Milestone (if created) with link
-- Project board with link
+- Project board with link (6 columns, priority and size fields configured)
 - Branch name
 - Total steps and checkboxes count
+- Priority and size assigned to each issue
 - Remind: use `closes #N` in PR descriptions to auto-close issues on merge
 - Suggest starting with Step 1
 

@@ -143,6 +143,30 @@ git push -u origin feat/<number>-<slug>
 
 Derive `<slug>` from the issue title (kebab-case, max 40 chars). The `gh issue develop` command creates the branch and links it — the subsequent `git push -u` ensures the remote tracking is set up.
 
+### 5b. Move card to "In progress"
+
+Read `references/project-board-operations.md` for the full command reference.
+
+Find the project board for the repo (`gh project list --owner "@me"`), then move the issue card to **"In progress"**:
+
+1. Get the project node ID and the item ID for this issue
+2. Get the Status field ID and the "In progress" option ID
+3. Update the item status with `gh project item-edit`
+
+Also check if **Priority** and **Size** are set on the card. If either is missing, infer from the plan:
+- **Priority** — P0 for blocking/foundational, P1 for core features, P2 for nice-to-haves
+- **Size** — based on step count: 1-2 = S, 3-4 = M, 5-6 = L, 7+ = XL
+
+Set them with `gh project item-edit`. If unsure about priority, ask the user with `AskUserQuestion` offering `["P0 (Critical)", "P1 (High)", "P2 (Medium)"]`.
+
+**Check for blockers.** Before starting work, scan the issue body for `> Blocked by #N` annotations. If any blocking issue is still open, flag it to the user:
+
+```
+⚠️ This issue is blocked by #N (<title>) which is still open. Continue anyway?
+```
+
+Use `AskUserQuestion` with options `["Yes, start anyway", "No, pick another issue"]`.
+
 ### 6. Create tasks
 
 Parse the Steps from the approved plan. Create a `TaskCreate` for each **Step** (not each checkbox — Steps are the right granularity for tasks).
@@ -169,6 +193,7 @@ If the issue has no parallel plan (Agent Teams not enabled), skip this step.
 Present concisely:
 - Branch name
 - Issue URL (linked)
+- Project board status (card moved to "In progress", priority and size set)
 - Task count and first task suggestion
 - Total Steps and checkboxes count
 - Remind: use `closes #N` in PR descriptions
