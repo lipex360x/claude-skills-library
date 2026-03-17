@@ -27,7 +27,7 @@ skills-library/
 | Plugin | Domain | Skills |
 |--------|--------|--------|
 | **workflow** | GitHub workflow: issues, branches, PRs, commits | add-backlog, create-pr, grill-me, list-backlog, list-issues, merge-pr, push, start-backlog, start-new-project, tdd |
-| **content** | Content creation, voice profiling, publishing | approve-post, capture-voice, write-content |
+| **content** | Content creation, voice profiling, publishing, mental unblocking | approve-post, capture-voice, inspire-me, write-content |
 | **design** | Visual design: diagrams, design systems | create-diagram, extract-design-system |
 | **database** | Database optimization and best practices | review-postgres |
 | **deploy** | Deployment and infrastructure | deploy-vercel |
