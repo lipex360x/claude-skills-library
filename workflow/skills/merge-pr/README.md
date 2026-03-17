@@ -1,30 +1,29 @@
-# merge-pr
+# /merge-pr
 
-> Merge the open pull request for the current branch and switch back to main.
+Merge the current branch's PR, write a detailed implementation summary on the issue, and move the card to Done.
 
-Finds the PR for the current branch, merges it with branch deletion, and switches to the base branch.
+## Triggers
 
-## Usage
-
-```text
-/merge-pr
-```
-
-> [!TIP]
-> Also activates when the user says "merge pull request", "merge this", "land the pr", or wants to finalize the current branch's PR.
+- `/merge-pr`
+- "merge pr", "merge this", "land the pr"
 
 ## How it works
 
-1. **Find the PR** — locates the open PR for the current branch via `gh pr view`
-2. **Merge** — merges with `--merge --delete-branch` (merge commit, remote branch cleanup)
-3. **Switch to base branch** — checks out the base branch and pulls latest
-4. **Report** — displays PR number, merge status, and current branch
+1. **Find the PR** — locates the open PR for the current branch
+2. **Determine target branch** — reads `pr-merge-to` from `.claude/project-settings.json` (default: `main`)
+3. **Write implementation summary** — posts a detailed comment on the linked issue covering what was built, key decisions, files changed, test coverage, and verification steps
+4. **Merge** — merges with `--delete-branch`
+5. **Move card** — moves the issue card to "Done" on the project board
+6. **Switch branch** — checks out the target branch and pulls
 
 ## Directory structure
 
 ```text
 merge-pr/
-└── SKILL.md              # Core instructions
+├── SKILL.md
+├── README.md
+└── references/
+    └── project-board-operations.md    # Commands for moving cards on the board
 ```
 
 ## Installation

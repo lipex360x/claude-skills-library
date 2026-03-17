@@ -230,7 +230,7 @@ Present:
 
 - **Visual verification via CDP (mandatory for web projects).** For every web application project (web apps, fullstack frameworks, frontends), include Chrome DevTools Protocol setup as a step in Phase 1 — before any frontend implementation. CDP enables Claude to connect to the user's browser, navigate as a user (visible in real-time), and take screenshots to evaluate the UI. The setup consists of two files created from skill templates:
   - `.claude/start-chrome.sh` — launches Chrome with `--remote-debugging-port=9222`, detects the Chrome binary cross-platform, reads tabs from `project-settings.json`. Use `templates/start-chrome.sh` as the source.
-  - `.claude/project-settings.json` — declarative CDP configuration (the single living document for all CDP settings). Use `templates/project-settings.json` as the source, adapting `baseUrl`, `testPort`, `tabs`, and `pages` to the project's routes.
+  - `.claude/project-settings.json` — declarative project configuration (the single living document for all project settings). Use `templates/project-settings.json` as the source. Contains `pr-merge-to` (target branch for merging PRs, default `main`) at the root level, and CDP settings under `chrome` — adapt `baseUrl`, `testPort`, `tabs`, and `pages` to the project's routes.
   - **`baseUrl`** — the app's root URL (e.g., `http://localhost:3000`). Resolves relative page paths.
   - **`testPort`** — dedicated port for the test server (e.g., 3100). CDP scripts hit this port, never the dev server.
   - **`tabs`** — URLs to open when Chrome launches. Typically just the app's main URL.
