@@ -21,8 +21,8 @@ Generate professional diagrams through a two-phase workflow: first build a high-
 
 | Route | Trigger | Flow |
 |-------|---------|------|
-| `create` | Text description of a diagram | Design HTML → User screenshots → Generate Excalidraw |
-| `replicate` | User sends a reference image | Analyze image → Recreate as HTML → User screenshots → Generate Excalidraw |
+| `create` | Text description of a diagram | Design HTML → Open in browser → User sends screenshot → Generate Excalidraw |
+| `replicate` | User sends a reference image | Analyze image → Recreate as HTML → Open in browser → User sends screenshot → Generate Excalidraw |
 | `excalidraw-only` | User explicitly asks for Excalidraw without HTML | Generate Excalidraw JSON directly (skip HTML phase) |
 
 ## Phase 1: HTML Diagram
@@ -49,9 +49,15 @@ The HTML output is the design artifact — a self-contained `.html` file that lo
    - **Connections**: SVG lines or CSS borders for arrows and connectors. Use proper arrowheads via SVG markers.
    - **Animation**: subtle fade-in animations on load. Hover effects on nodes for interactivity.
 
-   Write the file to the project directory (e.g., `diagram/<name>.html`).
+   Write the file to a `diagram/` directory in the project (e.g., `diagram/<name>.html`).
 
-4. **Ask the user to screenshot.** Tell the user: "Open the HTML file in your browser and send me a screenshot of the result."
+4. **Open the HTML in the browser.** After writing the file, open it automatically:
+
+   ```bash
+   open <path-to-html-file>
+   ```
+
+   Then ask the user: "Sent me a screenshot of the result so I can generate the Excalidraw version."
 
 5. **Wait for the screenshot.** The user sends back a screenshot of the rendered HTML. This becomes the visual reference for the Excalidraw conversion.
 
@@ -61,7 +67,7 @@ The HTML output is the design artifact — a self-contained `.html` file that lo
 
 2. **Recreate as HTML.** Build an HTML diagram that faithfully reproduces the reference image's structure and intent, but with elevated design quality. Don't copy ugly diagrams pixel-for-pixel — improve the aesthetics while preserving the information architecture.
 
-3. **Follow steps 4-5 from the create route.** Ask for screenshot, wait for it.
+3. **Follow steps 4-5 from the create route.** Open in browser, ask for screenshot.
 
 ## Phase 2: Excalidraw Export
 
@@ -109,6 +115,8 @@ When the user explicitly asks for Excalidraw without HTML (or the diagram is sim
 
 - **Self-contained HTML.** Every HTML file must work standalone — inline CSS, no external dependencies except Google Fonts CDN. The user should be able to open it in any browser.
 
+- **Always open after generating.** After writing the HTML file, always run `open <path>` to open it in the user's default browser. Don't wait for the user to open it manually — automate this step.
+
 - **Dark themes for technical diagrams.** Unless the user specifies otherwise, default to dark backgrounds for architecture, system, and technical diagrams. They look more professional and are easier on the eyes. Use light themes for business flows, org charts, and documentation diagrams.
 
 - **Excalidraw fidelity.** The Excalidraw version won't be pixel-perfect against the HTML — Excalidraw has a hand-drawn aesthetic. Focus on preserving the information architecture (nodes, connections, labels, grouping) rather than visual effects (gradients, shadows, glows). Those are HTML-only features.
@@ -124,3 +132,4 @@ When the user explicitly asks for Excalidraw without HTML (or the diagram is sim
   - Missing connections (every arrow must have start and end bindings)
   - Text smaller than 16px in Excalidraw (unreadable when zoomed out)
   - Random/UUID-style IDs in Excalidraw — use descriptive names (e.g., `"api_gateway"`, `"db_primary"`)
+  - Forgetting to open the HTML in the browser after generating it
