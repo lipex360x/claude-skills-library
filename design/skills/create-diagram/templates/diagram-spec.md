@@ -208,6 +208,75 @@ These rules ensure the agent converts spec elements to Excalidraw faithfully:
 | Shadow | Not available in Excalidraw — skip silently |
 | Gradients | Not available in Excalidraw — use solid closest color |
 
+## Layout
+
+The layout section provides spatial positioning data so the Excalidraw agent can place elements precisely without guessing. Without this, CSS Grid/Flexbox handles positioning in HTML but Excalidraw needs explicit coordinates.
+
+### Grid definition
+
+```json
+{
+  "layout": {
+    "grid": {
+      "columns": [
+        { "id": "col1", "width": 260 },
+        { "id": "col2", "width": 260 }
+      ],
+      "rows": [
+        { "id": "row1", "height": 320 },
+        { "id": "row2", "height": 280 }
+      ],
+      "columnGap": 200,
+      "rowGap": 120,
+      "originX": 60,
+      "originY": 100
+    }
+  }
+}
+```
+
+### Slot assignments
+
+Each group and node gets a slot assignment that maps to the grid:
+
+```json
+{
+  "id": "phase1",
+  "label": "Phase 1",
+  "slot": { "column": "col1", "row": "row1" },
+  "nodes": [
+    {
+      "id": "scaffold",
+      "slot": { "index": 0, "direction": "horizontal" }
+    }
+  ]
+}
+```
+
+- **Groups** get `slot.column` + `slot.row` to place them in the grid
+- **Nodes** within a group get `slot.index` + `slot.direction` (`"horizontal"` or `"vertical"`) — the agent computes x/y from the group origin, node width, and inter-node gap
+- **Annotations** keep their `position` field (`"right"`, `"left"`) — the agent offsets from the parent group
+
+### Arrow routing hints
+
+Connections can include routing hints to prevent arrow overlap:
+
+```json
+{
+  "id": "e_scaffold_to_db",
+  "from": "scaffold",
+  "to": "database",
+  "routeOffset": 40
+}
+```
+
+- `routeOffset` — vertical or horizontal pixel offset to separate arrows that share a similar path. Positive values push right/down, negative values push left/up.
+
+### When to populate layout
+
+- **Phase 1 (spec generation):** define the grid and slot assignments based on the diagram structure. Use element count and widths to estimate column widths and gaps.
+- **Phase 2 (after HTML validation):** if the user approved the HTML, refine the layout values to match the approved visual. Update column widths, gaps, and row heights to reflect what the CSS produced.
+
 ## Validation
 
 Before the spec is considered complete:
@@ -218,3 +287,6 @@ Before the spec is considered complete:
 - [ ] Every group has at least one node
 - [ ] Typography section covers all element types used
 - [ ] Colors are valid hex values (or rgba for transparency)
+- [ ] Layout grid is defined with columns, rows, gaps, and origin
+- [ ] Every group has a `slot` assignment (column + row)
+- [ ] Every node has a `slot` assignment (index + direction)

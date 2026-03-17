@@ -46,6 +46,8 @@ Append the entry to `analysis.md`. Continue numbering from the last entry. Each 
 ```markdown
 ## N. [Concise title — what needs to change]
 
+**Skill:** `skill-name` (specific section or phase affected)
+
 ### The problem
 [Concrete trigger situation — what happened, not what should happen]
 
@@ -80,6 +82,8 @@ When the user says `/capture-analysis remove N` or marks an item as implemented:
 ## Guidelines
 
 - **Project-agnostic content only.** Never reference project-specific files, domain terms, or business logic. Generalize: "when a migration introduces new tables" not "the Supabase migration for the owners table". This file feeds into global skills that work across all projects — project-specific details make entries unusable outside their origin context.
+
+- **Always identify the affected skill.** Every entry must have a `**Skill:**` field after the title. Infer the skill from context — which skill was running when the issue occurred, or which skill the user references. If ambiguous, ask. Format: backtick-wrapped skill name + parenthetical scope hint (e.g., `` `create-diagram` (Phase 3 Excalidraw agent) ``). This makes entries scannable and unambiguous when consumed in a different session.
 
 - **One concern per entry.** If the user describes multiple issues, create multiple entries. Mixed entries are harder to implement and harder to remove when partially done.
 

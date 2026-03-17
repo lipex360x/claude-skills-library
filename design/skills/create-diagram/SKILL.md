@@ -88,9 +88,26 @@ The HTML is the visual validation artifact. Generate it from the spec — every 
 
    If the user approves (sends screenshot without change requests, or says it's good): proceed to Phase 3.
 
+## Phase 2.5: Fidelity Briefing
+
+Before generating Excalidraw, set expectations. Tell the user:
+
+> **O que transfere bem:** estrutura, cores, texto, agrupamento, anotações com borda de destaque.
+> **O que degrada:** espaçamento preciso (CSS layout → coordenadas manuais), sombras, gradientes, efeitos de hover, setas curvas customizadas.
+>
+> Posso gerar o Excalidraw (com essas limitações) ou manter o HTML como entregável final. O que prefere?
+
+Use `AskUserQuestion` with options `["Gerar Excalidraw", "Manter só o HTML"]`. If the user chooses HTML-only, skip Phase 3 and end.
+
+This briefing exists because the HTML uses CSS Grid/Flexbox which auto-resolves layout, while Excalidraw needs manual coordinates. A beautiful HTML followed by a broken Excalidraw feels like a bait-and-switch — the briefing turns a negative surprise into an informed decision.
+
+### Update layout coordinates
+
+Before launching the Excalidraw agent, update the spec's `layout` section to match the approved HTML. Refine grid column widths, row heights, gaps, and slot assignments so the agent has precise positioning data. The layout section format is defined in `templates/diagram-spec.md`.
+
 ## Phase 3: Excalidraw Export
 
-Once the HTML is approved, launch a background agent to generate the Excalidraw file from the spec.
+Once the HTML is approved and the fidelity briefing is acknowledged, launch a background agent to generate the Excalidraw file from the spec.
 
 Read `references/excalidraw-format.md` for the complete JSON specification.
 
@@ -125,6 +142,20 @@ Write to: `diagram/<name>.excalidraw`
 ```
 
 Launch the agent with `run_in_background: true` so the conversation continues while the Excalidraw is generated.
+
+### Post-generation validation
+
+After the agent completes, validate the output before presenting to the user. Read the `.excalidraw` JSON and check:
+
+1. **Bounding-box overlap.** For elements in the same row, verify `x + width + 20` of one element doesn't exceed `x` of the next. If elements overlap, adjust x positions using the spec's layout grid.
+
+2. **Text fits container.** For bound text elements, verify `fontSize × 1.35 × lineCount ≤ containerHeight - 20`. If text overflows, increase the container height.
+
+3. **Arrow sanity.** For arrows with `startBinding`/`endBinding`, verify the referenced element IDs exist. Remove bindings that reference non-existent elements.
+
+If any check fails, fix the coordinates inline — the spec's layout section provides the intended positions. After fixes, write the corrected file.
+
+Only tell the user the file is ready after validation passes. This prevents the user from seeing broken layout on first open, which destroys trust in the workflow.
 
 ### Excalidraw-only route
 
