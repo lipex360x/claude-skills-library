@@ -10,19 +10,30 @@ Turn a project idea into a well-structured GitHub issue with phased checkboxes, 
 
 ## Steps
 
-### 1. Parse the prompt
+### 1. Check for grill-me output
 
-Extract from the user's input:
+Check if `.claude/grill-output.md` exists in the current working directory. If it does:
+
+- Read the document — it contains structured decisions from a `/grill-me` interview (problem, audience, behaviors, technical constraints, integrations, scope, priorities)
+- Use it as the primary input — skip most clarifying questions (Step 2) since the user already went through a deep interview
+- Still ask about anything the grill output doesn't cover (e.g., deployment, project name)
+- Inform the user: "Found grill-me output — using it as the planning base."
+
+If the document doesn't exist, proceed normally with Step 2.
+
+### 2. Parse the prompt
+
+Extract from the user's input (or from grill-output if available):
 - **Project name / slug** — if not obvious, derive from the description (kebab-case)
 - **Tech stack hints** — languages, frameworks, libraries mentioned
 - **Scope indicators** — "MVP", "production", "prototype", "just a quick..."
 - **Domain** — web app, CLI, library, API, monorepo, mobile, etc.
 
-If no argument was provided (bare `/start-new-project`), ask the user what they want to build before continuing.
+If no argument was provided (bare `/start-new-project`) and no grill-output exists, ask the user what they want to build before continuing.
 
-### 2. Ask clarifying questions
+### 3. Ask clarifying questions
 
-Generate 3-5 targeted questions to fill gaps. Present as a numbered list. Common gaps:
+If grill-output was consumed in Step 1, only ask about gaps not covered by the document. Otherwise, generate 3-5 targeted questions to fill gaps. Present as a numbered list. Common gaps:
 
 1. **Platform** — web, CLI, library, API, mobile?
 2. **Tech stack** — language, framework, database?
@@ -35,7 +46,7 @@ Skip questions the prompt already answers. Adapt to the project type — a CLI t
 
 **Wait for the user's answers before proceeding.** This is the first approval gate.
 
-### 3. Propose the phase structure
+### 4. Propose the phase structure
 
 Read `templates/issue-template.md` for the expected format. Read `references/phase-planning-guide.md` for decomposition heuristics by project type.
 
@@ -85,7 +96,7 @@ Before presenting, review the plan with a critical eye: tighten vague checkboxes
 
 **Wait for the user's approval before proceeding.** This is the second (and final) approval gate. The user may request changes — iterate until they approve.
 
-### 4. Repo scaffolding (labels + milestone)
+### 5. Repo scaffolding (labels + milestone)
 
 Before creating issues, ensure the repo has basic organizational primitives.
 
@@ -107,7 +118,7 @@ For single-issue projects, a project milestone is optional.
 
 **Backlog milestone** — always create a "Backlog" milestone (no due date) for every new project. This is a permanent bucket for future ideas, improvements, and low-priority items. It stays open indefinitely and gives the user a place to park ideas without losing them. When an item gets prioritized, move it from Backlog to an active milestone.
 
-### 5. Create the GitHub issues
+### 6. Create the GitHub issues
 
 After approval, create the issues. If the plan was split into multiple issues (mandatory split rule), create them sequentially — the first issue may reference later ones by number.
 
@@ -125,25 +136,21 @@ gh issue edit <number> --milestone "<milestone name>"
 
 For multi-issue projects, the milestone provides automatic progress tracking — each closed issue moves the percentage forward, giving clear visibility into how much of the project is done.
 
-### 6. Project board (for large projects)
+### 7. Create project board
 
-If the project generates **3+ issues**, offer to create a GitHub Project board for visual tracking:
+Always create a GitHub Project board for every new project — even with a single issue. Visual tracking provides a kanban view (Todo / In Progress / Done) that helps the user track progress across sessions.
 
 ```bash
 # Create the project
 gh project create --title "<project name>" --owner "@me"
 
-# Add issues to the project
+# Add issues to the project (including backlog issues if any)
 gh project item-add <project-number> --owner "@me" --url <issue-url>
 ```
 
 GitHub Projects V2 creates "Todo", "In Progress", and "Done" columns by default — no extra setup needed.
 
-**This step is optional and user-controlled.** Ask: "This project has N issues — want me to create a project board to track them visually?" If the user declines, skip silently.
-
-For projects with 1-2 issues, skip this step entirely — milestones already provide enough tracking.
-
-### 7. Create the feature branch
+### 8. Create the feature branch
 
 ```bash
 git checkout main
@@ -154,12 +161,12 @@ git push -u origin feature/<slug>
 
 The slug comes from step 1. If the issue number is known, optionally prefix: `feature/<number>-<slug>`.
 
-### 8. Summary
+### 9. Summary
 
 Present:
 - Issue URL(s) (linked)
 - Milestone (if created) with link
-- Project board (if created) with link
+- Project board with link
 - Branch name
 - Total steps and checkboxes count
 - Remind: use `closes #N` in PR descriptions to auto-close issues on merge
@@ -167,7 +174,7 @@ Present:
 
 ## Guidelines
 
-- **TDD by default.** Every step that introduces new behavior must include a test checkbox **before** the implementation checkbox. Write the test first, watch it fail, then implement. This applies to all project types — backend routes, CLI commands, library functions, UI components. TDD catches design issues early and produces code that is testable by construction, not by afterthought. When proposing the phase structure, ensure test checkboxes precede their corresponding implementation checkboxes within each step.
+- **TDD is mandatory, not optional.** Every step that introduces new behavior MUST include a test checkbox **before** the implementation checkbox — no exceptions. This is the single most important quality rule in this skill. Read `references/tdd-methodology.md` for the full methodology. Key principles: vertical slices (one test → one implementation → repeat, never write all tests first), test behavior through public interfaces (not implementation details), mock only at system boundaries (external APIs, not your own modules). When proposing the phase structure, verify every step follows TDD order: test checkbox first, implementation checkbox second. If a step has no test checkbox before its implementation, it's wrong — fix it before presenting. This applies to all project types — backend routes, CLI commands, library functions, UI components.
 
 - **Test isolation via docker-compose.** Tests must never touch production data. Orchestrate the test environment with a `docker-compose.test.yml` (or a `test` profile in the main `docker-compose.yml`) so that any developer can spin up the full test stack with a single command. This guarantees portability — the same setup works on any machine and in CI. When the project uses a cloud service (Supabase, Firebase, PlanetScale, Neon, etc.), include its local emulator as a docker-compose service (`supabase start`, `firebase emulators:start`). When tests produce files, use a temporary directory that is cleaned up after each run. Include the docker-compose test setup as an early checkbox in Phase 1 — before any test can run, the isolation boundary must exist. Tests that leak data into production are worse than no tests because they create false confidence. Two critical details:
   - **Env file separation.** Keep `.env.local` pointing at the remote/production service for normal development. Inject local container URLs **only** in the test context — via `.env.test`, test runner config (e.g., Playwright's `webServer.env`), or docker-compose environment variables. Never overwrite `.env.local` with test URLs because it creates a risk of forgetting to revert before deploying.
@@ -206,7 +213,7 @@ Present:
   - **`testPort`** — dedicated port for the test server (e.g., 3100). CDP scripts hit this port, never the dev server.
   - **`tabs`** — URLs to open when Chrome launches. Typically just the app's main URL.
   - **`pages`** — a route map declaring every page Claude can navigate to. **This is a living document** — every step that creates a new route or page must include a checkbox to add it to `pages` in `project-settings.json`.
-  - **CDP runner and `test:cdp` script.** Include in the CDP setup step: create `e2e/cdp/run-all.ts` from `templates/cdp-run-all.ts` (auto-discovers all `verify-*.ts` files), and add `"test:cdp": "npx tsx e2e/cdp/run-all.ts"` plus `"test:cdp:server": "dotenv -e .env.test -- npx next start -p 3100"` (adapt framework) to `package.json`. The server script ensures env vars (Supabase URLs, API keys) are loaded — without them, CDP scripts timeout on auth.
+  - **CDP runner and `test:cdp` script.** Include in the CDP setup step: create `e2e/cdp/run-all.ts` from `templates/cdp-run-all.ts` (auto-discovers all `verify-*.ts` files), and add `"test:cdp": "npx tsx e2e/cdp/run-all.ts"` plus `"test:cdp:server": "dotenv -e .env.test -- <framework-start-command> -p 3100"` (adapt to project framework: `next start`, `remix-serve build`, `node server.js`, etc.) to `package.json`. The server script ensures env vars (service URLs, API keys) are loaded — without them, CDP scripts timeout on auth.
   - **CDP is not E2E.** When instructing teammates (Agent Teams), be explicit: "do NOT run Playwright E2E tests" but "DO create CDP verification scripts in `e2e/cdp/`". Teammates conflate the two and skip CDP when told to skip E2E.
   - Playwright connects via `playwright.chromium.connectOverCDP('http://localhost:9222')` — the user sees everything happening in their browser in real-time.
   - **Read `references/cdp-best-practices.md`** for all CDP rules. Key rules enforced in every CDP script:

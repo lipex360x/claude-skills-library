@@ -131,15 +131,17 @@ Add cross-references between related issues in each body (e.g., "Related: #12, #
 
 Preserve the original title and labels. The issue stays in the Backlog milestone — it will be moved to an active milestone if the project uses them.
 
-### 5. Create branch
+### 5. Create branch linked to issue
+
+Use `gh issue develop` to create the branch and automatically link it to the issue on GitHub. This makes the branch visible in the issue sidebar.
 
 ```bash
 git checkout main && git pull
-git checkout -b feat/<number>-<slug>
+gh issue develop <number> --name feat/<number>-<slug> --checkout
 git push -u origin feat/<number>-<slug>
 ```
 
-Derive `<slug>` from the issue title (kebab-case, max 40 chars).
+Derive `<slug>` from the issue title (kebab-case, max 40 chars). The `gh issue develop` command creates the branch and links it — the subsequent `git push -u` ensures the remote tracking is set up.
 
 ### 6. Create tasks
 
@@ -173,7 +175,7 @@ Present concisely:
 
 ## Guidelines
 
-- **TDD by default.** Every Step that introduces new behavior must include a test checkbox **before** the implementation checkbox. Write the test first, watch it fail, then implement. This applies to all change types — new routes, new commands, new components, new utilities. TDD catches design issues early and produces code that is testable by construction, not by afterthought. When proposing the detailed plan, ensure test checkboxes precede their corresponding implementation checkboxes within each Step.
+- **TDD is mandatory, not optional.** Every Step that introduces new behavior MUST include a test checkbox **before** the implementation checkbox — no exceptions. This is the single most important quality rule in this skill. Read `references/tdd-methodology.md` for the full methodology. Key principles: vertical slices (one test → one implementation → repeat, never write all tests first), test behavior through public interfaces (not implementation details), mock only at system boundaries (external APIs, not your own modules). When proposing the detailed plan, verify every step follows TDD order: test checkbox first, implementation checkbox second. If a step has no test checkbox before its implementation, it's wrong — fix it before presenting. This applies to all change types — new routes, new commands, new components, new utilities.
 
 - **Test isolation via docker-compose.** Tests must never touch production data. When the issue involves database changes or file I/O, include a checkbox to configure the test environment using `docker-compose.test.yml` (or a `test` profile in the main compose file) — this orchestrates the full test stack so any developer can spin it up with a single command. For cloud services (Supabase, Firebase, PlanetScale, Neon, etc.), include their local emulators as compose services. When tests produce files, use a temporary directory cleaned up after each run. If the project already has a docker-compose test setup, verify it covers the new changes. Tests that leak data into production are worse than no tests because they create false confidence. Two critical details:
   - **Env file separation.** Keep `.env.local` pointing at the remote/production service. Inject local container URLs **only** in the test context — via `.env.test`, test runner config (e.g., Playwright's `webServer.env`), or docker-compose environment variables. Never overwrite `.env.local` with test URLs.
@@ -206,7 +208,7 @@ Present concisely:
 - **Visual verification via CDP (mandatory for web projects).** When the issue touches UI — new pages, component changes, layout fixes, styling — verification checkboxes must use CDP to confirm the result visually, not just functionally. The pattern: "Navigate to [page] via CDP and take screenshot to verify [expected state]". This catches layout breaks, missing elements, and visual regressions that unit tests and functional tests miss entirely. If CDP is not yet configured and the project is a web app with frontend, the first Step in the plan must set it up (`.claude/start-chrome.sh` + `.claude/project-settings.json` + `e2e/cdp/run-all.ts` runner + `test:cdp` and `test:cdp:server` scripts in `package.json`). If CDP is already configured, read the `pages` map from `project-settings.json` to reference routes by name in checkboxes. For non-web projects or backend-only issues, skip CDP entirely. Key CDP rules (see `references/cdp-best-practices.md` for the full set):
   - **Fresh context:** always `browser.newContext()` — never `browser.contexts()[0]`. Always `context.close()` in a `finally` block.
   - **Dedicated test port:** hit the test server (declared as `testPort` in `project-settings.json`), never the dev server. Test/seed users only exist locally.
-  - **Test server needs env vars:** start via `test:cdp:server` (loads `.env.test` with Supabase URLs, API keys). Without env vars, CDP scripts timeout on auth — the server starts but can't authenticate.
+  - **Test server needs env vars:** start via `test:cdp:server` (loads `.env.test` with service URLs, API keys). Without env vars, CDP scripts timeout on auth — the server starts but can't authenticate.
   - **No `run_in_background`:** run CDP scripts inline with Bash tool `timeout: 30000`. Background execution orphans processes.
   - **Server is user's responsibility:** pre-flight check before running. Never auto-start with `nohup`.
   - **Generic login redirect:** `waitForURL(url => !url.pathname.includes("/login"))` — never hardcode destination.

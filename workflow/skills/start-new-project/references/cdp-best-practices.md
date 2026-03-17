@@ -191,7 +191,7 @@ Every project with CDP verification should have a runner script and a `package.j
 {
   "scripts": {
     "test:cdp": "npx tsx e2e/cdp/run-all.ts",
-    "test:cdp:server": "dotenv -e .env.test -- npx next start -p 3100"
+    "test:cdp:server": "dotenv -e .env.test -- <framework-start-command> -p 3100"
   }
 }
 ```
