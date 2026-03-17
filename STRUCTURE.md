@@ -26,12 +26,12 @@ skills-library/
 
 | Plugin | Domain | Skills |
 |--------|--------|--------|
-| **workflow** | GitHub workflow: issues, branches, PRs, commits | add-backlog, create-pr, grill-me, list-backlog, list-issues, merge-pr, push, start-backlog, start-new-project |
+| **workflow** | GitHub workflow: issues, branches, PRs, commits | add-backlog, create-pr, grill-me, list-backlog, list-issues, merge-pr, push, start-backlog, start-new-project, tdd |
 | **content** | Content creation, voice profiling, publishing | approve-post, capture-voice, write-content |
 | **design** | Visual design: diagrams, design systems | create-diagram, extract-design-system |
 | **database** | Database optimization and best practices | review-postgres |
 | **deploy** | Deployment and infrastructure | deploy-vercel |
-| **meta** | Claude Code skill/hook management and analysis | capture-analysis, create-continuation, create-hook, create-readme, create-skill, find-skills, install-skill, uninstall-skill |
+| **meta** | Claude Code skill/hook management and analysis | capture-analysis, create-continuation, create-hook, create-readme, create-skill, find-skills, improve-codebase-architecture, install-skill, uninstall-skill |
 | **tasks** | Task visibility board management | clean-tasks, close-tasks, open-tasks |
 
 ## How to navigate
