@@ -1,6 +1,6 @@
 ---
 name: create-diagram
-description: "Create professional diagrams using an HTML-first design workflow with Excalidraw export. Use when creating visual diagrams, drawings, figures, schematics, charts, system architecture diagrams, network diagrams, flowcharts, UML, ER diagrams, sequence diagrams, state machines, org charts, mind maps, cloud infrastructure diagrams, research workflows, or any visual representation. Also use when the user sends a reference image to replicate as a diagram, says 'create a diagram', 'draw this', 'make a flowchart', 'diagram this architecture', or wants any kind of visual diagram — even if they don't explicitly say 'diagram.'"
+description: "Create professional diagrams using a spec-driven workflow with HTML preview and Excalidraw export. Use when creating visual diagrams, drawings, figures, schematics, charts, system architecture diagrams, network diagrams, flowcharts, UML, ER diagrams, sequence diagrams, state machines, org charts, mind maps, cloud infrastructure diagrams, research workflows, or any visual representation. Also use when the user sends a reference image to replicate as a diagram, says 'create a diagram', 'draw this', 'make a flowchart', 'diagram this architecture', or wants any kind of visual diagram — even if they don't explicitly say 'diagram.'"
 metadata:
   category: visual-design
   tags:
@@ -15,19 +15,19 @@ user-invocable: true
 
 # Create Diagram
 
-Generate professional diagrams through a two-phase workflow: first build a high-quality HTML visualization, then convert to portable Excalidraw format. The HTML phase is where the design happens — Claude excels at producing visually striking HTML. The Excalidraw phase makes it editable and portable.
+Generate professional diagrams through a three-phase spec-driven workflow: define the structure in a JSON spec, preview as HTML, then convert to editable Excalidraw. The spec is the single source of truth — both HTML and Excalidraw are derived from it, ensuring visual fidelity across formats.
 
 ## Task Routing
 
 | Route | Trigger | Flow |
 |-------|---------|------|
-| `create` | Text description of a diagram | Design HTML → Open in browser → User sends screenshot → Generate Excalidraw |
-| `replicate` | User sends a reference image | Analyze image → Recreate as HTML → Open in browser → User sends screenshot → Generate Excalidraw |
-| `excalidraw-only` | User explicitly asks for Excalidraw without HTML | Generate Excalidraw JSON directly (skip HTML phase) |
+| `create` | Text description of a diagram | Spec → HTML → User validates → Excalidraw |
+| `replicate` | User sends a reference image | Analyze image → Spec → HTML → User validates → Excalidraw |
+| `excalidraw-only` | User explicitly asks for Excalidraw without HTML | Spec → Excalidraw directly |
 
-## Phase 1: HTML Diagram
+## Phase 1: Diagram Spec
 
-The HTML output is the design artifact — a self-contained `.html` file that looks production-grade. Apply the same design thinking as `/frontend-design`: bold aesthetic choices, intentional typography, atmospheric details.
+The spec captures every visual detail needed to reproduce the diagram in any format. Read `templates/diagram-spec.md` for the complete format.
 
 ### Create route
 
@@ -38,98 +38,124 @@ The HTML output is the design artifact — a self-contained `.html` file that lo
    - Visual tone: dark/moody, light/clean, colorful/vibrant, minimal/monochrome
    - Layout preference: horizontal, vertical, radial, grid
 
-   Skip consultation when the request is specific enough to proceed directly. Simple requests (under 12 nodes, clear type) go straight to generation.
+   Skip consultation when the request is specific enough to proceed directly. Simple requests (under 12 nodes, clear type) go straight to spec generation.
 
-3. **Generate the HTML diagram.** Write a single self-contained HTML file with embedded CSS and no external dependencies (except Google Fonts). Apply these design principles:
+3. **Generate the spec.** Write `diagram/<name>-spec.json` with every element explicitly defined:
+   - Groups with background colors and labels
+   - Nodes with titles, icons, items, bullet styles
+   - Annotations with background, border-left accent color, positioning
+   - Connections with direction and style
+   - Panels (checklists, legends) if applicable
+   - Typography and color palette
 
-   - **Typography**: distinctive font choices — never Arial, Inter, or Roboto. Use Google Fonts (JetBrains Mono for labels, DM Sans or similar for descriptions). Pair a display font with a body font.
-   - **Color**: commit to a cohesive palette. Use CSS variables. Dominant color with sharp accents. Dark backgrounds work exceptionally well for technical diagrams.
-   - **Layout**: CSS Grid or Flexbox for positioning. Generous spacing between nodes. Asymmetry and intentional whitespace over rigid grids.
-   - **Atmosphere**: gradients, subtle glows, border effects, shadows. Not flat and lifeless — not overdone either.
-   - **Connections**: SVG lines or CSS borders for arrows and connectors. Use proper arrowheads via SVG markers.
-   - **Animation**: subtle fade-in animations on load. Hover effects on nodes for interactivity.
+   Every visual detail must be in the spec. If it's not in the spec, it won't be in the Excalidraw. The spec is the contract — no guessing allowed.
 
-   Write the file to a `diagram/` directory in the project (e.g., `diagram/<name>.html`).
+### Replicate route
 
-4. **Open the HTML in the browser.** After writing the file, open it automatically:
+1. **Analyze the reference image.** Extract the structure: nodes, labels, connections, layout direction, grouping, colors, hierarchy, annotation styles, and any visual accents (border-lefts, backgrounds, icons).
+
+2. **Generate the spec.** Capture the reference image's visual language in the spec, improving aesthetics while preserving the information architecture.
+
+3. **Continue to Phase 2.**
+
+## Phase 2: HTML Preview
+
+The HTML is the visual validation artifact. Generate it from the spec — every element in the spec must appear in the HTML.
+
+1. **Generate the HTML.** Write a single self-contained HTML file (`diagram/<name>.html`) with embedded CSS and no external dependencies (except Google Fonts). Design principles:
+
+   - **Typography**: use the fonts defined in the spec's `typography` section. Never Arial, Inter, or Roboto. Prefer JetBrains Mono for labels, DM Sans for descriptions.
+   - **Color**: use the spec's `palette`. CSS variables for consistency.
+   - **Layout**: CSS Grid or Flexbox. Generous spacing between nodes.
+   - **Atmosphere**: gradients, subtle glows, shadows. Not flat — not overdone.
+   - **Connections**: SVG arrows with proper arrowheads.
+   - **Animation**: subtle fade-in on load. Hover effects for interactivity.
+   - **Annotations**: render with background, border-left accent, and italic text exactly as specified.
+
+2. **Open the HTML in the browser.**
 
    ```bash
    open <path-to-html-file>
    ```
 
-   Then ask the user: "Sent me a screenshot of the result so I can generate the Excalidraw version."
+3. **Ask for validation.** Tell the user: "Me manda um screenshot do resultado. Se estiver aprovado, gero o Excalidraw. Se tiver ajustes, me fala."
 
-5. **Wait for the screenshot.** The user sends back a screenshot of the rendered HTML. This becomes the visual reference for the Excalidraw conversion.
+4. **Validation loop.** If the user requests changes:
+   - Update the spec JSON first (the spec is the source of truth)
+   - Regenerate the HTML from the updated spec
+   - Re-open in browser
+   - Repeat until approved
 
-### Replicate route
+   If the user approves (sends screenshot without change requests, or says it's good): proceed to Phase 3.
 
-1. **Analyze the reference image.** Extract the structure: nodes, labels, connections, layout direction, grouping, colors, and hierarchy.
+## Phase 3: Excalidraw Export
 
-2. **Recreate as HTML.** Build an HTML diagram that faithfully reproduces the reference image's structure and intent, but with elevated design quality. Don't copy ugly diagrams pixel-for-pixel — improve the aesthetics while preserving the information architecture.
+Once the HTML is approved, launch a background agent to generate the Excalidraw file from the spec.
 
-3. **Follow steps 4-5 from the create route.** Open in browser, ask for screenshot.
+Read `references/excalidraw-format.md` for the complete JSON specification.
 
-## Phase 2: Excalidraw Export
+### Agent prompt structure
 
-After receiving the screenshot of the rendered HTML, generate the Excalidraw JSON file.
+The agent receives a lean prompt with:
+- Path to the spec JSON (the source of truth)
+- Path to the excalidraw format reference
+- Path to the approved HTML (for visual cross-reference)
+- Key Excalidraw mapping rules (from the spec template's "Excalidraw mapping rules" table)
 
-Read `references/excalidraw-format.md` for the complete JSON specification, element types, and styling conventions.
+```
+Agent prompt template:
 
-### Conversion process
+Generate an Excalidraw file from the diagram spec.
 
-1. **Map the visual structure.** From the screenshot and the HTML source (which you wrote), identify every element: rectangles, text labels, arrows, groups, colors.
+1. Read the spec: `diagram/<name>-spec.json`
+2. Read the format reference: `<skill-dir>/references/excalidraw-format.md`
+3. Read the HTML for visual reference: `diagram/<name>.html`
 
-2. **Build the Excalidraw JSON.** For each visual element:
-   - Create the appropriate Excalidraw element (rectangle, ellipse, diamond, text, arrow)
-   - Match position and sizing from the HTML layout
-   - Apply colors from the HTML CSS variables
-   - Connect arrows using proper `startBinding`/`endBinding`
-   - Group related elements with `groupIds`
+Conversion rules:
+- Group backgrounds → large rounded rectangles with solid fill
+- Node cards → white rectangles with bound text (title + bullet items as \n-separated lines)
+- Node icons → prepend emoji to the title line
+- Annotations → THREE grouped elements: bg rectangle + thin accent rectangle (left border) + text
+- Connections → arrows with proper startBinding/endBinding
+- Checklist panels → rectangle container + checkbox rectangles + text elements
 
-3. **Apply layout rules:**
-   - 200-300px horizontal spacing between elements
-   - 100-150px vertical spacing between rows
-   - Font size 16-24px for readability
-   - All text elements use `fontFamily: 5` (Excalifont)
-   - Unique IDs for every element (use descriptive IDs, not random strings)
-   - Elements must not overlap
+Critical: Annotations must NOT be standalone text. They must have a visible background rectangle and a colored left-border accent rectangle, grouped together. This is the most common fidelity loss.
 
-4. **Write the `.excalidraw` file** next to the HTML file (e.g., `diagram/<name>.excalidraw`).
+Write to: `diagram/<name>.excalidraw`
+```
 
-5. **Present the result.** Tell the user:
-   - File location for both HTML and Excalidraw versions
-   - How to open (Excalidraw.com, VS Code extension, or Obsidian)
-   - Element count and diagram type summary
+Launch the agent with `run_in_background: true` so the conversation continues while the Excalidraw is generated.
 
 ### Excalidraw-only route
 
-When the user explicitly asks for Excalidraw without HTML (or the diagram is simple enough that HTML is overkill):
+When the user explicitly asks for Excalidraw without HTML:
 
-1. Generate the Excalidraw JSON directly from the text description.
-2. Follow the same layout rules and element conventions.
-3. Skip the HTML phase entirely — but still produce a high-quality result with proper spacing, colors, and typography.
+1. Generate the spec JSON (same as Phase 1)
+2. Generate the Excalidraw directly from the spec (no HTML, no agent — do it inline)
+3. Present the result
 
 ## Guidelines
 
-- **HTML is the design tool, Excalidraw is the deliverable.** The HTML phase exists because Claude produces far better visual designs in HTML/CSS than in raw JSON coordinates. The screenshot bridges the gap — it gives you a visual reference to translate into Excalidraw elements with correct positioning.
+- **The spec is the contract.** If a visual detail isn't in the spec, it won't survive the HTML → Excalidraw conversion. Every annotation background, every icon, every border accent must be explicitly declared. This is the single most important principle of this skill.
 
-- **Self-contained HTML.** Every HTML file must work standalone — inline CSS, no external dependencies except Google Fonts CDN. The user should be able to open it in any browser.
+- **Self-contained HTML.** Every HTML file must work standalone — inline CSS, no external dependencies except Google Fonts CDN.
 
-- **Always open after generating.** After writing the HTML file, always run `open <path>` to open it in the user's default browser. Don't wait for the user to open it manually — automate this step.
+- **Always open after generating.** After writing the HTML file, always run `open <path>` to open it in the user's default browser.
 
-- **Dark themes for technical diagrams.** Unless the user specifies otherwise, default to dark backgrounds for architecture, system, and technical diagrams. They look more professional and are easier on the eyes. Use light themes for business flows, org charts, and documentation diagrams.
+- **Dark themes for technical diagrams.** Unless the user specifies otherwise, default to dark backgrounds for architecture, system, and technical diagrams. Use light themes for business flows, org charts, and documentation diagrams.
 
-- **Excalidraw fidelity.** The Excalidraw version won't be pixel-perfect against the HTML — Excalidraw has a hand-drawn aesthetic. Focus on preserving the information architecture (nodes, connections, labels, grouping) rather than visual effects (gradients, shadows, glows). Those are HTML-only features.
+- **Excalidraw fidelity through the spec.** The Excalidraw version won't have gradients, shadows, or hover effects — those are HTML-only features. But structural elements (annotation backgrounds, border accents, icons, grouping) must be faithfully reproduced because the spec explicitly defines how to map them.
 
-- **No Draw.io.** This skill does not use Draw.io, MCP servers, or XML formats. The only outputs are HTML files and Excalidraw JSON files.
+- **No Draw.io.** This skill does not use Draw.io, MCP servers, or XML formats. The only outputs are spec JSON, HTML, and Excalidraw JSON files.
 
 - **Supported diagram types:** flowcharts, architecture diagrams, mind maps, ER diagrams, sequence diagrams, state machines, class diagrams, network topologies, data flow diagrams, org charts, swimlane/business flows, cloud infrastructure, research workflows, Kanban boards, timelines, and any custom visual representation.
 
 - **Avoid these anti-patterns:**
-  - Generic fonts (Arial, Inter, Roboto, system fonts) in the HTML phase
-  - White/plain backgrounds for technical diagrams — add atmosphere
-  - Overlapping elements in the Excalidraw output
-  - Missing connections (every arrow must have start and end bindings)
-  - Text smaller than 16px in Excalidraw (unreadable when zoomed out)
-  - Random/UUID-style IDs in Excalidraw — use descriptive names (e.g., `"api_gateway"`, `"db_primary"`)
-  - Forgetting to open the HTML in the browser after generating it
+  - Generating HTML without a spec first (the spec must always exist)
+  - Annotations as standalone text in Excalidraw (they need bg rect + accent rect + text, grouped)
+  - Generic fonts (Arial, Inter, Roboto) in the HTML phase
+  - Sending the entire HTML source in the agent prompt (send the spec path instead)
+  - Missing icon emojis in Excalidraw card titles
+  - Random/UUID-style IDs in Excalidraw — use descriptive names from the spec
+  - Skipping the validation loop — always wait for user approval before Excalidraw
+  - Modifying the HTML without updating the spec first

@@ -1,39 +1,49 @@
 # create-diagram
 
-Create professional diagrams using an HTML-first design workflow with Excalidraw export.
+Create professional diagrams using a spec-driven workflow with HTML preview and Excalidraw export.
 
-## Trigger phrases
+## Triggers
 
-- `/create-diagram system architecture for my app`
-- "draw a flowchart of the login process"
-- "make a diagram of this" (with a reference image)
-- Also activates when the user asks for any visual representation, diagram, chart, or schematic — even without explicitly saying "diagram"
+- `/create-diagram <description>` — create from text
+- `/create-diagram` with a reference image — replicate
+- "draw this", "make a flowchart", "diagram this architecture"
+- Activates for any visual representation request — even without explicitly saying "diagram"
 
 ## How it works
 
-1. **HTML Design** — Generates a high-quality, self-contained HTML file using production-grade aesthetics (bold typography, atmospheric colors, intentional layout). This is where the design happens — Claude excels at HTML/CSS.
-2. **User Screenshot** — The user opens the HTML in a browser and sends back a screenshot, giving Claude a visual reference of the rendered result.
-3. **Excalidraw Export** — Converts the visual structure into a portable `.excalidraw` JSON file, preserving the information architecture (nodes, connections, labels, grouping) in an editable format.
+1. **Spec** — generates a `diagram-spec.json` capturing every visual detail (nodes, connections, annotations with backgrounds, icons, colors)
+2. **HTML Preview** — renders a production-grade HTML from the spec, opens in browser for validation
+3. **Validation loop** — user approves or requests changes (spec is updated first, then HTML regenerated)
+4. **Excalidraw Export** — background agent converts the approved spec to `.excalidraw` with high fidelity
 
-When a reference image is provided, the skill analyzes it first and recreates it as HTML with improved aesthetics before converting to Excalidraw.
+The spec is the single source of truth. Both HTML and Excalidraw are derived from it, ensuring visual consistency across formats.
 
 ## Usage
 
 ```
-/create-diagram [description or reference image]
+/create-diagram system architecture for a payment management app
+/create-diagram [attach reference image] replicate this flow diagram
 ```
-
-Example: `/create-diagram microservices architecture with API gateway, auth service, and three backend services connected to a shared database`
 
 ## Directory structure
 
 ```
 create-diagram/
-├── SKILL.md              # Core instructions — HTML-first workflow + Excalidraw export
-├── README.md             # This file
-└── references/
-    └── excalidraw-format.md  # Complete Excalidraw JSON specification
+├── SKILL.md                          # Skill instructions — spec-driven workflow
+├── README.md                         # This file
+├── references/
+│   └── excalidraw-format.md          # Complete Excalidraw JSON specification
+└── templates/
+    └── diagram-spec.md               # Diagram spec JSON format documentation
 ```
+
+## Output
+
+Each diagram generates 3 files in the project's `diagram/` directory:
+
+- `<name>-spec.json` — semantic structure (source of truth)
+- `<name>.html` — visual preview (self-contained, no dependencies)
+- `<name>.excalidraw` — editable portable format
 
 ## Installation
 

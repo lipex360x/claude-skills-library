@@ -1,38 +1,70 @@
 # Skill Review Checklist
 
-Validate every item before finalizing a skill. Present results to the user.
+Validate every item before finalizing a skill. Present results to the user as a **markdown table** — this is the mandatory output format.
 
-## Description
+## Output format
 
-- [ ] Is it pushy enough? Does it include trigger contexts, not just a summary?
-- [ ] Does it answer WHAT the skill does AND WHEN it should activate?
-- [ ] Does it include the "even if they don't explicitly say X" pattern where appropriate?
+Always present the checklist as a table with three columns: Item, Status, and Notas (notes). Group items by category using row headers. Use `OK` for passing items, `WARN` for warnings, `FAIL` for failures, and `N/A` for non-applicable items.
 
-## SKILL.md body
+```markdown
+**Review Checklist — <skill-name>:**
 
-- [ ] Under 500 lines? Detail extracted to references/?
-- [ ] Instructions use imperative form? ("Extract X", not "You should extract X")
-- [ ] Constraints are reasoned ("because X") rather than rigid ("ALWAYS/NEVER")?
-- [ ] Steps are numbered with clear headers for major phases?
-- [ ] Output formats defined with concrete examples?
+| Item | Status | Notas |
+|------|--------|-------|
+| **Description** | | |
+| Pushy enough with trigger contexts? | OK | Includes "even if they don't explicitly say X" |
+| WHAT + WHEN? | OK | Clear action + multiple triggers |
+| **SKILL.md** | | |
+| Under 500 lines? | OK | ~120 lines, lean |
+| Imperative form? | OK | "Generate the spec", "Launch the agent" |
+| ...etc | | |
+```
 
-## Quality
+This format is compact, scannable, and lets the user see pass/fail at a glance. Do NOT use bullet lists with checkboxes — always use the table format.
 
-- [ ] Quality expectations repeated at multiple key points, not just stated once?
-- [ ] Specific anti-patterns named, not just generic "make it good"?
-- [ ] Refinement step included ("polish, don't add")?
+## Checklist items
 
-## Subagents (if applicable)
+### Description
 
-- [ ] Each agent prompt includes ALL necessary context (specs, rules, quality standards)?
-- [ ] Tool access is explicit — which tools for parent, which for subagents?
-- [ ] Two-phase build if agents depend on setup completing first?
-- [ ] Race conditions identified and mitigated?
+| Item | What to check |
+|------|---------------|
+| Pushy enough? | Includes trigger contexts, not just a summary |
+| WHAT + WHEN? | Answers what the skill does AND when it should activate |
+| "Even if" pattern? | Includes "even if they don't explicitly say X" where appropriate |
 
-## Structure
+### SKILL.md body
 
-- [ ] Directory follows the standard layout (SKILL.md, references/, templates/)?
-- [ ] References are one level deep (no reference chains)?
-- [ ] Large references (>300 lines) have a table of contents?
-- [ ] Skill is fully self-contained (no cross-skill dependencies)?
-- [ ] README.md generated from `templates/skill-readme.md` with all placeholders filled?
+| Item | What to check |
+|------|---------------|
+| Under 500 lines? | Detail extracted to references/ if approaching limit |
+| Imperative form? | "Extract X", not "You should extract X" |
+| Constraints reasoned? | Uses "because X" rather than rigid "ALWAYS/NEVER" |
+| Numbered steps? | Clear headers for major phases, numbers for sequential steps |
+| Output formats? | Defined with concrete examples |
+
+### Quality
+
+| Item | What to check |
+|------|---------------|
+| Quality repeated? | Quality expectations repeated at multiple key points, not just stated once |
+| Anti-patterns named? | Specific failure modes listed, not just generic "make it good" |
+| Refinement step? | Explicit "polish, don't add" step included |
+
+### Subagents (if applicable)
+
+| Item | What to check |
+|------|---------------|
+| Agent context complete? | Each agent prompt includes ALL necessary context (specs, rules, quality standards) |
+| Tool access explicit? | Which tools for parent, which for subagents |
+| Two-phase build? | If agents depend on setup completing first |
+| Race conditions? | Identified and mitigated |
+
+### Structure
+
+| Item | What to check |
+|------|---------------|
+| Standard layout? | Directory follows SKILL.md, references/, templates/ |
+| References depth? | One level deep, no reference chains |
+| Large refs have TOC? | References >300 lines have a table of contents |
+| Self-contained? | No cross-skill dependencies |
+| README generated? | README.md with all placeholders filled |
