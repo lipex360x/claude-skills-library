@@ -19,15 +19,29 @@ Generate a continuation prompt the user can paste into a new Claude Code convers
 
 ## Output format
 
-A markdown code block with a ready-to-paste prompt covering:
+A markdown code block with a ready-to-paste prompt. The prompt **must start** with a framing header that tells the receiving session what this is and how to behave:
 
+```
+# Continuation from previous session
+
+This is a context handoff from a previous conversation. Read it to understand where we left off. **Do NOT take any action** — just confirm you understood with a brief summary (2-3 sentences max) and wait for my next instruction.
+```
+
+After the framing header, include:
+
+- **Branch state** (clean/dirty, ahead/behind)
 - **What was completed** (from commits AND conversation — both matter)
 - **What's pending** (uncommitted changes, next steps, deferred requests)
-- **Branch state** (clean/dirty, ahead/behind)
 - **Conversation context** — decisions, preferences, anything the next session needs to know
 
 **Example structure:**
 ```
+# Continuation from previous session
+
+This is a context handoff from a previous conversation. Read it to understand where we left off. **Do NOT take any action** — just confirm you understood with a brief summary (2-3 sentences max) and wait for my next instruction.
+
+---
+
 Branch `feature/foo` (issue #N). Working tree dirty/clean — N files modified.
 
 ## What was done
