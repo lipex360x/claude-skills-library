@@ -12,14 +12,20 @@ Turn a project idea into a well-structured GitHub issue with phased checkboxes, 
 
 ### 1. Check for grill-me output
 
-Check if `.claude/grill-output.md` exists in the current working directory. If it does:
+Check if `.claude/grill-output.md` exists in the current working directory.
 
+**If found:**
 - Read the document — it contains structured decisions from a `/grill-me` interview (problem, audience, behaviors, technical constraints, integrations, scope, priorities)
-- Use it as the primary input — skip most clarifying questions (Step 2) since the user already went through a deep interview
+- Use it as the primary input — skip most clarifying questions (Step 3) since the user already went through a deep interview
 - Still ask about anything the grill output doesn't cover (e.g., deployment, project name)
 - Inform the user: "Found grill-me output — using it as the planning base."
 
-If the document doesn't exist, proceed normally with Step 2.
+**If not found:** use `AskUserQuestion` to suggest running `/grill-me` first:
+
+- **"Run /grill-me first (Recommended)"** — a structured interview extracts better decisions and produces a more detailed plan
+- **"Skip, continue with my prompt"** — proceed directly with what the user provided
+
+If the user chooses to run `/grill-me`, inform them: "Run `/grill-me` first, then come back with `/start-new-project`." and stop. If they choose to skip, proceed normally with Step 2.
 
 ### 2. Parse the prompt
 
