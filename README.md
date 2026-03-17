@@ -33,7 +33,7 @@ Common flags: `--copy` (no symlinks), `-a claude-code` (Claude Code only), `-y` 
 
 ## Plugins
 
-Skills are organized into **7 plugin groups** by domain. Invoke any skill directly by name (e.g., `/push`, `/create-skill`). There are **29 skills** in total.
+Skills are organized into **7 plugin groups** by domain. Invoke any skill directly by name (e.g., `/push`, `/create-skill`). There are **27 skills** in total.
 
 ---
 
@@ -115,13 +115,11 @@ Skills are organized into **7 plugin groups** by domain. Invoke any skill direct
 | Skill | Description |
 |-------|-------------|
 | [capture-analysis](./meta/skills/capture-analysis/) | Capture skill gaps, workflow frictions, and pattern improvements as structured entries. |
-| [create-command](./meta/skills/create-command/) | Guide for creating or improving Claude Code slash commands. |
 | [create-continuation](./meta/skills/create-continuation/) | Generate a continuation prompt for seamless session handoffs to a new conversation. |
 | [create-hook](./meta/skills/create-hook/) | Guide for creating or improving Claude Code hooks. |
 | [create-readme](./meta/skills/create-readme/) | Create or review a README.md for the project. |
 | [create-skill](./meta/skills/create-skill/) | Guide for creating, reviewing, and improving Claude Code skills. |
 | [find-skills](./meta/skills/find-skills/) | Discover and install agent skills from the open ecosystem. |
-| [generate-readme-blueprint](./meta/skills/generate-readme-blueprint/) | Generate README.md by analyzing project documentation structure. |
 | [install-skill](./meta/skills/install-skill/) | Install a skill from an npx skills link, with local or global selection. |
 | [uninstall-skill](./meta/skills/uninstall-skill/) | Uninstall a skill by name, local or global. |
 
