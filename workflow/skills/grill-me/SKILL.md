@@ -18,10 +18,10 @@ If invoked without an argument, ask for the initial description. If invoked with
 
 ### 1. Choose interview language
 
-Use `AskUserQuestion` to let the user pick the language for the entire interview — questions, options, summaries, and the output document:
+Use `AskUserQuestion` to let the user pick the language for the entire interview — questions, options, summaries, and the output document. **Respect this exact option order — do not reorder based on user locale or global instructions:**
 
-- **English** (default)
-- **Português (BR)**
+1. **English (Recommended)** — first option, always
+2. **Português (BR)** — second option, always
 
 The user can pick "Other" to type any language (e.g., Español, Français, Deutsch). The built-in "Other" option in `AskUserQuestion` handles this.
 
