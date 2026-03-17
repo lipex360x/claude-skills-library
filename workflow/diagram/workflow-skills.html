@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Workflow Skills — Complete Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0B0F1A;
+    --surface: #131825;
+    --surface-raised: #1A2035;
+    --border: #252D44;
+    --border-glow: #3B82F620;
+    --text: #E2E8F0;
+    --text-muted: #64748B;
+    --text-dim: #475569;
+    --blue: #3B82F6;
+    --blue-light: #60A5FA;
+    --blue-glow: #3B82F630;
+    --cyan: #06B6D4;
+    --cyan-glow: #06B6D420;
+    --emerald: #10B981;
+    --emerald-glow: #10B98120;
+    --amber: #F59E0B;
+    --amber-glow: #F59E0B20;
+    --violet: #8B5CF6;
+    --violet-glow: #8B5CF620;
+    --rose: #F43F5E;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-sans: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .canvas {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 32px 64px;
+    position: relative;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 56px;
+    position: relative;
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+  }
+
+  .header h1 {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--blue-light), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+
+  .header p {
+    font-size: 14px;
+    color: var(--text-muted);
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Phase sections ── */
+  .phase {
+    position: relative;
+    margin-bottom: 40px;
+  }
+
+  .phase-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .phase-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .phase-label .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* ── Dual paths ── */
+  .dual-paths {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr;
+    gap: 0;
+    align-items: start;
+  }
+
+  .path {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .path-header {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .path-header.greenfield {
+    color: var(--cyan);
+    background: var(--cyan-glow);
+    border: 1px solid #06B6D425;
+  }
+
+  .path-header.existing {
+    color: var(--violet);
+    background: var(--violet-glow);
+    border: 1px solid #8B5CF625;
+  }
+
+  .path-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .converge-lines {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 20px;
+  }
+
+  /* ── Skill nodes ── */
+  .node {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    position: relative;
+    transition: all 0.25s ease;
+    cursor: default;
+  }
+
+  .node:hover {
+    border-color: var(--blue);
+    box-shadow: 0 0 24px var(--blue-glow), 0 4px 16px rgba(0,0,0,0.3);
+    transform: translateY(-1px);
+  }
+
+  .node .skill-name {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .node .skill-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .node .board-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 8px;
+  }
+
+  .board-badge.backlog {
+    color: var(--text-muted);
+    background: #64748B15;
+    border: 1px solid #64748B30;
+  }
+
+  .board-badge.in-progress {
+    color: var(--blue-light);
+    background: var(--blue-glow);
+    border: 1px solid #3B82F630;
+  }
+
+  .board-badge.in-review {
+    color: var(--amber);
+    background: var(--amber-glow);
+    border: 1px solid #F59E0B30;
+  }
+
+  .board-badge.done {
+    color: var(--emerald);
+    background: var(--emerald-glow);
+    border: 1px solid #10B98130;
+  }
+
+  .board-badge.ready {
+    color: var(--cyan);
+    background: var(--cyan-glow);
+    border: 1px solid #06B6D430;
+  }
+
+  /* ── Accent colors on nodes ── */
+  .node.cyan { border-left: 3px solid var(--cyan); }
+  .node.cyan:hover { border-color: var(--cyan); box-shadow: 0 0 24px var(--cyan-glow), 0 4px 16px rgba(0,0,0,0.3); }
+
+  .node.violet { border-left: 3px solid var(--violet); }
+  .node.violet:hover { border-color: var(--violet); box-shadow: 0 0 24px var(--violet-glow), 0 4px 16px rgba(0,0,0,0.3); }
+
+  .node.blue { border-left: 3px solid var(--blue); }
+  .node.blue:hover { border-color: var(--blue); box-shadow: 0 0 24px var(--blue-glow), 0 4px 16px rgba(0,0,0,0.3); }
+
+  .node.emerald { border-left: 3px solid var(--emerald); }
+  .node.emerald:hover { border-color: var(--emerald); box-shadow: 0 0 24px var(--emerald-glow), 0 4px 16px rgba(0,0,0,0.3); }
+
+  .node.amber { border-left: 3px solid var(--amber); }
+  .node.amber:hover { border-color: var(--amber); box-shadow: 0 0 24px var(--amber-glow), 0 4px 16px rgba(0,0,0,0.3); }
+
+  /* ── Vertical flow ── */
+  .flow-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .flow-node {
+    width: 380px;
+  }
+
+  /* ── Arrows ── */
+  .arrow-down {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 0;
+    position: relative;
+  }
+
+  .arrow-down .line {
+    width: 1.5px;
+    height: 28px;
+    background: var(--border);
+  }
+
+  .arrow-down .head {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--border);
+  }
+
+  .arrow-down .label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+    position: absolute;
+    right: -60px;
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+  }
+
+  .arrow-down.accent .line { background: var(--blue); }
+  .arrow-down.accent .head { border-top-color: var(--blue); }
+
+  /* ── Iterate loop ── */
+  .loop-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .loop-bracket {
+    position: absolute;
+    right: -56px;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .loop-bracket svg {
+    width: 40px;
+    height: 100%;
+  }
+
+  .loop-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    position: absolute;
+    right: -110px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .loop-label .loop-icon {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--text-dim);
+    border-radius: 50%;
+    border-right-color: transparent;
+    position: relative;
+  }
+
+  .loop-label .loop-icon::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    right: -2px;
+    width: 0;
+    height: 0;
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    border-bottom: 4px solid var(--text-dim);
+    transform: rotate(45deg);
+  }
+
+  /* ── Decision diamond ── */
+  .decision-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .diamond {
+    width: 140px;
+    height: 80px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .diamond-shape {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .diamond-shape svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .diamond-text {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text);
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .decision-branch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .branch-line {
+    width: 40px;
+    height: 1.5px;
+    background: var(--border);
+    position: relative;
+  }
+
+  .branch-line::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -4px;
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 6px solid var(--border);
+  }
+
+  .branch-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+
+  .outcome-node {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* ── Terminal pill ── */
+  .terminal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 24px;
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .terminal.done-pill {
+    color: var(--emerald);
+    background: var(--emerald-glow);
+    border: 1px solid #10B98130;
+  }
+
+  /* ── Board section ── */
+  .board-section {
+    margin-top: 56px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+
+  .board-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+
+  .board-col {
+    text-align: center;
+    padding: 12px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    position: relative;
+    transition: all 0.25s ease;
+  }
+
+  .board-col:hover {
+    border-color: var(--blue);
+    background: var(--surface-raised);
+  }
+
+  .board-col .col-name {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .board-col .col-skills {
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    font-family: var(--font-mono);
+  }
+
+  .board-col .col-dot {
+    width: 8px;
+    height: 3px;
+    border-radius: 2px;
+    margin: 0 auto 8px;
+  }
+
+  .col-dot.gray { background: var(--text-dim); }
+  .col-dot.cyan { background: var(--cyan); }
+  .col-dot.blue { background: var(--blue); }
+  .col-dot.amber { background: var(--amber); }
+  .col-dot.emerald-dot { background: var(--emerald); }
+
+  /* ── Converge SVG ── */
+  .converge-svg {
+    width: 100%;
+    margin: 8px 0;
+  }
+
+  .converge-svg svg {
+    width: 100%;
+    height: 60px;
+  }
+
+  .converge-svg line, .converge-svg path {
+    stroke: var(--border);
+    stroke-width: 1.5;
+    fill: none;
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate {
+    animation: fadeUp 0.4s ease forwards;
+    opacity: 0;
+  }
+
+  .animate:nth-child(1) { animation-delay: 0.05s; }
+  .animate:nth-child(2) { animation-delay: 0.1s; }
+  .animate:nth-child(3) { animation-delay: 0.15s; }
+  .animate:nth-child(4) { animation-delay: 0.2s; }
+  .animate:nth-child(5) { animation-delay: 0.25s; }
+  .animate:nth-child(6) { animation-delay: 0.3s; }
+  .animate:nth-child(7) { animation-delay: 0.35s; }
+  .animate:nth-child(8) { animation-delay: 0.4s; }
+  .animate:nth-child(9) { animation-delay: 0.45s; }
+  .animate:nth-child(10) { animation-delay: 0.5s; }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    margin-top: 48px;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="canvas">
+
+  <!-- Header -->
+  <div class="header animate">
+    <h1>GitHub Workflow Skills</h1>
+    <p>Complete flow from discovery to merge</p>
+  </div>
+
+  <!-- ═══ Phase 1: Discovery ═══ -->
+  <div class="phase animate">
+    <div class="phase-label">
+      <span class="dot" style="background: var(--cyan)"></span>
+      Discovery
+      <span></span>
+    </div>
+
+    <div class="dual-paths">
+      <!-- Greenfield -->
+      <div class="path">
+        <div class="path-header greenfield">Greenfield</div>
+
+        <div class="node cyan">
+          <div class="skill-name">/grill-me</div>
+          <div class="skill-desc">Deep discovery interview — extracts decisions, constraints, and context</div>
+        </div>
+
+        <div class="arrow-down"><div class="line"></div><div class="head"></div></div>
+
+        <div class="node cyan">
+          <div class="skill-name">/start-new-project</div>
+          <div class="skill-desc">Plan phased issues, create board with 6 columns, setup branch</div>
+          <div class="board-badge backlog">→ Board: Backlog</div>
+        </div>
+      </div>
+
+      <!-- Center spacer -->
+      <div class="path-connector"></div>
+
+      <!-- Existing codebase -->
+      <div class="path">
+        <div class="path-header existing">Existing Codebase</div>
+
+        <div class="node violet">
+          <div class="skill-name">/improve-codebase-architecture</div>
+          <div class="skill-desc">Explore architectural friction, propose deep-module refactors as RFC issues</div>
+        </div>
+
+        <div class="arrow-down"><div class="line"></div><div class="head"></div></div>
+
+        <div class="node violet">
+          <div class="skill-name">/add-backlog</div>
+          <div class="skill-desc">Create issue in Backlog milestone with Size estimate</div>
+          <div class="board-badge backlog">→ Board: Backlog</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Converge arrow ═══ -->
+  <div class="converge-svg animate">
+    <svg viewBox="0 0 900 60" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <marker id="arrowDown" viewBox="0 0 10 10" refX="5" refY="10" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L5,10 L10,0" fill="none" stroke="#252D44" stroke-width="1.5"/>
+        </marker>
+      </defs>
+      <path d="M 200,0 L 200,30 Q 200,45 215,45 L 435,45" stroke="#252D44" stroke-width="1.5" fill="none"/>
+      <path d="M 700,0 L 700,30 Q 700,45 685,45 L 465,45" stroke="#252D44" stroke-width="1.5" fill="none"/>
+      <line x1="450" y1="45" x2="450" y2="60" stroke="#252D44" stroke-width="1.5" marker-end="url(#arrowDown)"/>
+    </svg>
+  </div>
+
+  <!-- ═══ Phase 2: Implementation ═══ -->
+  <div class="phase animate">
+    <div class="phase-label">
+      <span class="dot" style="background: var(--blue)"></span>
+      Implementation Cycle
+      <span></span>
+    </div>
+
+    <div class="flow-center">
+      <div class="loop-container">
+        <div class="flow-node node blue">
+          <div class="skill-name">/start-backlog</div>
+          <div class="skill-desc">Pull issue, expand acceptance criteria into step-by-step plan, create branch</div>
+          <div class="board-badge in-progress">→ Board: In progress</div>
+        </div>
+
+        <div class="arrow-down"><div class="line"></div><div class="head"></div></div>
+
+        <div class="flow-node node blue">
+          <div class="skill-name">/tdd</div>
+          <div class="skill-desc">Red → Green → Refactor — strict test-driven vertical slices</div>
+        </div>
+
+        <div class="arrow-down"><div class="line"></div><div class="head"></div></div>
+
+        <div class="flow-node node blue">
+          <div class="skill-name">/push</div>
+          <div class="skill-desc">Commit, push, and sync issue checkboxes automatically</div>
+        </div>
+
+        <!-- Loop bracket -->
+        <div class="loop-bracket">
+          <svg viewBox="0 0 40 200" preserveAspectRatio="none">
+            <path d="M 0,185 L 20,185 Q 35,185 35,170 L 35,30 Q 35,15 20,15 L 5,15" stroke="#3B82F640" stroke-width="1.5" fill="none" stroke-dasharray="4 3"/>
+            <path d="M 5,15 L 0,10 M 5,15 L 0,20" stroke="#3B82F640" stroke-width="1.5" fill="none"/>
+          </svg>
+        </div>
+        <div class="loop-label">
+          <div class="loop-icon"></div>
+          iterate
+        </div>
+      </div>
+
+      <div class="arrow-down accent">
+        <div class="line"></div>
+        <div class="head"></div>
+        <div class="label">ready</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Phase 3: Review & Merge ═══ -->
+  <div class="phase animate">
+    <div class="phase-label">
+      <span class="dot" style="background: var(--emerald)"></span>
+      Review & Merge
+      <span></span>
+    </div>
+
+    <div class="flow-center">
+      <div class="flow-node node amber">
+        <div class="skill-name">/create-pr</div>
+        <div class="skill-desc">Scope transfer — moves incomplete tasks to new issue with bidirectional comments</div>
+        <div class="board-badge in-review">→ Board: In review</div>
+      </div>
+
+      <div class="arrow-down">
+        <div class="line"></div>
+        <div class="head"></div>
+        <div class="label">PR approved</div>
+      </div>
+
+      <div class="flow-node node emerald">
+        <div class="skill-name">/merge-pr</div>
+        <div class="skill-desc">Implementation summary, merge, notify unblocked issues, check milestone</div>
+        <div class="board-badge done">→ Board: Done</div>
+      </div>
+
+      <div class="arrow-down"><div class="line"></div><div class="head"></div></div>
+
+      <!-- Decision -->
+      <div class="decision-row">
+        <div></div>
+
+        <div class="diamond">
+          <div class="diamond-shape">
+            <svg viewBox="0 0 140 80">
+              <polygon points="70,4 136,40 70,76 4,40" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="diamond-text">Unblocked<br>issues?</div>
+        </div>
+
+        <div class="decision-branch">
+          <div class="branch-label">yes</div>
+          <div class="branch-line"></div>
+          <div class="outcome-node">
+            Notify + Move to Ready
+            <div class="board-badge ready" style="margin-top: 6px; margin-left: 0;">→ Board: Ready</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow-down">
+        <div class="line"></div>
+        <div class="head"></div>
+        <div class="label" style="right: -30px;">no</div>
+      </div>
+
+      <div class="terminal done-pill">Done</div>
+    </div>
+  </div>
+
+  <!-- ═══ Board Section ═══ -->
+  <div class="board-section animate">
+    <div class="phase-label">
+      <span class="dot" style="background: var(--text-dim)"></span>
+      Project Board
+      <span></span>
+    </div>
+
+    <div class="board-row">
+      <div class="board-col">
+        <div class="col-dot gray"></div>
+        <div class="col-name">Backlog</div>
+        <div class="col-skills">/start-new-project<br>/add-backlog</div>
+      </div>
+      <div class="board-col">
+        <div class="col-dot cyan"></div>
+        <div class="col-name">Ready</div>
+        <div class="col-skills">/merge-pr<br><span style="font-size:9px;color:var(--text-dim)">(unblocks)</span></div>
+      </div>
+      <div class="board-col">
+        <div class="col-dot blue"></div>
+        <div class="col-name">In progress</div>
+        <div class="col-skills">/start-backlog</div>
+      </div>
+      <div class="board-col">
+        <div class="col-dot amber"></div>
+        <div class="col-name">In review</div>
+        <div class="col-skills">/create-pr</div>
+      </div>
+      <div class="board-col">
+        <div class="col-dot emerald-dot"></div>
+        <div class="col-name">Ready to PR</div>
+        <div class="col-skills"><span style="font-size:9px;color:var(--text-dim)">PR approved</span></div>
+      </div>
+      <div class="board-col">
+        <div class="col-dot emerald-dot"></div>
+        <div class="col-name">Done</div>
+        <div class="col-skills">/merge-pr</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer animate">
+    skills-library/workflow · 10 skills · 6 board columns
+  </div>
+
+</div>
+
+</body>
+</html>
