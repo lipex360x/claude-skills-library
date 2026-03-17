@@ -1,12 +1,18 @@
 # Claude Skills Library
 
-> Production-ready skills and commands for Claude Code — workflow automation, project scaffolding, design systems, and more.
+> Production-ready skills for Claude Code — organized as plugins.
 
 ## Contents
 
 - [Installation](#installation)
-- [Skills](#skills)
-- [Commands](#commands)
+- [Plugins](#plugins)
+  - [workflow](#workflow) — GitHub workflow automation
+  - [content](#content) — Content creation and publishing
+  - [design](#design) — Visual design and diagrams
+  - [database](#database) — Database optimization
+  - [deploy](#deploy) — Deployment and infrastructure
+  - [meta](#meta) — Skill and hook management
+  - [tasks](#tasks) — Task visibility board
 - [Adding new skills](#adding-new-skills)
 
 ## Installation
@@ -20,59 +26,124 @@ npx skills add lipex360x/claude-skills-library --all
 Install a specific skill:
 
 ```bash
-npx skills add lipex360x/claude-skills-library --skill create-skill
+npx skills add lipex360x/claude-skills-library --skill {skill-name}
 ```
 
-## Skills
+Common flags: `--copy` (no symlinks), `-a claude-code` (Claude Code only), `-y` (skip prompts).
 
-Skills are intelligent, context-aware automations triggered by natural language or `/slash-commands`. Each skill lives in its own directory under `skills/` with a `SKILL.md` and supporting references.
+## Plugins
 
-| Skill | Command | Description |
-|-------|---------|-------------|
-| [analysis](./skills/analysis/) | `/analysis` | Capture skill gaps, workflow frictions, and pattern improvements |
-| [backlog-start](./skills/backlog-start/) | `/backlog-start` | Pull a backlog issue and start implementation with expanded plan |
-| [create-command](./skills/create-command/) | `/create-command` | Guide for creating or improving Claude Code slash commands |
-| [create-hook](./skills/create-hook/) | `/create-hook` | Guide for creating or improving Claude Code hooks |
-| [create-readme](./skills/create-readme/) | `/create-readme` | Generate or review a project README.md |
-| [create-skill](./skills/create-skill/) | `/create-skill` | Guide for creating, reviewing, and improving Claude Code skills |
-| [drawio](./skills/drawio/) | `/drawio` | AI-powered Draw.io diagram creation with YAML design system |
-| [find-skills](./skills/find-skills/) | `/find-skills` | Discover and install agent skills from the ecosystem |
-| [myvoice](./skills/myvoice/) | `/myvoice` | Capture the user's writing voice for authentic content generation |
-| [prompt-continue](./skills/prompt-continue/) | `/prompt-continue` | Generate continuation prompts for seamless session handoffs |
-| [push](./skills/push/) | `/push` | Commit, push, and auto-update GitHub issue checkboxes |
-| [readme-blueprint-generator](./skills/readme-blueprint-generator/) | `/readme-blueprint-generator` | Generate README from project documentation structure |
-| [skill-creator](./skills/skill-creator/) | `/skill-creator` | Create, modify, benchmark, and optimize skills |
-| [start-new-project](./skills/start-new-project/) | `/start-new-project` | Plan and scaffold projects with structured GitHub issues |
-| [supabase-postgres-best-practices](./skills/supabase-postgres-best-practices/) | — | Postgres performance optimization and best practices |
-| [system-design](./skills/system-design/) | `/system-design` | Extract design systems from reference images into artboards |
-| [vercel-cli](./skills/vercel-cli/) | `/vercel-cli` | Deploy and manage projects on Vercel from the CLI |
-| [written](./skills/written/) | `/written` | Create compelling written content and marketing copy |
+Skills are organized into **7 plugin groups** by domain. Each plugin is a namespace — invoke skills as `/plugin:skill-name` (e.g., `/workflow:push`). There are **29 skills** in total.
 
-> [!TIP]
-> Each skill has its own README with trigger phrases, workflow details, and usage examples. Click any skill link above to learn more.
+---
+
+### workflow
+
+> GitHub workflow automation: issues, branches, PRs, commits.
+
+| Skill | Description |
+|-------|-------------|
+| [add-backlog](./workflow/skills/add-backlog/) | Create a GitHub issue in the project's Backlog milestone. |
+| [create-pr](./workflow/skills/create-pr/) | Create a pull request from the current branch, linking it to the open issue. |
+| [list-backlog](./workflow/skills/list-backlog/) | List open backlog issues with numbered summary for selection. |
+| [list-issues](./workflow/skills/list-issues/) | List all open issues grouped by milestone with priority sorting and next-issue suggestion. |
+| [merge-pr](./workflow/skills/merge-pr/) | Merge the open pull request for the current branch and switch back to main. |
+| [push](./workflow/skills/push/) | Commit, push, and update GitHub issue checkboxes in one command. |
+| [start-backlog](./workflow/skills/start-backlog/) | Pull a backlog issue and start implementation with an expanded step-by-step plan. |
+| [start-new-project](./workflow/skills/start-new-project/) | Plan and scaffold a new project from a prompt with structured GitHub issues. |
 
 [Back to top](#claude-skills-library)
 
-## Commands
+---
 
-Commands are lightweight slash commands — single `.md` files in `commands/` that perform focused operations.
+### content
 
-| Command | Description |
-|---------|-------------|
-| `/backlog-add` | Create a backlog issue in the project's Backlog milestone |
-| `/backlog-list` | List open backlog issues with numbered summary for selection |
-| `/issues-list` | List all open issues grouped by milestone with priority sorting |
-| `/post-approve` | Approve draft, generate EN translation, publish to local files and Google Drive |
-| `/pr-create` | Create a PR from the current branch, linking to the open issue |
-| `/pr-merge` | Merge the open PR for the current branch and switch to main |
-| `/skill-install` | Install a skill from an npx skills link |
-| `/skill-uninstall` | Uninstall a skill by name (local or global) |
-| `/tv-clean` | Remove completed tasks from the task visibility board |
-| `/tv-close` | Close the task visibility board and stop task tracking |
-| `/tv-open` | Reopen the task visibility board and resume task tracking |
+> Content creation, voice profiling, and publishing.
+
+| Skill | Description |
+|-------|-------------|
+| [approve-post](./content/skills/approve-post/) | Approve the current draft, generate English translation, and publish to local files and Google Drive. |
+| [capture-voice](./content/skills/capture-voice/) | Analyze conversations to capture the user's writing voice for authentic content generation. |
+| [write-content](./content/skills/write-content/) | Create compelling written content and marketing copy that sounds like the user wrote it. |
+
+[Back to top](#claude-skills-library)
+
+---
+
+### design
+
+> Visual design: diagrams, design systems, and artboards.
+
+| Skill | Description |
+|-------|-------------|
+| [create-diagram](./design/skills/create-diagram/) | AI-powered Draw.io diagram creation, editing, and replication with a YAML design system supporting 6 themes. |
+| [extract-design-system](./design/skills/extract-design-system/) | Analyze a design image and create a full design system project with separated artboards. |
+
+[Back to top](#claude-skills-library)
+
+---
+
+### database
+
+> Database optimization and best practices.
+
+| Skill | Description |
+|-------|-------------|
+| [optimize-postgresql](./database/skills/optimize-postgresql/) | PostgreSQL-specific development assistant focusing on advanced data types, JSONB, full-text search, and extensions. |
+| [review-postgres](./database/skills/review-postgres/) | Postgres performance optimization and best practices from Supabase. |
+
+[Back to top](#claude-skills-library)
+
+---
+
+### deploy
+
+> Deployment and infrastructure management.
+
+| Skill | Description |
+|-------|-------------|
+| [deploy-vercel](./deploy/skills/deploy-vercel/) | Deploy, manage, and develop projects on Vercel from the command line. |
+
+[Back to top](#claude-skills-library)
+
+---
+
+### meta
+
+> Claude Code skill, hook, and command management and analysis.
+
+| Skill | Description |
+|-------|-------------|
+| [capture-analysis](./meta/skills/capture-analysis/) | Capture skill gaps, workflow frictions, and pattern improvements as structured entries. |
+| [create-command](./meta/skills/create-command/) | Guide for creating or improving Claude Code slash commands. |
+| [create-continuation](./meta/skills/create-continuation/) | Generate a continuation prompt for seamless session handoffs to a new conversation. |
+| [create-hook](./meta/skills/create-hook/) | Guide for creating or improving Claude Code hooks. |
+| [create-readme](./meta/skills/create-readme/) | Create or review a README.md for the project. |
+| [create-skill](./meta/skills/create-skill/) | Guide for creating, reviewing, and improving Claude Code skills. |
+| [find-skills](./meta/skills/find-skills/) | Discover and install agent skills from the open ecosystem. |
+| [generate-readme-blueprint](./meta/skills/generate-readme-blueprint/) | Generate README.md by analyzing project documentation structure. |
+| [install-skill](./meta/skills/install-skill/) | Install a skill from an npx skills link, with local or global selection. |
+| [uninstall-skill](./meta/skills/uninstall-skill/) | Uninstall a skill by name, local or global. |
+
+[Back to top](#claude-skills-library)
+
+---
+
+### tasks
+
+> Task visibility board management.
+
+| Skill | Description |
+|-------|-------------|
+| [clean-tasks](./tasks/skills/clean-tasks/) | Remove completed tasks from the task visibility board. |
+| [close-tasks](./tasks/skills/close-tasks/) | Close the task visibility board and stop task tracking for the session. |
+| [open-tasks](./tasks/skills/open-tasks/) | Reopen the task visibility board and resume task tracking. |
 
 [Back to top](#claude-skills-library)
 
 ## Adding new skills
 
-New skills created with `/create-skill` automatically generate a README following the standard [template](./templates/skill-readme.md).
+Use `/meta:create-skill` to scaffold a new skill with the standard template. It walks you through intent, triggers, structure, and generates the `SKILL.md` with correct frontmatter.
+
+> [!TIP]
+> Each skill directory contains a `SKILL.md` with full instructions, trigger phrases, and workflow details. Click any skill link above to explore.

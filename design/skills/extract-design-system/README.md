@@ -1,40 +1,31 @@
-# system-design
+# extract-design-system
 
-> Extract a design system from a reference image and build a complete project with separated artboards — foundations, components, and sections — all in parallel.
+> Analyze a design image and create a full design system project with separated artboards (foundations, components, sections) via MCP tools.
+
+Reverse-engineers the visual language from reference images — extracting colors, typography, spacing, and component patterns — then builds a complete project with parallel subagents, each writing an artboard. The user stays on the project hub watching thumbnails appear progressively.
 
 ## Usage
 
-```
-/system-design my-project
+```text
+/extract-design-system [project-slug]
 ```
 
-> [!IMPORTANT]
-> Place reference images in the `design/` folder before running. The skill analyzes all images found there. If no project slug is provided, it infers one from the image filename or asks.
+> [!TIP]
+> Also activates when providing a reference image, screenshot, or mockup and asking to extract a design system, create artboards, build a component library, or reverse-engineer visual patterns — even without explicitly saying "design system."
 
 ## How it works
 
-| Phase | What happens |
-|-------|-------------|
-| **Discover** | Finds reference images and reverse-engineers the visual language: colors (hex), typography, spacing, and component patterns |
-| **Plan** | Splits the design system into 3-6 artboards (Foundations, Components, Hero & Navigation, Content Sections, Footer & CTA) |
-| **Design Brief** | Presents extracted tokens and artboard plan for user approval |
-| **Design Spec** | Compiles a self-contained reference document passed to every subagent |
-| **Phase A: Setup** | Creates the project, writes `tokens.css`, opens the project hub, and batch-creates artboard skeletons (shimmer cards appear immediately) |
-| **Phase B: Agents** | Spawns one agent per artboard in parallel — each writes HTML via `curl` to the HTTP API. Thumbnails appear progressively on the hub |
-
-The user stays on the **project hub** throughout, watching thumbnails appear in real-time as each agent finishes its artboard.
-
-## Trigger phrases
-
-- "extract a design system"
-- "create artboards from this design"
-- "build a component library"
-- Also activates when a reference image, screenshot, or mockup is provided — even without explicitly saying "design system"
+1. **Discover** — finds reference images in `design/` and extracts the full visual language (hex colors, typography, spacing rhythm, component patterns)
+2. **Plan** — splits the design system into 3-6 artboards (Foundations, Components, Hero & Navigation, Content Sections, Footer & CTA)
+3. **Design Brief** — presents extracted tokens and artboard plan for user approval
+4. **Design Spec** — compiles a self-contained reference document passed to every subagent
+5. **Phase A: Setup** — creates the project, writes `tokens.css`, opens the hub, and batch-creates artboard skeletons (shimmer cards appear immediately)
+6. **Phase B: Agents** — spawns one agent per artboard in parallel; each writes HTML via `curl` to the HTTP API, and thumbnails appear progressively on the hub
 
 ## Directory structure
 
-```
-system-design/
+```text
+extract-design-system/
 ├── SKILL.md                        # Core instructions and hub-centric build process
 ├── references/
 │   ├── agent-prompt.md             # Prompt template and curl instructions for subagents
@@ -46,5 +37,5 @@ system-design/
 ## Installation
 
 ```bash
-npx skills add lipex360x/claude-skills-library --skill system-design
+npx skills add lipex360x/claude-skills-library --skill extract-design-system
 ```
