@@ -93,13 +93,13 @@ Parse all checkboxes in the linked issue body (`- [ ]` unchecked, `- [x]` checke
 
 Grep test files for `.fixme`, `.skip`, `.todo`, and `only` markers. Flag any found — do not proceed until resolved or explicitly approved.
 
-## 5. Move card to "Ready to PR"
+## 5. Move card to "In review"
 
-If a project board exists for the repo (`gh project list --owner "@me"`), move the issue card to **"Ready to PR"**:
+If a project board exists for the repo (`gh project list --owner "@me"`), move the issue card to **"In review"** — the PR is now open and being reviewed:
 
 1. Find the project and get the project node ID
 2. Find the item ID for this issue
-3. Get the Status field ID and the "Ready to PR" option ID
+3. Get the Status field ID and the "In review" option ID
 4. Update with `gh project item-edit`
 
 Read `references/project-board-operations.md` for the full command reference.
@@ -114,7 +114,7 @@ Report:
 - PR URL
 - Issue linked (if any)
 - Scope transfers performed (if any)
-- Board status (card moved to "Ready to PR", or skipped)
+- Board status (card moved to "In review", or skipped)
 
 ## Guidelines
 

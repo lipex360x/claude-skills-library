@@ -147,7 +147,11 @@ Derive `<slug>` from the issue title (kebab-case, max 40 chars). The `gh issue d
 
 Read `references/project-board-operations.md` for the full command reference.
 
-Find the project board for the repo (`gh project list --owner "@me"`), then move the issue card to **"In progress"**:
+Find the project board for the repo (`gh project list --owner "@me"`).
+
+**If no board exists**, ask the user with `AskUserQuestion` offering `["Yes, create a board", "No, skip board tracking"]`. If they choose to create one, read `references/project-board-setup.md` and set up the full board (6 status columns, Priority and Size fields). Add the current issue to the board after creation.
+
+**If a board exists** (or was just created), move the issue card to **"In progress"**:
 
 1. Get the project node ID and the item ID for this issue
 2. Get the Status field ID and the "In progress" option ID

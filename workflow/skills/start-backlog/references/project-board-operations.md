@@ -61,7 +61,7 @@ gh project item-edit --project-id "$PROJECT_ID" --id "$ITEM_ID" --field-id "$SIZ
 | Ready | This is ready to be picked up |
 | In progress | This is actively being worked on |
 | In review | This item is in review |
-| Ready to PR | This is ready for a pull request |
+| Ready to PR | Review approved, ready to merge |
 | Done | This has been completed |
 
 ### Priority Options

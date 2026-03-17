@@ -80,26 +80,64 @@ gh issue comment <number> --body "<summary>"
 
 The summary should be **specific and concrete** — file paths, test names, route URLs. Generic summaries ("improved the auth system") are useless. Someone reading this comment six months from now should understand exactly what changed and why.
 
-## 4. Merge the PR
+## 4. Move card to "Ready to PR"
+
+If a project board exists for the repo (`gh project list --owner "@me"`), move the issue card to **"Ready to PR"** — signaling that review is complete and the PR is about to be merged:
+
+1. Find the project and get the project node ID
+2. Find the item ID for this issue
+3. Get the Status field ID and the "Ready to PR" option ID
+4. Update with `gh project item-edit`
+
+Read `references/project-board-operations.md` for the full command reference.
+
+If no project board exists, skip this step and Step 7.
+
+## 5. Merge the PR
 
 ```bash
 gh pr merge --merge --delete-branch
 ```
 
-## 5. Move card to "Done"
+## 6. Move card to "Done"
 
-If a project board exists for the repo (`gh project list --owner "@me"`), move the issue card to **"Done"**:
+Move the issue card to **"Done"** on the project board:
 
-1. Find the project and get the project node ID
-2. Find the item ID for this issue
-3. Get the Status field ID and the "Done" option ID
-4. Update with `gh project item-edit`
+1. Get the "Done" option ID from the Status field
+2. Update with `gh project item-edit`
 
-Read `references/project-board-operations.md` for the full command reference.
+## 7. Notify unblocked issues
 
-If no project board exists, skip this step.
+Scan the **closed issue's body** for `> **Blocks** #N` annotations. For each referenced issue that is still open:
 
-## 6. Switch to base branch
+1. **Add a comment** on the unblocked issue:
+   ```markdown
+   ## Blocker resolved
+
+   #<source> (<source title>) has been merged. This issue is now unblocked.
+   ```
+
+2. **Move the card to "Ready"** on the project board — signaling that the issue is now actionable. Use the same project board operations (get item ID, get "Ready" option ID, update with `gh project item-edit`).
+
+If no `Blocks` annotations exist, skip this step.
+
+## 8. Check milestone completion
+
+If the closed issue belongs to a milestone, check its progress:
+
+```bash
+gh api repos/{owner}/{repo}/milestones --jq '.[] | select(.title == "<milestone>") | {title, open_issues, closed_issues}'
+```
+
+If `open_issues` is 0 (all issues closed), report:
+
+```
+🎉 Milestone "<name>" is now 100% complete! (N/N issues closed)
+```
+
+If not complete, report progress: "Milestone '<name>': X/Y issues closed (Z%)".
+
+## 9. Switch to base branch
 
 After merge, switch to the target branch and pull:
 
@@ -107,12 +145,14 @@ After merge, switch to the target branch and pull:
 git checkout <target-branch> && git pull
 ```
 
-## 7. Report
+## 10. Report
 
 Present concisely:
 - PR number and merge status
 - Issue summary posted (with issue URL)
-- Board status (card moved to "Done", or skipped)
+- Board status (card moved through Ready to PR → Done)
+- Unblocked issues (if any — list issue numbers and their new status)
+- Milestone progress (percentage or completion notice)
 - Current branch after switch
 
 ## Guidelines
@@ -120,6 +160,8 @@ Present concisely:
 - **Implementation summaries are the issue's memory.** Six months from now, the issue is the first place someone looks to understand what was done. If the summary is vague, they'll have to dig through commits and diffs — that's a failure. Be specific: file paths, function names, test coverage, verification steps.
 
 - **Key decisions matter most.** The "what" is visible in the diff. The "why" lives only in the summary. Document trade-offs, alternatives considered, and constraints that shaped the implementation.
+
+- **Unblock notifications close the loop.** When a blocker is resolved, the blocked issue needs to know. The comment + card move to "Ready" makes this visible to anyone watching the board — no manual triage needed.
 
 - **English for all issue content.** Comments and summaries are always in English because they're public and portable. Communication with the user follows their language preference.
 
