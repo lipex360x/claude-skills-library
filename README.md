@@ -76,7 +76,7 @@ Skills are organized into **7 plugin groups** by domain. Invoke any skill direct
 
 | Skill | Description |
 |-------|-------------|
-| [create-diagram](./design/skills/create-diagram/) | AI-powered Draw.io diagram creation, editing, and replication with a YAML design system supporting 6 themes. |
+| [create-diagram](./design/skills/create-diagram/) | Create professional diagrams using an HTML-first design workflow with Excalidraw export. |
 | [extract-design-system](./design/skills/extract-design-system/) | Analyze a design image and create a full design system project with separated artboards. |
 
 [Back to top](#claude-skills-library)

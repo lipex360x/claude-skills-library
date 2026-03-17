@@ -1,46 +1,38 @@
 # create-diagram
 
-> AI-powered Draw.io diagram creation, editing, and replication with a YAML design system supporting 6 themes.
+Create professional diagrams using an HTML-first design workflow with Excalidraw export.
 
-Create, edit, validate, and export professional Draw.io diagrams through a YAML-first workflow. Supports semantic shapes, typed connectors, academic/IEEE-style figures, cloud architecture stencils, and 3-layer validation. Accepts Mermaid, CSV, and YAML input with `.drawio` and `.svg` output.
+## Trigger phrases
 
-## Usage
-
-```text
-/create-diagram [diagram-description-or-instruction]
-```
-
-> [!TIP]
-> Also activates when creating visual diagrams, flowcharts, system architecture diagrams, network diagrams, UML, ER diagrams, sequence diagrams, state machines, org charts, mind maps, cloud infrastructure diagrams, or IEEE-style paper figures.
+- `/create-diagram system architecture for my app`
+- "draw a flowchart of the login process"
+- "make a diagram of this" (with a reference image)
+- Also activates when the user asks for any visual representation, diagram, chart, or schematic — even without explicitly saying "diagram"
 
 ## How it works
 
-1. **Route** — matches the request to create, edit, replicate, academic-paper, stencil-heavy, or edge-audit workflow
-2. **Fast path vs full path** — simple diagrams (up to ~12 nodes, clear type/theme/layout) render directly; complex or academic diagrams go through consultation with ASCII draft confirmation
-3. **Normalize** — converts Mermaid or CSV input into canonical YAML spec
-4. **Render** — generates `.drawio` XML or `.svg` output using the CLI toolchain
-5. **Validate** — runs 3-layer checks (structure, layout, quality) with optional `--strict` mode
+1. **HTML Design** — Generates a high-quality, self-contained HTML file using production-grade aesthetics (bold typography, atmospheric colors, intentional layout). This is where the design happens — Claude excels at HTML/CSS.
+2. **User Screenshot** — The user opens the HTML in a browser and sends back a screenshot, giving Claude a visual reference of the rendered result.
+3. **Excalidraw Export** — Converts the visual structure into a portable `.excalidraw` JSON file, preserving the information architecture (nodes, connections, labels, grouping) in an editable format.
+
+When a reference image is provided, the skill analyzes it first and recreates it as HTML with improved aesthetics before converting to Excalidraw.
+
+## Usage
+
+```
+/create-diagram [description or reference image]
+```
+
+Example: `/create-diagram microservices architecture with API gateway, auth service, and three backend services connected to a shared database`
 
 ## Directory structure
 
-```text
+```
 create-diagram/
-├── SKILL.md                 # Core instructions and routing rules
-├── assets/
-│   ├── examples/            # Sample .drawio files
-│   ├── schemas/             # JSON Schema for YAML spec
-│   └── themes/              # Theme JSON definitions
-├── references/
-│   ├── docs/                # Design system docs, format guides
-│   ├── examples/            # Reusable YAML spec templates
-│   └── workflows/           # Step-by-step workflow guides
-├── scripts/
-│   ├── cli.js               # Main CLI tool
-│   ├── dsl/                 # YAML/Mermaid/CSV converters
-│   ├── adapters/            # Input format adapters
-│   ├── math/                # LaTeX/MathJax support
-│   └── svg/                 # SVG export module
-└── evals/                   # Evaluation prompts and assertions
+├── SKILL.md              # Core instructions — HTML-first workflow + Excalidraw export
+├── README.md             # This file
+└── references/
+    └── excalidraw-format.md  # Complete Excalidraw JSON specification
 ```
 
 ## Installation
