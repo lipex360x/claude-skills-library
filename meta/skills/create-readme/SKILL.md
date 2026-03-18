@@ -21,7 +21,7 @@ Check if `README.md` exists in the project root.
 Build a README from scratch by analyzing the project.
 
 1. Scan the project: package.json, source structure, config files, CI/CD, tests, docs.
-2. Fetch reference READMEs for structure and tone inspiration. Read `references/readme-references.md` for the list.
+2. Read `references/readme-references.md` for the list of local reference READMEs. Read at least 2 that match the project type for structure and tone inspiration.
 3. Draft the README following the formatting rules below.
 4. Present the draft to the user before writing.
 
@@ -30,7 +30,7 @@ Build a README from scratch by analyzing the project.
 Analyze the existing README against the formatting standards and reference patterns. Preserve domain-specific content — the user built it for a reason.
 
 1. Read the current README.
-2. Fetch at least 2 reference READMEs for comparison. Read `references/readme-references.md` for the list.
+2. Read `references/readme-references.md` for the list of local reference READMEs. Read at least 2 that match the project type for comparison.
 3. Identify improvements in **formatting and structure only**:
    - Missing navigation (content index, back-to-top links)
    - Missing GFM admonitions where appropriate
