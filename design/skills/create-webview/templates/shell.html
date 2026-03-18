@@ -1,0 +1,26 @@
+<!-- ==========================================================================
+   Shell — Data-Driven Presentation
+
+   - Replace {{TITLE}} with presentation title
+   - Replace {{FONT_FAMILY}} with Google Fonts spec
+     (e.g., DM+Sans:wght@400;500;600;700;800)
+   - viewport width matches slide width (default 1440)
+   - CSS and JS are local files, not inline — keeps source readable
+   - Only external dependency: Google Fonts
+   ========================================================================== -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1440">
+    <title>{{TITLE}}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family={{FONT_FAMILY}}&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="slides"></div>
+    <script src="js/renderer.js"></script>
+</body>
+</html>

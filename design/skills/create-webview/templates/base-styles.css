@@ -1,0 +1,342 @@
+/* ==========================================================================
+   Base Styles — Data-Driven Presentation
+
+   Adapt brand identity by changing :root variables.
+   Dark theme by default — swap --bg/--text values for light theme.
+   ========================================================================== */
+
+/* ---------- Brand Variables ---------- */
+:root {
+    /* Primary brand color — change this to match client identity */
+    --primary: #3b82f6;
+    --primary-light: #60a5fa;
+    --primary-muted: #1e3a5f;
+    --primary-bg: rgba(59, 130, 246, 0.1);
+
+    /* Dark theme (default) */
+    --dark: #0a0a0a;
+    --bg: #0f0f0f;
+    --text: #e8e8e8;
+    --text-muted: #888;
+    --surface: #1a1a1a;
+    --surface-alt: #141414;
+    --border: #2a2a2a;
+
+    /* Accent colors */
+    --success: #22c55e;
+    --success-bg: rgba(34, 197, 94, 0.1);
+    --warning: #f59e0b;
+    --warning-bg: rgba(245, 158, 11, 0.1);
+    --danger: #ef4444;
+    --danger-bg: rgba(239, 68, 68, 0.1);
+
+    /* Slide dimensions */
+    --slide-width: 1440px;
+    --slide-height: 810px;
+    --slide-padding-x: 80px;
+    --slide-padding-y: 56px;
+}
+
+/* ---------- Reset & Base ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #000;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Slide Base ---------- */
+.slide {
+    width: var(--slide-width);
+    height: var(--slide-height);
+    margin: 0 auto;
+    padding: var(--slide-padding-y) var(--slide-padding-x);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ---------- Slide Number ---------- */
+.slide-number {
+    position: absolute;
+    top: 24px;
+    right: 32px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Tags / Badges ---------- */
+.tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--primary);
+    background: var(--primary-bg);
+    padding: 4px 14px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    white-space: nowrap;
+}
+
+/* ---------- Typography ---------- */
+.slide-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.slide-subtitle {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+}
+
+/* ---------- Metrics Grid ---------- */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+}
+
+.metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+}
+
+.metric-icon {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.metric-value {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 8px 0;
+    line-height: 1;
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+}
+
+/* ---------- Bar Charts ---------- */
+.bar-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.bar-label {
+    width: 140px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.bar-track {
+    flex: 1;
+    height: 28px;
+    background: var(--surface-alt);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
+    font-size: 0.8rem;
+    color: white;
+    font-weight: 600;
+}
+
+/* ---------- Timeline ---------- */
+.timeline-container {
+    position: relative;
+    padding-left: 40px;
+}
+
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 24px;
+    padding-left: 24px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -29px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 2px solid var(--bg);
+}
+
+.timeline-date {
+    font-size: 0.8rem;
+    color: var(--primary-light);
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.timeline-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.timeline-detail {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* ---------- Detail Cards ---------- */
+.detail-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+}
+
+.detail-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.detail-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.detail-card-badge {
+    font-size: 0.75rem;
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.detail-card-body {
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+/* ---------- Data Tables ---------- */
+.df-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+.df-table thead th {
+    background: var(--surface-alt);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.7rem;
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+}
+
+.df-table tbody tr:nth-child(even) {
+    background: var(--surface);
+}
+
+.df-table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+}
+
+/* ---------- Split Layout ---------- */
+.split-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 24px;
+}
+
+.split-layout.aside-right {
+    grid-template-columns: 2fr 1fr;
+}
+
+.split-layout.aside-left {
+    grid-template-columns: 1fr 2fr;
+}
+
+/* ---------- Watermark ---------- */
+.slide::after {
+    content: '';
+    position: absolute;
+    bottom: 24px;
+    right: 32px;
+    width: 80px;
+    height: 32px;
+    /* background: url('../img/logo.png') no-repeat center / contain; */
+    opacity: 0.3;
+}
+
+.no-watermark::after {
+    display: none;
+}
+
+/* ---------- Print ---------- */
+@media print {
+    body {
+        background: none;
+    }
+
+    .slide {
+        break-after: page;
+        break-inside: avoid;
+        margin: 0;
+    }
+}

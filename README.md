@@ -77,6 +77,7 @@ Skills are organized into **7 plugin groups** by domain. Invoke any skill direct
 | Skill | Description |
 |-------|-------------|
 | [create-diagram](./design/skills/create-diagram/) | Create professional diagrams using an HTML-first design workflow with Excalidraw export. |
+| [create-webview](./design/skills/create-webview/) | Create data-driven HTML presentations from structured sources (Excel, PPTX, CSV → SQLite → JSON → HTML slides → PDF). |
 | [extract-design-system](./design/skills/extract-design-system/) | Analyze a design image and create a full design system project with separated artboards. |
 
 [Back to top](#claude-skills-library)
