@@ -11,6 +11,7 @@
   - [design](#design) — Visual design and diagrams
   - [database](#database) — Database optimization
   - [deploy](#deploy) — Deployment and infrastructure
+  - [gws](#gws) — Google Workspace automation
   - [meta](#meta) — Skill and hook management
   - [tasks](#tasks) — Task visibility board
 - [Adding new skills](#adding-new-skills)
@@ -33,7 +34,7 @@ Common flags: `--copy` (no symlinks), `-a claude-code` (Claude Code only), `-y` 
 
 ## Plugins
 
-Skills are organized into **7 plugin groups** by domain. Invoke any skill directly by name (e.g., `/push`, `/create-skill`). There are **26 skills** in total.
+Skills are organized into **8 plugin groups** by domain. Invoke any skill directly by name (e.g., `/push`, `/create-skill`). There are **26 skills** in total.
 
 ---
 
@@ -103,6 +104,18 @@ Skills are organized into **7 plugin groups** by domain. Invoke any skill direct
 | Skill | Description |
 |-------|-------------|
 | [deploy-vercel](./deploy/skills/deploy-vercel/) | Deploy, manage, and develop projects on Vercel from the command line. |
+
+[Back to top](#claude-skills-library)
+
+---
+
+### gws
+
+> Google Workspace automation: Gmail filters, inbox management.
+
+| Skill | Description |
+|-------|-------------|
+| [check-gmail](./gws/skills/check-gmail/) | Scan Gmail inbox, detect filter gaps, and update filters with structured user decisions. |
 
 [Back to top](#claude-skills-library)
 
