@@ -37,7 +37,13 @@ Extract:
 - **What/Why** — context for planning
 - **Acceptance criteria** — the high-level checkboxes to expand into detailed steps
 
-Also analyze the **current codebase** to inform the plan. **Start by checking for `ARCHITECTURE.md` at the project root.** If it exists, read it first — it contains stack, layers, patterns, schema, auth model, and routes, eliminating the need for expensive exploration (~2k tokens vs ~53k). Only spawn an exploration agent if ARCHITECTURE.md is missing, incomplete, or appears stale (e.g., routes in the file don't match `src/app/` directory). If ARCHITECTURE.md doesn't exist, read relevant files the traditional way to understand existing patterns and identify where changes will land. This context is essential for writing concrete checkboxes with file paths.
+Also analyze the **current codebase** to inform the plan. **Start by checking for `ARCHITECTURE.md` at the project root.** If it exists, read it first — it contains stack, layers, patterns, schema, auth model, and routes, eliminating the need for expensive exploration (~2k tokens vs ~53k). Only spawn an exploration agent if ARCHITECTURE.md is missing, incomplete, or appears stale (e.g., routes in the file don't match `src/app/` directory).
+
+**If ARCHITECTURE.md doesn't exist, create it.** This is the first issue being worked on — the codebase has no knowledge cache yet. Explore the codebase (read package.json, directory structure, key config files, existing routes/schema), then generate `ARCHITECTURE.md` at the project root using the same structure as `start-new-project` (stack, layers, patterns by canonical example, schema summary, auth model, routes). This file is the **living context document** — `/merge-pr` will update it after each merge, and every subsequent `/start-backlog` will read it first. Creating it now pays for itself immediately: the plan you're about to write will be more concrete, and every future session starts with context instead of re-exploration.
+
+If ARCHITECTURE.md already exists but is stale, update it with what you discover during exploration — don't leave known-incorrect information in the file.
+
+This context is essential for writing concrete checkboxes with file paths.
 
 **CDP detection (for web projects).** Check two things:
 
@@ -48,6 +54,18 @@ Also analyze the **current codebase** to inform the plan. **Start by checking fo
 ### 2b. Check Agent Teams capability
 
 Run `echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to determine if Agent Teams is enabled (value `1`). Store the result — you **MUST** use it in Step 3 to decide whether to include the parallel execution plan. This check is not optional.
+
+### 2c. Enforce development standards
+
+Before proposing any plan, verify that the issue and project setup enforce these non-negotiable standards. If any are missing or weak, the plan **must** compensate by making them explicit in every relevant Step:
+
+1. **TDD is mandatory.** Scan the issue body for TDD references (test-first checkboxes, red-green-refactor mentions, references to `tdd-methodology.md`). If TDD is not explicitly enforced — either because `/start-new-project` didn't make it clear or because this is a standalone backlog item — **you must enforce it yourself**. Every Step that introduces behavior gets test-first checkboxes. This is not a suggestion to consider; it's a structural requirement of the plan. Read `references/tdd-methodology.md` for the full methodology.
+
+2. **No workarounds.** The plan must solve problems at their root. If a Step would require a workaround (hardcoded values to bypass a bug, temporary flags, monkey-patches, `any` casts to silence type errors, skipped validations), it's a signal that the Step is wrong or incomplete. Rewrite it to address the underlying issue. Workarounds create invisible tech debt that compounds across issues — what starts as "just for now" becomes permanent the moment the next issue lands on top of it.
+
+3. **No unnecessary code comments.** Code comments are allowed only when the logic is genuinely non-obvious — complex algorithms, unintuitive business rules, or regulatory constraints that aren't self-evident from the code. Self-documenting code (clear names, small functions, explicit types) replaces comments. Never add comments that restate what the code does ("// increment counter"), explain obvious patterns ("// check if user exists"), or serve as section dividers. When proposing checkboxes, never include "add comments" or "document the code" — if the code needs a comment to be understood, the code needs to be rewritten.
+
+If any of these standards conflict with the original issue's approach, flag it to the user and propose the correction. Don't silently ignore a weak issue setup.
 
 ### 3. Propose the detailed plan
 
@@ -247,6 +265,12 @@ Present concisely:
 
 - **ARCHITECTURE.md maintenance.** Every Step that introduces a new pattern, route, table, or dependency must include a checkbox: "Update `ARCHITECTURE.md` with [specific addition]" — naming exactly what changed (e.g., "add billing query hook to Patterns section", "add `/billing` route to Routes section", "add `recharts` to Stack & dependencies"). This keeps the codebase knowledge cache current without a bulk "update everything" step at the end. If ARCHITECTURE.md doesn't exist and the project is a web app or has sufficient complexity, include a checkbox in Step 1 to generate it using the patterns discovered during codebase analysis.
 
+- **No workarounds.** Every step must solve problems at their root. If a step would require a workaround (hardcoded values to bypass a bug, temporary flags, monkey-patches, `any` casts to silence type errors, skipped validations), it's a signal that the step is wrong or incomplete. Rewrite it to address the underlying issue. Workarounds create invisible tech debt that compounds across issues — what starts as "just for now" becomes permanent the moment the next issue lands on top of it.
+
+- **No unnecessary code comments.** Code comments are allowed only when the logic is genuinely non-obvious — complex algorithms, unintuitive business rules, or regulatory constraints that aren't self-evident from the code. Self-documenting code (clear names, small functions, explicit types) replaces comments. Never include "add comments" or "document the code" as checkboxes — if the code needs a comment to be understood, the code needs to be rewritten.
+
+- **Web research is authorized.** When the agent is blocked on a problem — unfamiliar framework behavior, unclear best practices, or an error with no obvious solution — it is authorized to search the web for best practices and solutions. This is not a last resort; it's a standard tool. Better to spend 30 seconds searching than 10 minutes guessing.
+
 - **Avoid these anti-patterns:**
   - Checkboxes without TDD order — implementation before test, or tests missing entirely. Always: test checkbox first, then implementation checkbox
   - Generic checkboxes without file paths ("Add tests" → "Add test for login in `src/__tests__/auth.test.ts` — expect 200 with valid credentials")
@@ -255,5 +279,7 @@ Present concisely:
   - Over-expanding simple issues into 10+ Steps when 3 would suffice
   - Checkboxes that duplicate the acceptance criteria verbatim instead of expanding them
   - Local/absolute paths in issue content (`~/.brain/`, `/Users/...`) — always use project-relative paths
+  - Workarounds or hacks instead of proper solutions — if it needs a TODO comment, the step is incomplete
+  - Comments that restate what the code does — self-documenting code replaces narration
   - Proposing a plan without checking `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` first — if enabled, the Execution mode section at the top is **mandatory**, not optional. Skipping it means the user loses the ability to parallelize work
   - Placing the Agent Teams section at the bottom of the issue — the agent reads top-down and will default to isolated worktree agents if it doesn't see the execution mode first

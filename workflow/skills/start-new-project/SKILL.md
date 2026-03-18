@@ -251,6 +251,12 @@ Present:
 
 - **ARCHITECTURE.md — codebase knowledge cache.** Include a checkbox in Phase 1 (Step 1 or the scaffolding step) to generate an initial `ARCHITECTURE.md` at the project root using `templates/architecture.md` as the structure. This file captures stack, layers, patterns (by canonical example), schema summary, auth model, and routes — the information an exploration agent would discover by reading 15+ files. Future conversations read this file instead of re-exploring from scratch (~2k tokens vs ~53k tokens). Every subsequent Step that introduces a new pattern, route, table, or dependency must include a checkbox: "Update `ARCHITECTURE.md` with [specific addition]" — naming exactly what changed (e.g., "add reserves query hook pattern", "add `/reserves` route", "add `recharts` to Stack & dependencies"). This is not a generic "update docs" checkbox — it must be tied to the specific change. The file is a living document; an outdated one is worse than none because it creates false confidence.
 
+- **No workarounds.** Every step must solve problems at their root. If a step would require a workaround (hardcoded values to bypass a bug, temporary flags, monkey-patches, `any` casts to silence type errors, skipped validations), it's a signal that the step is wrong or incomplete. Rewrite it to address the underlying issue. Workarounds create invisible tech debt that compounds across phases — what starts as "just for now" becomes permanent the moment the next phase lands on top of it.
+
+- **No unnecessary code comments.** Code comments are allowed only when the logic is genuinely non-obvious — complex algorithms, unintuitive business rules, or regulatory constraints that aren't self-evident from the code. Self-documenting code (clear names, small functions, explicit types) replaces comments. Never include "add comments" or "document the code" as checkboxes — if the code needs a comment to be understood, the code needs to be rewritten.
+
+- **Web research is authorized.** When the agent is blocked on a problem — unfamiliar framework behavior, unclear best practices, or an error with no obvious solution — it is authorized to search the web for best practices and solutions. This is not a last resort; it's a standard tool. Better to spend 30 seconds searching than 10 minutes guessing.
+
 - **Avoid these anti-patterns:**
   - Checkboxes without TDD order — implementation before test, or tests missing entirely. Always: test checkbox first, then implementation checkbox
   - Generic checkboxes without file paths ("Add tests" → "Add test for login in `src/__tests__/auth.test.ts` — expect 200 with valid credentials")
@@ -259,3 +265,5 @@ Present:
   - Monolithic issues with 10+ steps when the mandatory split rule should have triggered
   - Front-loading detail on later phases — Phase 1 should be precise, later phases can be higher-level
   - Local/absolute paths in issue content (`~/.brain/`, `/Users/...`) — always use project-relative paths
+  - Workarounds or hacks instead of proper solutions — if it needs a TODO comment, the step is incomplete
+  - Comments that restate what the code does — self-documenting code replaces narration

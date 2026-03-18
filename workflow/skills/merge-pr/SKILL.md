@@ -80,7 +80,31 @@ gh issue comment <number> --body "<summary>"
 
 The summary should be **specific and concrete** — file paths, test names, route URLs. Generic summaries ("improved the auth system") are useless. Someone reading this comment six months from now should understand exactly what changed and why.
 
-## 4. Move card to "Ready to PR"
+## 4. Update ARCHITECTURE.md
+
+Check if `ARCHITECTURE.md` exists at the project root. If it does, analyze the diff (`git diff main...HEAD`) for changes that affect the architecture document:
+
+- **New routes or pages** — add to the Routes section
+- **New patterns** — add to the Patterns section with a canonical example reference
+- **Schema changes** — update the Schema summary
+- **New dependencies** — add to Stack & dependencies
+- **New layers or modules** — update the Layers section
+- **Auth changes** — update the Auth model section
+
+Read the current `ARCHITECTURE.md`, then update it with the relevant additions. Be surgical — only add what this branch introduced, don't rewrite existing content. Each addition should name the specific change (e.g., "add `/billing` route", "add `recharts` to dependencies").
+
+If `ARCHITECTURE.md` doesn't exist and the project has sufficient complexity (3+ routes, multiple layers, or a database), generate it from the current codebase state — this branch's merge is the trigger. Use the same structure as `start-new-project` (stack, layers, patterns, schema, auth, routes).
+
+**Commit the ARCHITECTURE.md update** as part of the merge preparation — it should be on the branch before merging so the base branch receives the updated file:
+
+```bash
+git add ARCHITECTURE.md
+git commit -m "docs: update ARCHITECTURE.md with implementation changes"
+```
+
+If no architectural changes were introduced (e.g., pure bugfix, config-only change), skip this step.
+
+## 5. Move card to "Ready to PR"
 
 If a project board exists for the repo (`gh project list --owner "@me"`), move the issue card to **"Ready to PR"** — signaling that review is complete and the PR is about to be merged:
 
@@ -91,22 +115,22 @@ If a project board exists for the repo (`gh project list --owner "@me"`), move t
 
 Read `references/project-board-operations.md` for the full command reference.
 
-If no project board exists, skip this step and Step 7.
+If no project board exists, skip this step and Step 8.
 
-## 5. Merge the PR
+## 6. Merge the PR
 
 ```bash
 gh pr merge --merge --delete-branch
 ```
 
-## 6. Move card to "Done"
+## 7. Move card to "Done"
 
 Move the issue card to **"Done"** on the project board:
 
 1. Get the "Done" option ID from the Status field
 2. Update with `gh project item-edit`
 
-## 7. Notify unblocked issues
+## 8. Notify unblocked issues
 
 Scan the **closed issue's body** for `> **Blocks** #N` annotations. For each referenced issue that is still open:
 
@@ -121,7 +145,7 @@ Scan the **closed issue's body** for `> **Blocks** #N` annotations. For each ref
 
 If no `Blocks` annotations exist, skip this step.
 
-## 8. Check milestone completion
+## 9. Check milestone completion
 
 If the closed issue belongs to a milestone, check its progress:
 
@@ -137,7 +161,7 @@ If `open_issues` is 0 (all issues closed), report:
 
 If not complete, report progress: "Milestone '<name>': X/Y issues closed (Z%)".
 
-## 9. Switch to base branch
+## 10. Switch to base branch
 
 After merge, switch to the target branch and pull:
 
@@ -145,11 +169,12 @@ After merge, switch to the target branch and pull:
 git checkout <target-branch> && git pull
 ```
 
-## 10. Report
+## 11. Report
 
 Present concisely:
 - PR number and merge status
 - Issue summary posted (with issue URL)
+- ARCHITECTURE.md updated (or "no architectural changes")
 - Board status (card moved through Ready to PR → Done)
 - Unblocked issues (if any — list issue numbers and their new status)
 - Milestone progress (percentage or completion notice)
@@ -166,5 +191,7 @@ Present concisely:
 - **English for all issue content.** Comments and summaries are always in English because they're public and portable. Communication with the user follows their language preference.
 
 - **No local paths in comments.** Use project-relative paths only.
+
+- **ARCHITECTURE.md is the project's living memory.** This file carries context across issues — what `/start-backlog` reads to understand the codebase, and what `/merge-pr` updates to keep it current. Updating it after each merge is not optional documentation work; it's feeding the next development cycle. A stale ARCHITECTURE.md causes the next `/start-backlog` to make decisions based on outdated information, which cascades into wrong file paths, missed patterns, and duplicated exploration.
 
 - **Respect the target branch.** The `pr-merge-to` setting exists because not every project merges to `main` — some use `develop`, `staging`, or release branches. Always check before merging.
