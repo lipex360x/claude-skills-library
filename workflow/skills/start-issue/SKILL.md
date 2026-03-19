@@ -133,10 +133,10 @@ Before presenting, review the plan with a critical eye: tighten vague checkboxes
 
 ### 4. Update the issue (or create additional issues)
 
-After approval, rewrite the issue body with the detailed plan:
+After approval, rewrite the issue body with the detailed plan and assign it to the user:
 
 ```bash
-gh issue edit <number> --body "<approved body>"
+gh issue edit <number> --body "<approved body>" --add-assignee @me
 ```
 
 If the mandatory split rule triggered (8+ steps), create the additional issues:
