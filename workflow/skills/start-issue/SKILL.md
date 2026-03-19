@@ -1,12 +1,12 @@
 ---
-name: start-backlog
-description: Pull a backlog issue and start implementation — reads the issue, expands acceptance criteria into a detailed step-by-step plan with checkboxes, rewrites the issue, creates branch and tasks. Use this skill when the user says "backlog start", "start issue", "pull from backlog", "work on issue #N", or wants to begin implementing a backlog item — even if they don't explicitly say "backlog."
+name: start-issue
+description: Pull an issue and start implementation — reads the issue, expands acceptance criteria into a detailed step-by-step plan with checkboxes, rewrites the issue, creates branch and tasks. Use this skill when the user says "start issue", "work on issue #N", "pull from backlog", "start #N", or wants to begin implementing an issue — even if they don't explicitly say "issue."
 user-invocable: true
 ---
 
-# Backlog Start
+# Start Issue
 
-Turn a backlog issue with high-level acceptance criteria into a detailed implementation plan with Steps and checkboxes, then set up the branch and tasks. One approval gate: the proposed plan. Everything else is automated.
+Turn an issue with high-level acceptance criteria into a detailed implementation plan with Steps and checkboxes, then set up the branch and tasks. One approval gate: the proposed plan. Everything else is automated.
 
 ## Steps
 

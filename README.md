@@ -50,7 +50,7 @@ Skills are organized into **8 plugin groups** by domain. Invoke any skill direct
 | [list-issues](./workflow/skills/list-issues/) | List all open issues grouped by milestone with priority sorting and next-issue suggestion. |
 | [merge-pr](./workflow/skills/merge-pr/) | Merge the open pull request for the current branch and switch back to main. |
 | [push](./workflow/skills/push/) | Commit, push, and update GitHub issue checkboxes in one command. |
-| [start-backlog](./workflow/skills/start-backlog/) | Pull a backlog issue and start implementation with an expanded step-by-step plan. |
+| [start-issue](./workflow/skills/start-issue/) | Pull an issue and start implementation with an expanded step-by-step plan. |
 | [start-new-project](./workflow/skills/start-new-project/) | Plan and scaffold a new project from a prompt with structured GitHub issues. |
 
 [Back to top](#claude-skills-library)

@@ -1,17 +1,17 @@
-# start-backlog
+# start-issue
 
-> Pull a backlog issue and start implementation — reads the issue, expands acceptance criteria into a detailed step-by-step plan with checkboxes, creates branch and tasks.
+> Pull an issue and start implementation — reads the issue, expands acceptance criteria into a detailed step-by-step plan with checkboxes, creates branch and tasks.
 
-Turns a backlog issue with high-level acceptance criteria into a detailed implementation plan with TDD-ordered Steps and checkboxes, then sets up the branch and task board. One approval gate: the proposed plan.
+Turns an issue with high-level acceptance criteria into a detailed implementation plan with TDD-ordered Steps and checkboxes, then sets up the branch and task board. One approval gate: the proposed plan.
 
 ## Usage
 
 ```text
-/start-backlog <issue-number>
+/start-issue <issue-number>
 ```
 
 > [!TIP]
-> Also activates when the user says "backlog start", "start issue", "pull from backlog", "work on issue #N", or wants to begin implementing a backlog item.
+> Also activates when the user says "start issue", "work on issue #N", "pull from backlog", "start #N", or wants to begin implementing an issue.
 
 ## How it works
 
@@ -26,7 +26,7 @@ Turns a backlog issue with high-level acceptance criteria into a detailed implem
 ## Directory structure
 
 ```text
-start-backlog/
+start-issue/
 ├── SKILL.md              # Core instructions
 ├── references/           # CDP best practices
 └── templates/            # Step template format
@@ -35,5 +35,5 @@ start-backlog/
 ## Installation
 
 ```bash
-npx skills add lipex360x/claude-skills-library --skill start-backlog
+npx skills add lipex360x/claude-skills-library --skill start-issue
 ```
