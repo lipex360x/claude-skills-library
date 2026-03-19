@@ -1,6 +1,6 @@
 ---
-name: merge-pr
-description: Merge the open pull request for the current branch, write a detailed implementation summary on the issue, and move the card to Done. Use this skill when the user says "merge pr", "merge pull request", "merge this", "land the pr", or wants to finalize and merge the current branch's PR — even if they don't explicitly say "merge."
+name: close-pr
+description: Merge the open pull request for the current branch, write a detailed implementation summary on the issue, and move the card to Done. Use this skill when the user says "close pr", "merge pr", "merge pull request", "merge this", "land the pr", or wants to finalize and merge the current branch's PR — even if they don't explicitly say "merge."
 user-invocable: true
 disable-model-invocation: true
 allowed-tools: Bash, Read
@@ -192,6 +192,6 @@ Present concisely:
 
 - **No local paths in comments.** Use project-relative paths only.
 
-- **ARCHITECTURE.md is the project's living memory.** This file carries context across issues — what `/start-backlog` reads to understand the codebase, and what `/merge-pr` updates to keep it current. Updating it after each merge is not optional documentation work; it's feeding the next development cycle. A stale ARCHITECTURE.md causes the next `/start-backlog` to make decisions based on outdated information, which cascades into wrong file paths, missed patterns, and duplicated exploration.
+- **ARCHITECTURE.md is the project's living memory.** This file carries context across issues — what `/start-backlog` reads to understand the codebase, and what `/close-pr` updates to keep it current. Updating it after each merge is not optional documentation work; it's feeding the next development cycle. A stale ARCHITECTURE.md causes the next `/start-backlog` to make decisions based on outdated information, which cascades into wrong file paths, missed patterns, and duplicated exploration.
 
 - **Respect the target branch.** The `pr-merge-to` setting exists because not every project merges to `main` — some use `develop`, `staging`, or release branches. Always check before merging.

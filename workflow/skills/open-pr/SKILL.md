@@ -1,5 +1,5 @@
 ---
-name: create-pr
+name: open-pr
 description: Create a pull request from the current branch, linking it to the open issue. Use this skill when the user says "create pr", "open pr", "pr create", "make a pull request", "submit for review", or wants to open a PR for the current branch — even if they don't explicitly say "pull request."
 user-invocable: true
 disable-model-invocation: true
