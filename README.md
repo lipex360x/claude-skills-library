@@ -45,10 +45,10 @@ Skills are organized into **8 plugin groups** by domain. Invoke any skill direct
 | Skill | Description |
 |-------|-------------|
 | [add-backlog](./workflow/skills/add-backlog/) | Create a GitHub issue in the project's Backlog milestone. |
-| [create-pr](./workflow/skills/create-pr/) | Create a pull request from the current branch, linking it to the open issue. |
+| [open-pr](./workflow/skills/open-pr/) | Create a pull request from the current branch, linking it to the open issue. |
 | [list-backlog](./workflow/skills/list-backlog/) | List open backlog issues with numbered summary for selection. |
 | [list-issues](./workflow/skills/list-issues/) | List all open issues grouped by milestone with priority sorting and next-issue suggestion. |
-| [merge-pr](./workflow/skills/merge-pr/) | Merge the open pull request for the current branch and switch back to main. |
+| [close-pr](./workflow/skills/close-pr/) | Merge the open pull request for the current branch and switch back to main. |
 | [push](./workflow/skills/push/) | Commit, push, and update GitHub issue checkboxes in one command. |
 | [start-issue](./workflow/skills/start-issue/) | Pull an issue and start implementation with an expanded step-by-step plan. |
 | [start-new-project](./workflow/skills/start-new-project/) | Plan and scaffold a new project from a prompt with structured GitHub issues. |

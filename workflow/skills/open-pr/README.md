@@ -1,10 +1,10 @@
-# /create-pr
+# /open-pr
 
 Create a pull request from the current branch, linking it to the open issue. Handles scope transfers for incomplete tasks and moves the card to "Ready to PR" on the project board.
 
 ## Triggers
 
-- `/create-pr [title]`
+- `/open-pr [title]`
 - "open pr", "make a pull request", "submit for review"
 
 ## How it works
@@ -19,7 +19,7 @@ Create a pull request from the current branch, linking it to the open issue. Han
 ## Directory structure
 
 ```text
-create-pr/
+open-pr/
 ├── SKILL.md
 ├── README.md
 └── references/
@@ -29,5 +29,5 @@ create-pr/
 ## Installation
 
 ```bash
-npx skills add lipex360x/claude-skills-library --skill create-pr
+npx skills add lipex360x/claude-skills-library --skill open-pr
 ```

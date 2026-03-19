@@ -1371,7 +1371,7 @@
       "y": 786,
       "width": 240,
       "height": 70,
-      "text": "/create-pr\nScope transfer — moves incomplete\ntasks with bidirectional comments\n→ Board: In review",
+      "text": "/open-pr\nScope transfer — moves incomplete\ntasks with bidirectional comments\n→ Board: In review",
       "fontSize": 13,
       "fontFamily": 2,
       "textAlign": "left",
@@ -1394,7 +1394,7 @@
       "link": null,
       "locked": false,
       "containerId": "createpr",
-      "originalText": "/create-pr\nScope transfer — moves incomplete\ntasks with bidirectional comments\n→ Board: In review",
+      "originalText": "/open-pr\nScope transfer — moves incomplete\ntasks with bidirectional comments\n→ Board: In review",
       "lineHeight": 1.25
     },
     {
@@ -1525,7 +1525,7 @@
       "y": 926,
       "width": 240,
       "height": 70,
-      "text": "/merge-pr\nImplementation summary, merge,\nnotify unblocked, check milestone\n→ Board: Done",
+      "text": "/close-pr\nImplementation summary, merge,\nnotify unblocked, check milestone\n→ Board: Done",
       "fontSize": 13,
       "fontFamily": 2,
       "textAlign": "left",
@@ -1548,7 +1548,7 @@
       "link": null,
       "locked": false,
       "containerId": "mergepr",
-      "originalText": "/merge-pr\nImplementation summary, merge,\nnotify unblocked, check milestone\n→ Board: Done",
+      "originalText": "/close-pr\nImplementation summary, merge,\nnotify unblocked, check milestone\n→ Board: Done",
       "lineHeight": 1.25
     },
     {
@@ -2158,7 +2158,7 @@
       "y": 1296,
       "width": 92,
       "height": 48,
-      "text": "Ready\n/merge-pr\n(unblocks)",
+      "text": "Ready\n/close-pr\n(unblocks)",
       "fontSize": 10,
       "fontFamily": 3,
       "textAlign": "center",
@@ -2183,7 +2183,7 @@
       "link": null,
       "locked": false,
       "containerId": "b2",
-      "originalText": "Ready\n/merge-pr\n(unblocks)",
+      "originalText": "Ready\n/close-pr\n(unblocks)",
       "lineHeight": 1.25
     },
     {
@@ -2298,7 +2298,7 @@
       "y": 1300,
       "width": 92,
       "height": 40,
-      "text": "In review\n/create-pr",
+      "text": "In review\n/open-pr",
       "fontSize": 10,
       "fontFamily": 3,
       "textAlign": "center",
@@ -2323,7 +2323,7 @@
       "link": null,
       "locked": false,
       "containerId": "b4",
-      "originalText": "In review\n/create-pr",
+      "originalText": "In review\n/open-pr",
       "lineHeight": 1.25
     },
     {
@@ -2438,7 +2438,7 @@
       "y": 1300,
       "width": 80,
       "height": 40,
-      "text": "Done\n/merge-pr",
+      "text": "Done\n/close-pr",
       "fontSize": 10,
       "fontFamily": 3,
       "textAlign": "center",
@@ -2463,7 +2463,7 @@
       "link": null,
       "locked": false,
       "containerId": "b6",
-      "originalText": "Done\n/merge-pr",
+      "originalText": "Done\n/close-pr",
       "lineHeight": 1.25
     },
     {

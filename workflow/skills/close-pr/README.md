@@ -1,11 +1,11 @@
-# /merge-pr
+# /close-pr
 
 Merge the current branch's PR, write a detailed implementation summary on the issue, notify unblocked issues, and move the card to Done.
 
 ## Triggers
 
-- `/merge-pr`
-- "merge pr", "merge this", "land the pr"
+- `/close-pr`
+- "close pr", "merge pr", "merge this", "land the pr"
 
 ## How it works
 
@@ -20,7 +20,7 @@ Merge the current branch's PR, write a detailed implementation summary on the is
 ## Directory structure
 
 ```text
-merge-pr/
+close-pr/
 ├── SKILL.md
 ├── README.md
 └── references/
@@ -30,5 +30,5 @@ merge-pr/
 ## Installation
 
 ```bash
-npx skills add lipex360x/claude-skills-library --skill merge-pr
+npx skills add lipex360x/claude-skills-library --skill close-pr
 ```
