@@ -2,7 +2,7 @@
 name: approve-post
 description: Approve the current draft, generate English translation, and publish to local files and Google Drive. Use this skill when the user says "approve post", "publish post", "post approve", "ship the post", or wants to finalize and publish a draft — even if they don't explicitly say "approve."
 user-invocable: true
-disable-model-invocation: true
+disable-model-invocation: false
 allowed-tools: Bash, Read, Write, Edit, Glob
 ---
 

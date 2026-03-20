@@ -2,7 +2,7 @@
 name: list-backlog
 description: List open backlog issues with table summary and size sorting. Use this skill when the user says "list backlog", "show backlog", "backlog list", "what's in the backlog", or wants to see pending backlog items — even if they don't explicitly say "backlog."
 user-invocable: true
-disable-model-invocation: true
+disable-model-invocation: false
 allowed-tools: Bash
 ---
 

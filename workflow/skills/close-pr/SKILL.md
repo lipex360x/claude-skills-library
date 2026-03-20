@@ -2,7 +2,7 @@
 name: close-pr
 description: Merge the open pull request for the current branch, write a detailed implementation summary on the issue, and move the card to Done. Use this skill when the user says "close pr", "merge pr", "merge pull request", "merge this", "land the pr", or wants to finalize and merge the current branch's PR — even if they don't explicitly say "merge."
 user-invocable: true
-disable-model-invocation: true
+disable-model-invocation: false
 allowed-tools: Bash, Read
 ---
 

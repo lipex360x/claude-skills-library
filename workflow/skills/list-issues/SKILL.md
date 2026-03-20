@@ -2,7 +2,7 @@
 name: list-issues
 description: List all open issues grouped by milestone with priority sorting and next-issue suggestion. Use this skill when the user says "list issues", "show issues", "what issues are open", "issues list", or wants an overview of all open work — even if they don't explicitly say "issues."
 user-invocable: true
-disable-model-invocation: true
+disable-model-invocation: false
 allowed-tools: Bash
 ---
 
