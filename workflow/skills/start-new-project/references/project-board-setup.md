@@ -67,32 +67,36 @@ gh api graphql -f query='
 ' -f projectId="$PROJECT_ID"
 ```
 
-**Update the Status field with all 6 options:**
+**Update the Status field with all 7 options:**
+
+> **API gotcha:** The mutation uses `singleSelectOptions` (not `singleSelectField`), takes only `fieldId` (not `projectId`), and option objects do NOT accept an `id` field — the API replaces all options by name. Existing items retain their status if the option name matches.
 
 ```bash
 STATUS_FIELD_ID="<from previous query>"
 
 gh api graphql -f query='
-  mutation($projectId: ID!, $fieldId: ID!) {
+  mutation {
     updateProjectV2Field(input: {
-      projectId: $projectId
-      fieldId: $fieldId
-      singleSelectField: {
-        options: [
-          { name: "Backlog", description: "This item hasn'\''t been started", color: GREEN }
-          { name: "Ready", description: "This is ready to be picked up", color: YELLOW }
-          { name: "In progress", description: "This is actively being worked on", color: ORANGE }
-          { name: "In review", description: "This item is in review", color: PURPLE }
-          { name: "Ready to PR", description: "Review approved, ready to merge", color: BLUE }
-          { name: "Done", description: "This has been completed", color: GRAY }
-          { name: "Cancelled", description: "Closed without implementation", color: RED }
-        ]
-      }
+      fieldId: "'"$STATUS_FIELD_ID"'"
+      singleSelectOptions: [
+        { name: "Backlog", description: "This item hasn'\''t been started", color: GREEN }
+        { name: "Ready", description: "This is ready to be picked up", color: YELLOW }
+        { name: "In progress", description: "This is actively being worked on", color: ORANGE }
+        { name: "In review", description: "This item is in review", color: PURPLE }
+        { name: "Ready to PR", description: "Review approved, ready to merge", color: BLUE }
+        { name: "Done", description: "This has been completed", color: GRAY }
+        { name: "Cancelled", description: "Closed without implementation", color: RED }
+      ]
     }) {
-      projectV2Field { ... on ProjectV2SingleSelectField { id } }
+      projectV2Field {
+        ... on ProjectV2SingleSelectField {
+          id
+          options { id name color }
+        }
+      }
     }
   }
-' -f projectId="$PROJECT_ID" -f fieldId="$STATUS_FIELD_ID"
+'
 ```
 
 ### 3. Create Priority field
