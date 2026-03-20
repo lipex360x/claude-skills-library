@@ -1,12 +1,16 @@
 ---
 name: create-skill
-description: Guide the user through creating, reviewing, or improving Claude Code skills — from structuring SKILL.md files to writing effective descriptions, designing progressive disclosure, and launching subagents. Use this skill whenever the user mentions "create a skill", "improve a skill", "skill quality", "skill best practices", "how to write a skill", or wants to build a new /command — even if they don't explicitly say "skill."
+description: Guide the user through creating, reviewing, or improving Claude Code skills — from structuring SKILL.md files to writing effective descriptions, designing progressive disclosure, and launching subagents. Use this skill whenever the user mentions "create a skill", "improve a skill", "update a skill", "skill quality", "skill best practices", "how to write a skill", or wants to build or update a /command — even if they don't explicitly say "skill."
 user-invocable: true
 ---
 
 # Create Skill
 
 Step-by-step guide for building high-quality Claude Code skills. Distilled from Anthropic's official skill repository and hands-on experience shipping production skills.
+
+## Create or update
+
+This skill handles both **new skills** and **updates to existing skills**. When the user references existing skills, read them first and apply changes following the same quality standards. Decide whether to edit in place or recreate based on the scope of changes. The user often mixes multiple requests (new + edits) in a single prompt — handle all of them.
 
 ## Process
 
@@ -83,22 +87,14 @@ bash ~/.brain/scripts/setup.sh
 
 Without this step, the skill won't appear in `/` autocomplete in new sessions.
 
-### 9. Generate README.md
+### 9. Update READMEs
 
-After the skill passes review, generate a `README.md` in the skill's root directory. This is the public-facing documentation — it tells users what the skill does and how to install it.
+After the skill passes review, update two READMEs using the `/create-readme` skill:
 
-1. Read `templates/skill-readme.md` for the README format.
-2. Fill in every placeholder using data from the skill:
-   - `{skill-name}` — from the frontmatter `name` field
-   - `{One-line description}` — a concise summary derived from the frontmatter `description` (not the full description — distill it to one sentence)
-   - **Trigger phrases** — extract from the description: the `/command` invocation plus 2-3 natural language phrases that would activate the skill
-   - **How it works** — summarize the major phases from the SKILL.md process steps
-   - **Usage** — show the `/skill-name` invocation with any arguments, plus a brief example scenario
-   - **Directory structure** — reflect the actual directories and files created for this skill (not the template's generic structure)
-   - **Installation** — use the format `npx skills add <repo-url> --skill <skill-name>`
-3. Write the README.md to the skill's root directory.
+1. **Skill README** — Run `/create-readme` targeting the skill's own directory. This creates or updates the skill's `README.md` with what it does, how to trigger it, and how to install it.
+2. **skills-library README** — Run `/create-readme` targeting the `skills-library/` root directory. This keeps the master catalog of all skills up to date with any new or changed skills.
 
-Keep the README concise — it's a quick reference, not a duplicate of SKILL.md.
+Both READMEs must be updated on every create or update — never skip this step.
 
 ## Frontmatter reference
 

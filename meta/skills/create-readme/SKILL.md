@@ -45,6 +45,7 @@ Analyze the existing README against the formatting standards and reference patte
 
 Apply these in both modes:
 
+- **Language: English by default.** Always write READMEs in English unless the user explicitly requests another language. READMEs are public-facing documentation — English maximizes reach. If the user says "em português", "en español", or similar, follow their request.
 - **GFM** (GitHub Flavored Markdown) for all formatting.
 - **GitHub admonitions** (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`) where they add clarity — not decoration.
 - **No emoji overuse.** One or two in the title is fine. Emoji-heavy section headers are not.
