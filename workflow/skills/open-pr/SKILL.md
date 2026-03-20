@@ -53,11 +53,13 @@ Parse all checkboxes in the linked issue body (`- [ ]` unchecked, `- [x]` checke
    - **"Move to #N (<title>)"** — suggest the most relevant open issue based on topic overlap (compare the unchecked item's content against open issue titles and bodies)
    - **"Create new backlog issue"** — if no existing issue fits
    - **"Mark as done (already completed)"** — if the work was actually done but the checkbox wasn't ticked
-   - **"Skip — not needed for this PR"** — drop it without moving
+   - **"Skip with justification"** — drop it from the PR scope with a recorded reason
 
-4. **Execute the transfers.** For each item moved to another issue:
+4. **Execute the decisions.** Handle each based on the user's choice:
 
-   **On the source issue (current):**
+   **If "Move to #N":**
+
+   On the source issue (current):
    - Mark the checkbox as checked (`- [ ]` → `- [x]`)
    - Add a comment explaining the transfer:
      ```markdown
@@ -70,7 +72,7 @@ Parse all checkboxes in the linked issue body (`- [ ]` unchecked, `- [x]` checke
      Marking as complete here — resolution tracked in #<target>.
      ```
 
-   **On the target issue:**
+   On the target issue:
    - Add the unchecked item as a new checkbox in the appropriate Step (or create a new Step if none fits)
    - Add a comment connecting the two issues:
      ```markdown
@@ -87,7 +89,25 @@ Parse all checkboxes in the linked issue body (`- [ ]` unchecked, `- [x]` checke
    - Create a new issue with the unchecked items, assign to "Backlog" milestone
    - Add the scope transfer comment on the source issue pointing to the new issue
 
-5. After all transfers, update the source issue body with `gh issue edit`.
+   **If "Skip with justification":**
+   - Ask the user for the reason (or draft one based on conversation context)
+   - Mark the checkbox as checked (`- [ ]` → `- [x]`)
+   - Add a comment on the source issue:
+     ```markdown
+     ## Scope skip
+
+     The following item was skipped during PR readiness check for branch `<branch-name>`:
+
+     - <checkbox text>
+
+     **Reason:** <justification — e.g., "Behavior is already covered by query-level tests in tests/db/queries.test.ts. A dedicated component test would only mock the same function call, adding no meaningful coverage.">
+     ```
+
+   **If "Mark as done":**
+   - Mark the checkbox as checked (`- [ ]` → `- [x]`)
+   - No comment needed — the work was done, the checkbox was just missed
+
+5. After all decisions, update the source issue body with `gh issue edit`.
 
 ### 4b. Check test markers
 
@@ -122,7 +142,9 @@ Report:
 
 - **Scope transfers preserve traceability.** The bidirectional comments (source → target and target → source) ensure anyone reading either issue understands the full history. Never move a task silently — always leave a paper trail.
 
-- **Don't force transfers.** The user decides what happens to each unchecked item. Present suggestions with context, but respect their choice. "Skip" is always a valid option.
+- **Don't force transfers.** The user decides what happens to each unchecked item. Present suggestions with context, but respect their choice. "Skip with justification" is always a valid option.
+
+- **Every skip leaves a trace.** The "Skip with justification" option exists specifically to prevent silent drops. When an item is skipped, the comment on the issue ensures future readers (including future sessions) understand the rationale. Draft the justification from conversation context when possible — don't make the user write it from scratch.
 
 - **Technical context in transfer comments.** Don't just say "moved to #10" — explain WHY the item belongs there. This helps future readers understand the decision (e.g., "The fix requires migrating the repository to SQL, which is exactly Step 1 of this issue").
 

@@ -12,6 +12,8 @@ Step-by-step guide for building high-quality Claude Code skills. Distilled from 
 
 This skill handles both **new skills** and **updates to existing skills**. When the user references existing skills, read them first and apply changes following the same quality standards. Decide whether to edit in place or recreate based on the scope of changes. The user often mixes multiple requests (new + edits) in a single prompt — handle all of them.
 
+**Updates follow the same process as creation.** Even for small changes, every step applies — description check (Step 3), quality techniques (Step 5), review checklist (Step 7), READMEs (Step 9), STRUCTURE.md (Step 10), and push (Step 11). The temptation is to skip steps for "just a small edit" — this is how skills drift from quality standards. Steps that are genuinely not applicable (e.g., subagents for a skill without them) can be marked N/A in the review, but they must still be evaluated, not silently skipped.
+
 ## Process
 
 ### 1. Understand the intent

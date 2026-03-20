@@ -12,7 +12,7 @@ Create a pull request from the current branch, linking it to the open issue. Han
 1. **Validate branch** — ensures you're not on `main`, pushes unpushed commits
 2. **Link to issue** — extracts issue number from branch name (e.g., `42-add-feature` → #42)
 3. **Build PR content** — derives title from arguments, issue, or commits; builds body with summary, test plan, and `Closes #N`
-4. **Readiness check** — verifies all issue checkboxes are complete. If unchecked items exist, offers to transfer them to other issues with bidirectional scope transfer comments. Scans for `.fixme`, `.skip`, `.todo`, and `only` markers in test files
+4. **Readiness check** — verifies all issue checkboxes are complete. If unchecked items exist, offers four options per item: move to another issue (with bidirectional scope transfer comments), create a new backlog issue, mark as done, or skip with justification (leaves a "Scope skip" comment on the issue with the reason). Scans for `.fixme`, `.skip`, `.todo`, and `only` markers in test files
 5. **Move card** — moves the issue card to "In review" on the project board
 6. **Create and report** — creates the PR with `gh pr create` and reports the URL
 
