@@ -17,10 +17,16 @@ Handles the full installation flow for skills — from running the npx command t
 
 1. **Ask scope** — If not specified, asks whether to install locally (project) or globally (skills-library/)
 2. **Local install** — Runs the npx command with `--copy -a claude-code -y` flags. Skill lands in `.claude/skills/`
-3. **Global install** — Runs npx, identifies the installed skill, determines the target plugin group, moves it to `skills-library/<group>/skills/`, creates a symlink in `~/.claude/skills/`, cleans up npx leftovers, and updates `STRUCTURE.md`
+3. **Global install:**
+   - **Sync** — Pulls latest `skills-library/` from remote before installing
+   - **Duplicate check** — Warns if the skill already exists and asks whether to reinstall or cancel
+   - **Install** — Runs npx, identifies the skill, determines the target plugin group, moves it to `skills-library/<group>/skills/`, creates a symlink, cleans up leftovers, and updates `STRUCTURE.md`
 
 > [!NOTE]
 > For global installs, the skill automatically determines the correct plugin group (workflow, content, design, database, deploy, meta, tasks) based on the skill's description. If ambiguous, it asks.
+
+> [!IMPORTANT]
+> The duplicate check prevents accidental reinstalls. If a skill with the same name already exists, you'll be prompted to confirm before overwriting.
 
 ## Directory structure
 

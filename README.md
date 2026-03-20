@@ -133,7 +133,7 @@ Skills are organized into **8 plugin groups** by domain. Invoke any skill direct
 | [create-readme](./meta/skills/create-readme/) | Create or review a README.md for the project. |
 | [create-skill](./meta/skills/create-skill/) | Guide for creating, reviewing, and improving Claude Code skills. |
 | [find-skills](./meta/skills/find-skills/) | Discover and install agent skills from the open ecosystem. |
-| [install-skill](./meta/skills/install-skill/) | Install a skill from an npx skills link, with local or global selection. |
+| [install-skill](./meta/skills/install-skill/) | Install a skill from an npx skills link — syncs skills-library, checks for duplicates, and supports local or global selection. |
 | [uninstall-skill](./meta/skills/uninstall-skill/) | Uninstall a skill by name, local or global. |
 
 [Back to top](#claude-skills-library)

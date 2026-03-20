@@ -18,15 +18,39 @@ Run the npx command as-is with `--copy -a claude-code -y` flags appended (if not
 
 ## 3. Global install
 
-### 3.1 Run npx
+### 3.1 Sync skills-library
+
+Pull latest changes from the remote to ensure the local skills-library is up to date before installing anything:
+
+```bash
+cd ~/www/claude/skills-library && git pull
+```
+
+If the pull fails (e.g. uncommitted changes, merge conflicts), warn the user and ask whether to proceed anyway or resolve first.
+
+### 3.2 Check for duplicates
+
+Extract the skill name from the npx command (typically the last argument, e.g. `npx skills add @user/skill-name` → `skill-name`). Then check if it already exists:
+
+```bash
+ls -d ~/www/claude/skills-library/*/skills/*/ 2>/dev/null | grep -i "<skill-name>"
+ls -d ~/.claude/skills/*/ 2>/dev/null | grep -i "<skill-name>"
+```
+
+If the skill already exists, use `AskUserQuestion` with selectable options:
+- `["Reinstall (overwrite existing)", "Cancel installation"]`
+
+Explain which group the existing skill is in. Only proceed if the user explicitly chooses to reinstall. If they cancel, stop immediately.
+
+### 3.3 Run npx
 
 Run the npx command with `--copy -a claude-code -y` flags. By default npx installs into the project's `.claude/skills/`.
 
-### 3.2 Identify the installed skill
+### 3.4 Identify the installed skill
 
 Find the new skill directory in the project's `.claude/skills/`. Read its `SKILL.md` frontmatter to get the skill name and description.
 
-### 3.3 Determine the target plugin group
+### 3.5 Determine the target plugin group
 
 The skills-library uses plugin groups to organize skills. Current groups and their purposes:
 
@@ -56,11 +80,11 @@ If a new group is needed:
      skills/
    ```
 
-### 3.4 Move the skill
+### 3.6 Move the skill
 
 Move the skill directory from the project's `.claude/skills/<skill-name>/` to `~/www/claude/skills-library/<group>/skills/<skill-name>/`.
 
-### 3.5 Register the skill
+### 3.7 Register the skill
 
 Run `setup.sh` to create the symlink in `~/.claude/skills/` and register the new skill for discovery:
 
@@ -70,7 +94,7 @@ bash ~/.brain/scripts/setup.sh
 
 This is idempotent — it scans all plugins, creates missing symlinks, and cleans stale ones. Without this step, the skill won't appear in `/` autocomplete in new sessions.
 
-### 3.6 Clean up npx leftovers
+### 3.8 Clean up npx leftovers
 
 Remove artifacts left by npx in the project's working directory:
 - Empty `.claude/skills/` directory
@@ -79,7 +103,7 @@ Remove artifacts left by npx in the project's working directory:
 
 Only remove these if they were created by the install — check they are empty or npx-generated before deleting.
 
-### 3.7 Update STRUCTURE.md
+### 3.9 Update STRUCTURE.md
 
 Read `~/www/claude/.brain/STRUCTURE.md`. Find the section for the target plugin group. Add a new entry following the existing format:
 
@@ -96,7 +120,7 @@ Insert alphabetically within the group. If a new group was created, add a new se
 
 Insert the new group section alphabetically among existing groups.
 
-### 3.8 Report
+### 3.10 Report
 
 Report to the user:
 - Skill name and description
