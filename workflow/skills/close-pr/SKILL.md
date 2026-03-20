@@ -132,7 +132,29 @@ Move the issue card to **"Done"** on the project board:
 
 ## 8. Notify unblocked issues
 
-Scan the **closed issue's body** for `> **Blocks** #N` annotations. For each referenced issue that is still open:
+Detect all issues that were blocked by the closed issue, using two complementary scans:
+
+### 8a. Forward scan — closed issue declares what it blocks
+
+Scan the **closed issue's body** for `> **Blocks** #N` annotations. Collect all referenced issue numbers.
+
+### 8b. Reverse scan — other issues declare dependency on this one
+
+Fetch all open issues and scan their bodies for patterns referencing the closed issue number:
+- `Depends on #N`
+- `Blocked by #N`
+- `After #N`
+- `Related issues: #N` (where N is the closed issue number)
+
+```bash
+gh issue list --state open --json number,title,body --limit 100
+```
+
+Filter issues whose body contains a dependency pattern matching the closed issue number. Collect these issue numbers.
+
+### 8c. Process unblocked issues
+
+Merge results from 8a and 8b (deduplicate). For each referenced issue that is still open:
 
 1. **Add a comment** on the unblocked issue:
    ```markdown
@@ -141,9 +163,18 @@ Scan the **closed issue's body** for `> **Blocks** #N` annotations. For each ref
    #<source> (<source title>) has been merged. This issue is now unblocked.
    ```
 
-2. **Move the card to "Ready"** on the project board — signaling that the issue is now actionable. Use the same project board operations (get item ID, get "Ready" option ID, update with `gh project item-edit`).
+2. **Clean the dependency reference** from the unblocked issue's body — remove or strike through the line referencing the closed issue (e.g., `Depends on #N` → `~Depends on #N~` or remove entirely). This prevents `/list-issues` and `/list-backlog` from still showing the issue as blocked.
 
-If no `Blocks` annotations exist, skip this step.
+   ```bash
+   # Fetch current body, update it, then edit
+   gh issue view <unblocked-number> --json body -q '.body'
+   # Remove/strikethrough the dependency line referencing the closed issue
+   gh issue edit <unblocked-number> --body "<updated body>"
+   ```
+
+3. **Move the card to "Ready"** on the project board — signaling that the issue is now actionable. Use the same project board operations (get item ID, get "Ready" option ID, update with `gh project item-edit`).
+
+If no blocked issues are found in either scan, skip this step.
 
 ## 9. Check milestone completion
 
