@@ -24,7 +24,7 @@ Store the result as `REPO_URL` for building issue links.
 
 ## 2. Fetch issues
 
-Run: `gh issue list --milestone "Backlog" --state open --json number,title,labels --jq '.[] | {number, title, labels: [.labels[].name]}'`
+Run: `gh issue list --milestone "Backlog" --state open --json number,title,labels,body --limit 100`
 
 If the milestone doesn't exist or has no issues, say so and stop.
 
@@ -33,8 +33,14 @@ If the milestone doesn't exist or has no issues, say so and stop.
 Parse each issue and extract:
 - **number** — issue number
 - **title** — issue title
-- **labels** — all labels except size labels
-- **size** — extracted from `size:*` label (XS, S, M, L, XL). If no size label, treat as `—`
+- **labels** — all labels except size and priority labels
+- **size** — extracted from `size:*` label (XS, S, M, L, XL). If none, treat as `—`
+- **priority** — extracted from `priority:*` or `P0`–`P3` labels. If none, treat as `—`
+- **status** — determined by dependency detection (see below)
+
+### Dependency detection
+
+Scan the body for patterns like "Depends on #N", "After #N", "Blocked by #N", or "Related issues: #N". Check if referenced issues are still open (use `gh issue view #N --json state -q '.state'` or cross-reference with the fetched list). If any dependency is open, set status to `**Blocked** by #N, #M` (listing all open blockers). Otherwise leave status empty.
 
 **Sorting:**
 - If user passed `asc`: sort by size ascending using order: XS < S < M < L < XL (issues without size go last)
@@ -48,15 +54,14 @@ Use this exact format:
 ```
 Backlog (N issues):
 
-| Issue | Title | Labels | Size |
-|-------|-------|--------|------|
-| [#28](REPO_URL/issues/28) | Title here | feature | M |
-| [#27](REPO_URL/issues/27) | Title here | enhancement | XS |
+| # | Title | Size | Priority | Status |
+|---|-------|------|----------|--------|
+| [#28](REPO_URL/issues/28) | Title here | M | P2 | |
+| [#31](REPO_URL/issues/31) | Title here | — | — | **Blocked** by #30 |
 ...
 ```
 
-- The `Issue` column must be a markdown link: `[#<number>](REPO_URL/issues/<number>)`
-- The `Labels` column shows all labels EXCEPT the `size:*` label, comma-separated
-- The `Size` column shows only the size letter (XS, S, M, L, XL) or `—` if none
+- The `#` column must be a markdown link: `[#<number>](REPO_URL/issues/<number>)`
+- Status is empty when free, or `**Blocked** by #N, #M` listing open blockers
 
 After the table, add: `Use /start-issue <issue-number> to start working on one.`
