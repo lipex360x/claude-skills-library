@@ -96,6 +96,24 @@ After the skill passes review, update two READMEs using the `/create-readme` ski
 
 Both READMEs must be updated on every create or update — never skip this step.
 
+### 10. Update STRUCTURE.md files
+
+Check if the changes require updates to structure files — this applies when skills were created, moved, renamed, or deleted:
+
+1. **`skills-library/STRUCTURE.md`** — Read it and check if the skill is listed. If not (new skill) or if its location changed, update the entry. If a skill was removed, delete the entry.
+2. **`.brain/STRUCTURE.md`** — Only update if the change affects `.brain/` structure (rare for skill-only changes, but check).
+
+Skip this step if the changes are purely content edits to existing skills (no structural changes).
+
+### 11. Push to GitHub
+
+After all updates are complete (skill, READMEs, STRUCTURE.md), push both repos automatically using `/push -y`:
+
+1. **`skills-library/`** — Stage all files touched in this session, commit with a conventional message, and push.
+2. **`.brain/`** — If any `.brain/` files were modified (STRUCTURE.md, CLAUDE.md, etc.), stage, commit, and push. If `.brain/` has no changes, skip.
+
+This is the final step — the skill creation/update is not done until changes are pushed to GitHub.
+
 ## Frontmatter reference
 
 ```yaml
