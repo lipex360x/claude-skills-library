@@ -149,7 +149,7 @@ Always create a GitHub Project board for every new project — even with a singl
 **Board setup:**
 
 1. **Create the project** — `gh project create --title "<project name>" --owner "@me"`
-2. **Configure Status field** — replace the default 3 columns (Todo/In Progress/Done) with 6: **Backlog**, **Ready**, **In progress**, **In review**, **Ready to PR**, **Done**. Use the GraphQL mutation in the reference to update the Status field options with descriptions and colors.
+2. **Configure Status field** — replace the default 3 columns (Todo/In Progress/Done) with 7: **Backlog**, **Ready**, **In progress**, **In review**, **Ready to PR**, **Done**, **Cancelled**. Use the GraphQL mutation in the reference to update the Status field options with descriptions and colors. The Cancelled column is for issues closed without implementation (won't fix, duplicate, out of scope) — it keeps them separate from Done so throughput metrics aren't polluted.
 3. **Create Priority field** — single-select with options: `P0` (Critical), `P1` (High), `P2` (Medium)
 4. **Create Size field** — single-select with options: `XS`, `S`, `M`, `L`, `XL`
 5. **Add issues to the project** — `gh project item-add` for each issue
@@ -187,7 +187,7 @@ The slug comes from step 1. If the issue number is known, optionally prefix: `fe
 Present:
 - Issue URL(s) (linked)
 - Milestone (if created) with link
-- Project board with link (6 columns, priority and size fields configured)
+- Project board with link (7 columns, priority and size fields configured)
 - Branch name
 - Total steps and checkboxes count
 - Priority and size assigned to each issue

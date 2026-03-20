@@ -4,7 +4,7 @@ Complete reference for setting up a GitHub Projects V2 board with custom columns
 
 ## Board Structure
 
-### Status Columns (6)
+### Status Columns (7)
 
 | Column | Description |
 |--------|-------------|
@@ -14,6 +14,7 @@ Complete reference for setting up a GitHub Projects V2 board with custom columns
 | In review | This item is in review |
 | Ready to PR | Review approved, ready to merge |
 | Done | This has been completed |
+| Cancelled | Closed without implementation (won't fix, duplicate, out of scope) |
 
 ### Custom Fields
 
@@ -41,7 +42,7 @@ Save the project number from the output.
 
 ### 2. Configure Status field
 
-The default Status field has "Todo", "In Progress", "Done". Replace with the 6 custom columns.
+The default Status field has "Todo", "In Progress", "Done". Replace with the 7 custom columns.
 
 **Get the project ID and Status field ID:**
 
@@ -84,6 +85,7 @@ gh api graphql -f query='
           { name: "In review", description: "This item is in review", color: PURPLE }
           { name: "Ready to PR", description: "Review approved, ready to merge", color: BLUE }
           { name: "Done", description: "This has been completed", color: GRAY }
+          { name: "Cancelled", description: "Closed without implementation", color: RED }
         ]
       }
     }) {

@@ -20,7 +20,7 @@ Turn a project idea into a well-structured GitHub issue with phased checkboxes, 
 3. **Propose the phase structure** — decomposes into Phases and Steps with TDD-ordered checkboxes, file paths, and verification. Splits into multiple issues if 8+ steps (second approval gate)
 4. **Repo scaffolding** — creates priority labels (P0-P3), project milestone, and a permanent Backlog milestone
 5. **Create GitHub issues** — creates approved issues with labels and milestone assignment
-6. **Project board** — for 3+ issues, offers to create a GitHub Projects board
+6. **Project board** — creates a GitHub Projects board with 7 status columns (Backlog → Ready → In progress → In review → Ready to PR → Done → Cancelled), Priority, and Size fields
 7. **Create feature branch** — `feature/<slug>` from main
 8. **Summary** — presents issue URLs, milestone, branch name, and step/checkbox counts
 
