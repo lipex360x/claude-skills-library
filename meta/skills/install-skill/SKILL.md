@@ -105,25 +105,40 @@ Only remove these if they were created by the install — check they are empty o
 
 ### 3.9 Update STRUCTURE.md
 
-Read `~/www/claude/.brain/STRUCTURE.md`. Find the section for the target plugin group. Add a new entry following the existing format:
+Read `~/www/claude/skills-library/STRUCTURE.md`. Find the section for the target plugin group. Add a new entry following the existing format:
 
 ```
 - `<skill-name>` — <short description from frontmatter>
 ```
 
-Insert alphabetically within the group. If a new group was created, add a new section following the pattern:
+Insert alphabetically within the group. If a new group was created, add a new section following the pattern of existing groups in the table.
 
+### 3.10 Update READMEs
+
+Update two READMEs using the `/create-readme` skill:
+
+1. **Skill README** — Run `/create-readme` targeting the skill's own directory (`~/www/claude/skills-library/<group>/skills/<skill-name>/`). Creates or updates the skill's README with what it does, how to trigger it, and how to install it.
+2. **skills-library README** — Run `/create-readme` targeting `~/www/claude/skills-library/`. Keeps the master catalog of all skills up to date.
+
+Both READMEs must be updated — never skip this step.
+
+### 3.11 Push to GitHub
+
+Push the skills-library repo using `/push -y`:
+
+```bash
+cd ~/www/claude/skills-library
 ```
-**<group-name>** — <group description>
-- `<skill-name>` — <short description>
-```
 
-Insert the new group section alphabetically among existing groups.
+Stage all files touched in this session (skill files, STRUCTURE.md, READMEs), commit with a conventional message, and push.
 
-### 3.10 Report
+The installation is not complete until changes are pushed to GitHub.
+
+### 3.12 Report
 
 Report to the user:
 - Skill name and description
 - Which group it was added to
 - Symlink created at `~/.claude/skills/<skill-name>`
-- STRUCTURE.md updated
+- STRUCTURE.md, READMEs updated
+- Pushed to GitHub
