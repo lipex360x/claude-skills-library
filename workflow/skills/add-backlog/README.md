@@ -1,6 +1,6 @@
 # /add-backlog
 
-Create a GitHub issue in the project's Backlog milestone and add it to the project board with Size.
+Create a GitHub issue in the project's Backlog milestone, detect blocker impact on existing issues, and add it to the project board with Size.
 
 ## Triggers
 
@@ -12,8 +12,10 @@ Create a GitHub issue in the project's Backlog milestone and add it to the proje
 1. **Analyze scope** — detects multiple independent concerns and proposes splitting into separate issues
 2. **Structure the issue** — builds a body with What, Why, and Acceptance criteria (2-4 checkboxes)
 3. **Labels and Size** — asks which labels to apply and the estimated Size (XS/S/M/L/XL)
-4. **Create** — creates the issue with `gh issue create` under the Backlog milestone
-5. **Add to board** — adds the issue to the project board with status "Backlog" and the chosen Size
+4. **Detect blocker impact** — fetches open backlog issues and analyzes if the new issue would block any of them (route changes, schema changes, component restructuring). Presents potential blockers for user approval before creating
+5. **Create** — creates the issue with `gh issue create` under the Backlog milestone
+6. **Update blocked issues** — for each approved blocker, adds `Depends on #N` to the blocked issue's body and posts a comment. Uses the same dependency format detected by `/list-backlog`, `/list-issues`, and `/close-pr`
+7. **Add to board** — adds the issue to the project board with status "Backlog" and the chosen Size
 
 ## Directory structure
 

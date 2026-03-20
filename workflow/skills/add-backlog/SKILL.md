@@ -29,11 +29,73 @@ Use `AskUserQuestion` to ask which labels to apply (fetch available labels with 
 
 Ask for **Size** using `AskUserQuestion` with options `["XS (< 1h)", "S (1-2h)", "M (half day)", "L (full day)", "XL (multi-day)"]`. Size helps with prioritization when picking from the backlog later.
 
-## 4. Create
+## 4. Detect blocker impact
+
+Before creating the issue, check if it could block existing open issues. This prevents silent dependency gaps that only surface when someone starts working on a blocked issue.
+
+### 4a. Fetch open issues
+
+```bash
+gh issue list --milestone "Backlog" --state open --json number,title,body --limit 100
+```
+
+### 4b. Analyze overlap
+
+Compare the **new issue's scope** (routes, schema, components, UI areas) against each open issue. An existing issue is potentially blocked when the new issue would change something the existing issue depends on — examples:
+
+- New issue adds a route layer (`/[course]/[subject]`) → existing issues referencing the old route structure are blocked
+- New issue changes DB schema (new table, FK changes) → existing issues that query affected tables are blocked
+- New issue restructures a component hierarchy → existing issues that modify those components are blocked
+
+Only flag **direct, clear dependencies** — not loose topical overlap. "Both touch CSS" is not a blocker; "new issue changes the route structure that the other issue's breadcrumbs depend on" is.
+
+### 4c. Present blockers for approval
+
+If potential blockers are found, present them to the user via `AskUserQuestion` with `multiSelect: true`:
+
+```
+question: "This issue may block the following existing issues. Select which ones to mark as blocked:"
+options:
+  - label: "#27 — Add breadcrumb back-navigation"
+    description: "Route structure changes affect breadcrumb paths"
+  - label: "#28 — Favorite lessons with localStorage"
+    description: "Route changes affect lesson URL keys in localStorage"
+  - label: "None — no blockers"
+    description: "Skip blocker detection"
+```
+
+If the user selects "None" or no blockers are found, proceed to Step 5 without modifications.
+
+### 4d. Store approved blockers
+
+Keep the list of approved blocked issue numbers — they will be updated in Step 6 after the new issue is created (because we need the new issue number for the `Depends on #N` reference).
+
+## 5. Create
 
 Create with: `gh issue create --title "<title>" --body "<body>" --milestone "Backlog"`
 
-## 5. Add to project board
+## 6. Update blocked issues
+
+For each issue approved as blocked in Step 4c:
+
+1. **Add dependency annotation** to the blocked issue's body. Fetch the current body, prepend `> Depends on #N` (where N is the newly created issue number) below any existing dependency lines, and update:
+
+   ```bash
+   gh issue view <blocked-number> --json body -q '.body'
+   gh issue edit <blocked-number> --body "<updated body with dependency>"
+   ```
+
+2. **Add a comment** on the blocked issue explaining the new dependency:
+
+   ```markdown
+   ## New dependency
+
+   #<new-number> (<new title>) was created and introduces changes that this issue depends on. Marking as blocked until #<new-number> is resolved.
+   ```
+
+This follows the same dependency format used by `/close-pr` (Step 8) for unblocking — `Depends on #N` is the canonical pattern detected by `/list-backlog`, `/list-issues`, and `/close-pr`.
+
+## 7. Add to project board
 
 Check if a project board exists for the repo:
 
@@ -51,9 +113,10 @@ Read `references/project-board-operations.md` for the full command reference.
 
 **If no board exists**, skip this step — the issue is still tracked via the Backlog milestone.
 
-## 6. Report
+## 8. Report
 
 Present:
 - Issue URL
 - Size assigned
 - Board status (added to board, or milestone-only)
+- Blocked issues updated (list issue numbers, or "none")
