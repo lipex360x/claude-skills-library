@@ -37,18 +37,33 @@ def gws_call(args, params=None, body=None):
 
     # Parse JSON directly — no tail stripping (wrapper outputs clean JSON)
     try:
-        return json.loads(output)
+        data = json.loads(output)
     except json.JSONDecodeError:
         # Fallback: skip first line if bare gws added a status line
         lines = output.split("\n", 1)
         if len(lines) > 1:
             try:
-                return json.loads(lines[1])
+                data = json.loads(lines[1])
             except json.JSONDecodeError:
                 pass
+            else:
+                # Check for API error in fallback-parsed JSON
+                if "error" in data:
+                    err = data["error"]
+                    print(f"API error ({err.get('code', '?')}): {err.get('message', 'unknown')}", file=sys.stderr)
+                    sys.exit(1)
+                return data
         print(f"Error: invalid JSON from GWS CLI", file=sys.stderr)
         print(f"stdout (first 500 chars): {output[:500]}", file=sys.stderr)
         sys.exit(1)
+
+    # Check for API error responses (e.g. network failures, auth errors)
+    if "error" in data:
+        err = data["error"]
+        print(f"API error ({err.get('code', '?')}): {err.get('message', 'unknown')}", file=sys.stderr)
+        sys.exit(1)
+
+    return data
 
 
 def extract_header(headers, name):
@@ -77,7 +92,7 @@ except SystemExit:
 # --- List inbox messages ---
 print(f"Fetching inbox (max {MAX_RESULTS})...", file=sys.stderr)
 data = gws_call(
-    ["gmail", "users messages", "list"],
+    ["gmail", "users", "messages", "list"],
     params={"userId": "me", "q": "in:inbox", "maxResults": MAX_RESULTS},
 )
 messages = data.get("messages", [])
@@ -94,7 +109,7 @@ if not messages:
 results = []
 for i, msg in enumerate(messages):
     detail = gws_call(
-        ["gmail", "users messages", "get"],
+        ["gmail", "users", "messages", "get"],
         params={"userId": "me", "id": msg["id"], "format": "full"},
     )
     headers = detail.get("payload", {}).get("headers", [])

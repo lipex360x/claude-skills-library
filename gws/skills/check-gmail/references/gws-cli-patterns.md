@@ -74,7 +74,7 @@ gws-claude.sh gmail users settings filters create \
   }'
 ```
 
-For Marketing (archive + mark read, no custom label):
+For Marketing (archive only, no custom label):
 
 ```bash
 gws-claude.sh gmail users settings filters create \
@@ -82,11 +82,12 @@ gws-claude.sh gmail users settings filters create \
   --json '{
     "criteria": {"from": "..."},
     "action": {
-      "removeLabelIds": ["INBOX"],
-      "markRead": true
+      "removeLabelIds": ["INBOX"]
     }
   }'
 ```
+
+> **Note:** `markRead` is NOT a valid filter action property. The Gmail API only accepts `addLabelIds`, `forward`, and `removeLabelIds` in `action`. To mark as read, use `messages modify` after the fact.
 
 ### Delete filter
 
