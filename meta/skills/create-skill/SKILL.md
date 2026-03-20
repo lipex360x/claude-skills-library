@@ -25,6 +25,33 @@ Ask the user:
 
 Use `AskUserQuestion` with concrete options when clarifying ambiguous decisions — it's faster than freeform conversation and keeps the flow moving.
 
+#### 1.1 Classify scope (mandatory vs optional)
+
+When the user's request contains **multiple actions** (e.g., "rename X, add Y, update Z"), break it into discrete steps and classify each one. This prevents silently skipping steps the user considers mandatory.
+
+**Process:**
+
+1. Parse the request into a numbered list of discrete actions
+2. For each action, suggest whether it seems **mandatory** or **optional** based on the request wording — direct instructions ("rename", "add", "change") are likely mandatory; vague mentions ("maybe also", "if possible", "could also") are likely optional
+3. Present via `AskUserQuestion` with `multiSelect: true` so the user selects which are mandatory. Pre-label suggestions in the option descriptions:
+
+```
+question: "Which of these steps are mandatory? (unselected = optional, can be skipped if not applicable)"
+options:
+  - label: "1. Rename skill to create-excalidraw"
+    description: "Suggested: Mandatory — direct instruction"
+  - label: "2. Add design aesthetics reference"
+    description: "Suggested: Mandatory — direct instruction"
+  - label: "3. Trim SKILL.md to under 500 lines"
+    description: "Suggested: Optional — quality improvement, not explicitly requested"
+```
+
+4. After the user responds, mark each step internally:
+   - **Mandatory** steps: execute unconditionally, never skip or simplify
+   - **Optional** steps: execute if applicable, can be deprioritized if they conflict with mandatory steps
+
+**When to skip this gate:** If the request is a single, unambiguous action (e.g., "create a skill that does X"), there's nothing to classify — proceed directly to step 2.
+
 ### 2. Design the structure
 
 ```

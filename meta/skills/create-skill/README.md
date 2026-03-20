@@ -15,7 +15,7 @@ Step-by-step guide for building high-quality Claude Code skills — from structu
 
 ## How it works
 
-1. **Understand the intent** — Asks what the skill should do, when it should activate, and whether it's user-invocable or auto-triggered
+1. **Understand the intent** — Asks what the skill should do, when it should activate, and whether it's user-invocable or auto-triggered. For multi-action requests, classifies each step as mandatory or optional via selectable prompt — preventing silent step-skipping
 2. **Design the structure** — Plans the directory layout using progressive disclosure to keep token costs low
 3. **Write the description** — Crafts the trigger description using proven patterns that prevent under-triggering
 4. **Write the SKILL.md body** — Imperative form, numbered steps, explicit output formats, under 500 lines
