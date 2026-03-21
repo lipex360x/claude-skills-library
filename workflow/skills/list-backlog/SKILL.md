@@ -6,7 +6,9 @@ disable-model-invocation: false
 allowed-tools: Bash
 ---
 
-List all open issues in the "Backlog" milestone for the current repo.
+List all issues in the "Backlog" column of the project board for the current repo.
+
+Read `references/project-board-operations.md` for board query patterns and column definitions.
 
 ## Arguments
 
@@ -22,13 +24,37 @@ Run: `gh repo view --json url -q '.url'`
 
 Store the result as `REPO_URL` for building issue links.
 
-## 2. Fetch issues
+## 2. Discover project board
 
-Run: `gh issue list --milestone "Backlog" --state open --json number,title,labels,body --limit 100`
+Find the project board for the current repo:
 
-If the milestone doesn't exist or has no issues, say so and stop.
+```bash
+PROJECT_NUMBER=$(gh project list --owner "@me" --format json | jq -r '.projects[] | select(.title | test("<repo-name>"; "i")) | .number')
+```
 
-## 3. Process and sort
+If no board is found, say "No project board found for this repo." and stop.
+
+## 3. Fetch backlog items from board
+
+Query the board for items in the "Backlog" column:
+
+```bash
+gh project item-list "$PROJECT_NUMBER" --owner "@me" --format json | jq '[
+  .items[]
+  | select(.status == "Backlog")
+  | {number: .content.number, title: .content.title}
+]'
+```
+
+If no items are in Backlog, say so and stop.
+
+## 4. Fetch full issue details
+
+The board query returns limited data. For each issue number from step 3, fetch full details:
+
+```bash
+gh issue view <number> --json number,title,labels,body
+```
 
 Parse each issue and extract:
 - **number** — issue number
@@ -47,7 +73,7 @@ Scan the body for patterns like "Depends on #N", "After #N", "Blocked by #N", or
 - If user passed `desc`: sort by size descending using order: XL > L > M > S > XS (issues without size go last)
 - If no argument: sort by issue number ascending (natural order)
 
-## 4. Present results as table
+## 5. Present results as table
 
 Use this exact format:
 

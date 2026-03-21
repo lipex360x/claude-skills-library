@@ -104,41 +104,34 @@ git commit -m "docs: update ARCHITECTURE.md with implementation changes"
 
 If no architectural changes were introduced (e.g., pure bugfix, config-only change), skip this step.
 
-## 5. Move card to "Ready to PR"
-
-If a project board exists for the repo (`gh project list --owner "@me"`), move the issue card to **"Ready to PR"** — signaling that review is complete and the PR is about to be merged:
-
-1. Find the project and get the project node ID
-2. Find the item ID for this issue
-3. Get the Status field ID and the "Ready to PR" option ID
-4. Update with `gh project item-edit`
-
-Read `references/project-board-operations.md` for the full command reference.
-
-If no project board exists, skip this step and Step 8.
-
-## 6. Merge the PR
+## 5. Merge the PR
 
 ```bash
 gh pr merge --merge --delete-branch
 ```
 
-## 7. Move card to "Done"
+## 6. Move card to "Done"
 
-Move the issue card to **"Done"** on the project board:
+If a project board exists for the repo (`gh project list --owner "@me"`), move the issue card from **"In review"** → **"Done"**:
 
-1. Get the "Done" option ID from the Status field
-2. Update with `gh project item-edit`
+1. Find the project and get the project node ID
+2. Find the item ID for this issue
+3. Get the Status field ID and the "Done" option ID
+4. Update with `gh project item-edit`
 
-## 8. Notify unblocked issues
+Read `references/project-board-operations.md` for the full command reference.
+
+If no project board exists, skip this step and Step 7.
+
+## 7. Notify unblocked issues
 
 Detect all issues that were blocked by the closed issue, using two complementary scans:
 
-### 8a. Forward scan — closed issue declares what it blocks
+### 7a. Forward scan — closed issue declares what it blocks
 
 Scan the **closed issue's body** for `> **Blocks** #N` annotations. Collect all referenced issue numbers.
 
-### 8b. Reverse scan — other issues declare dependency on this one
+### 7b. Reverse scan — other issues declare dependency on this one
 
 Fetch all open issues and scan their bodies for patterns referencing the closed issue number:
 - `Depends on #N`
@@ -152,9 +145,9 @@ gh issue list --state open --json number,title,body --limit 100
 
 Filter issues whose body contains a dependency pattern matching the closed issue number. Collect these issue numbers.
 
-### 8c. Process unblocked issues
+### 7c. Process unblocked issues
 
-Merge results from 8a and 8b (deduplicate). For each referenced issue that is still open:
+Merge results from 7a and 7b (deduplicate). For each referenced issue that is still open:
 
 1. **Add a comment** on the unblocked issue:
    ```markdown
@@ -176,23 +169,7 @@ Merge results from 8a and 8b (deduplicate). For each referenced issue that is st
 
 If no blocked issues are found in either scan, skip this step.
 
-## 9. Check milestone completion
-
-If the closed issue belongs to a milestone, check its progress:
-
-```bash
-gh api repos/{owner}/{repo}/milestones --jq '.[] | select(.title == "<milestone>") | {title, open_issues, closed_issues}'
-```
-
-If `open_issues` is 0 (all issues closed), report:
-
-```
-🎉 Milestone "<name>" is now 100% complete! (N/N issues closed)
-```
-
-If not complete, report progress: "Milestone '<name>': X/Y issues closed (Z%)".
-
-## 10. Switch to base branch
+## 8. Switch to base branch
 
 After merge, switch to the target branch and pull:
 
@@ -200,15 +177,14 @@ After merge, switch to the target branch and pull:
 git checkout <target-branch> && git pull
 ```
 
-## 11. Report
+## 9. Report
 
 Present concisely:
 - PR number and merge status
 - Issue summary posted (with issue URL)
 - ARCHITECTURE.md updated (or "no architectural changes")
-- Board status (card moved through Ready to PR → Done)
+- Board status (card moved to Done)
 - Unblocked issues (if any — list issue numbers and their new status)
-- Milestone progress (percentage or completion notice)
 - Current branch after switch
 
 ## Guidelines

@@ -9,10 +9,10 @@ Complete reference for setting up a GitHub Projects V2 board with custom columns
 | Column | Description |
 |--------|-------------|
 | Backlog | This item hasn't been started |
+| Todo | Triaged, will do, not urgent |
 | Ready | This is ready to be picked up |
-| In progress | This is actively being worked on |
+| In Progress | This is actively being worked on |
 | In review | This item is in review |
-| Ready to PR | Review approved, ready to merge |
 | Done | This has been completed |
 | Cancelled | Closed without implementation (won't fix, duplicate, out of scope) |
 
@@ -80,10 +80,10 @@ gh api graphql -f query='
       fieldId: "'"$STATUS_FIELD_ID"'"
       singleSelectOptions: [
         { name: "Backlog", description: "This item hasn'\''t been started", color: GREEN }
+        { name: "Todo", description: "Triaged, will do, not urgent", color: BLUE }
         { name: "Ready", description: "This is ready to be picked up", color: YELLOW }
-        { name: "In progress", description: "This is actively being worked on", color: ORANGE }
+        { name: "In Progress", description: "This is actively being worked on", color: ORANGE }
         { name: "In review", description: "This item is in review", color: PURPLE }
-        { name: "Ready to PR", description: "Review approved, ready to merge", color: BLUE }
         { name: "Done", description: "This has been completed", color: GRAY }
         { name: "Cancelled", description: "Closed without implementation", color: RED }
       ]

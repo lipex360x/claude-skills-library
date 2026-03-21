@@ -86,7 +86,7 @@ Parse all checkboxes in the linked issue body (`- [ ]` unchecked, `- [x]` checke
      ```
 
    **If "Create new backlog issue":**
-   - Create a new issue with the unchecked items, assign to "Backlog" milestone
+   - Create a new issue with the unchecked items, add to the project board in the "Backlog" column
    - Add the scope transfer comment on the source issue pointing to the new issue
 
    **If "Skip with justification":**
