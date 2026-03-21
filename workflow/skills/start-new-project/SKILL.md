@@ -112,17 +112,15 @@ Before creating issues, ensure the repo has basic organizational primitives.
 
 Don't force labels on repos that already have a custom scheme. Adapt to what's there.
 
-**Milestone** — if the project generates 2+ issues, create a milestone to group them:
+**Milestone (optional)** — milestones serve as scope/release groupings (e.g., "v1.0", "Sprint 3"), not as status indicators. Status is tracked on the project board via columns.
+
+If the user wants milestones for versioning or sprint grouping, create them:
 
 ```bash
 gh api repos/{owner}/{repo}/milestones -f title="<milestone name>" -f description="<one-line goal>" [-f due_on="<YYYY-MM-DDT00:00:00Z>"]
 ```
 
-Good milestone names: the project name itself ("Project X MVP"), a version ("v1.0"), or a phase ("Phase 1: Core").
-
-For single-issue projects, a project milestone is optional.
-
-**Backlog milestone** — always create a "Backlog" milestone (no due date) for every new project. This is a permanent bucket for future ideas, improvements, and low-priority items. It stays open indefinitely and gives the user a place to park ideas without losing them. When an item gets prioritized, move it from Backlog to an active milestone.
+Good milestone names: a version ("v1.0"), a sprint ("Sprint 3"), or a release ("Phase 1: Core"). Do not create milestones automatically — only when the user explicitly requests them or when the project has a clear versioning/release structure.
 
 ### 6. Create the GitHub issues
 
@@ -134,13 +132,13 @@ gh issue create --title "<concise title>" --body "<approved body>"
 
 Apply labels if the repo uses them. Common: `enhancement`, `feature`, plus a priority label. For multi-issue projects, include the phase number in the issue title (e.g., "Phase 1: Scaffolding & Data Layer").
 
-Assign all issues to the milestone:
+If milestones were created in Step 5, assign issues to them:
 
 ```bash
 gh issue edit <number> --milestone "<milestone name>"
 ```
 
-For multi-issue projects, the milestone provides automatic progress tracking — each closed issue moves the percentage forward, giving clear visibility into how much of the project is done.
+**Note:** Board item assignment (primary tracking mechanism) happens in Step 7 after the project board is created.
 
 ### 7. Create project board
 
@@ -149,10 +147,10 @@ Always create a GitHub Project board for every new project — even with a singl
 **Board setup:**
 
 1. **Create the project** — `gh project create --title "<project name>" --owner "@me"`
-2. **Configure Status field** — replace the default 3 columns (Todo/In Progress/Done) with 7: **Backlog**, **Ready**, **In progress**, **In review**, **Ready to PR**, **Done**, **Cancelled**. Use the GraphQL mutation in the reference to update the Status field options with descriptions and colors. The Cancelled column is for issues closed without implementation (won't fix, duplicate, out of scope) — it keeps them separate from Done so throughput metrics aren't polluted.
+2. **Configure Status field** — replace the default 3 columns (Todo/In Progress/Done) with 7: **Backlog**, **Todo**, **Ready**, **In Progress**, **In review**, **Done**, **Cancelled**. Use the GraphQL mutation in the reference to update the Status field options with descriptions and colors. The Cancelled column is for issues closed without implementation (won't fix, duplicate, out of scope) — it keeps them separate from Done so throughput metrics aren't polluted.
 3. **Create Priority field** — single-select with options: `P0` (Critical), `P1` (High), `P2` (Medium)
 4. **Create Size field** — single-select with options: `XS`, `S`, `M`, `L`, `XL`
-5. **Add issues to the project** — `gh project item-add` for each issue
+5. **Add issues to the project** — `gh project item-add` for each issue created in Step 6. This is the primary tracking mechanism — board columns indicate status, not milestones
 6. **Set initial field values** — set status to "Backlog", priority and size based on the plan (infer from step count and complexity, or ask the user during the approval gate if uncertain)
 
 **Priority and Size assignment:** When creating issues (Step 6), determine priority and size for each:
@@ -224,7 +222,7 @@ Present:
 
 - **Split large projects into multiple issues.** A single monolithic issue with 10+ steps buries progress and makes the milestone useless. When the mandatory split rule triggers (8+ steps), each Phase becomes its own issue, titled "Phase N: Theme Name". Each issue is independently completable, has its own verification section, and contributes to milestone progress (e.g., 4 issues = each closure moves the milestone 25%). This gives clear visibility into project progress — both for the developer and for anyone watching the repo.
 
-- **Milestones for multi-issue projects.** When a project spans 2+ issues, always group them under a GitHub milestone. This gives automatic progress tracking (% complete) and a clear finish line. For single-issue projects, milestones are optional.
+- **Milestones are optional scope groupings.** Milestones serve as version/release/sprint groupings — not as status indicators. Status is tracked on the project board via columns. Create milestones only when the user requests them or the project has a clear versioning structure.
 
 - **`closes #N` in PRs.** Always remind the user to include `closes #N` in PR descriptions. This auto-closes the linked issue on merge and updates milestone progress automatically.
 

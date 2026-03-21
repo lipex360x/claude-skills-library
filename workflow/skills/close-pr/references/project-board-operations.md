@@ -1,6 +1,6 @@
 # Project Board Operations Reference
 
-Reference for interacting with an existing GitHub Projects V2 board — moving cards, setting fields.
+Reference for interacting with an existing GitHub Projects V2 board — moving cards, setting fields, and querying items by status.
 
 ## Moving a Card to a Status
 
@@ -36,6 +36,31 @@ gh api graphql -f query='
 gh project item-edit --project-id "$PROJECT_ID" --id "$ITEM_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "<target-option-id>"
 ```
 
+## Querying Items by Status
+
+To list all items in a specific board column (e.g., "Backlog"):
+
+```bash
+# 1. Discover the project number
+PROJECT_NUMBER=$(gh project list --owner "@me" --format json | jq -r '.projects[] | select(.title == "<project name>") | .number')
+
+# 2. List all items and filter by status
+gh project item-list "$PROJECT_NUMBER" --owner "@me" --format json | jq '[
+  .items[]
+  | select(.status == "Backlog")
+  | {
+      id: .id,
+      number: .content.number,
+      title: .content.title,
+      type: .content.type,
+      labels: .labels,
+      status: .status
+    }
+]'
+```
+
+> **Note:** `gh project item-list` returns items with a `.status` field containing the column name, and `.content` with issue details (number, title, type, url). For full issue data (body, labels), use the issue number with `gh issue view`.
+
 ## Setting Priority and Size
 
 If an issue doesn't have priority or size set, use the same `item-edit` pattern:
@@ -53,16 +78,17 @@ gh project item-edit --project-id "$PROJECT_ID" --id "$ITEM_ID" --field-id "$SIZ
 
 ## Board Structure Reference
 
-### Status Columns (6)
+### Status Columns (7)
 
 | Column | Description |
 |--------|-------------|
 | Backlog | This item hasn't been started |
+| Todo | Triaged, will do, not urgent |
 | Ready | This is ready to be picked up |
-| In progress | This is actively being worked on |
+| In Progress | This is actively being worked on |
 | In review | This item is in review |
-| Ready to PR | Review approved, ready to merge |
 | Done | This has been completed |
+| Cancelled | Closed without implementation (won't fix, duplicate, out of scope) |
 
 ### Priority Options
 - `P0` — Critical

@@ -4,16 +4,17 @@ Complete reference for setting up a GitHub Projects V2 board with custom columns
 
 ## Board Structure
 
-### Status Columns (6)
+### Status Columns (7)
 
 | Column | Description |
 |--------|-------------|
 | Backlog | This item hasn't been started |
+| Todo | Triaged, will do, not urgent |
 | Ready | This is ready to be picked up |
-| In progress | This is actively being worked on |
+| In Progress | This is actively being worked on |
 | In review | This item is in review |
-| Ready to PR | Review approved, ready to merge |
 | Done | This has been completed |
+| Cancelled | Closed without implementation (won't fix, duplicate, out of scope) |
 
 ### Custom Fields
 
@@ -41,7 +42,7 @@ Save the project number from the output.
 
 ### 2. Configure Status field
 
-The default Status field has "Todo", "In Progress", "Done". Replace with the 6 custom columns.
+The default Status field has "Todo", "In Progress", "Done". Replace with the 7 custom columns.
 
 **Get the project ID and Status field ID:**
 
@@ -66,28 +67,36 @@ gh api graphql -f query='
 ' -f projectId="$PROJECT_ID"
 ```
 
-**Update the Status field with all 6 options:**
+**Update the Status field with all 7 options:**
+
+> **API gotcha:** The mutation uses `singleSelectOptions` (not `singleSelectField`), takes only `fieldId` (not `projectId`), and option objects do NOT accept an `id` field — the API replaces all options by name. Existing items retain their status if the option name matches.
 
 ```bash
 STATUS_FIELD_ID="<from previous query>"
 
 gh api graphql -f query='
-  mutation($fieldId: ID!) {
+  mutation {
     updateProjectV2Field(input: {
-      fieldId: $fieldId
+      fieldId: "'"$STATUS_FIELD_ID"'"
       singleSelectOptions: [
-        { name: "Backlog", description: "This item has not been started", color: GREEN }
+        { name: "Backlog", description: "This item hasn'\''t been started", color: GREEN }
+        { name: "Todo", description: "Triaged, will do, not urgent", color: BLUE }
         { name: "Ready", description: "This is ready to be picked up", color: YELLOW }
-        { name: "In progress", description: "This is actively being worked on", color: ORANGE }
+        { name: "In Progress", description: "This is actively being worked on", color: ORANGE }
         { name: "In review", description: "This item is in review", color: PURPLE }
-        { name: "Ready to PR", description: "Review approved, ready to merge", color: BLUE }
         { name: "Done", description: "This has been completed", color: GRAY }
+        { name: "Cancelled", description: "Closed without implementation", color: RED }
       ]
     }) {
-      projectV2Field { ... on ProjectV2SingleSelectField { id options { id name } } }
+      projectV2Field {
+        ... on ProjectV2SingleSelectField {
+          id
+          options { id name color }
+        }
+      }
     }
   }
-' -f fieldId="$STATUS_FIELD_ID"
+'
 ```
 
 ### 3. Create Priority field

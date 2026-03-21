@@ -1,12 +1,12 @@
 ---
 name: add-backlog
-description: Create a GitHub issue in the project's Backlog milestone. Use this skill when the user says "add to backlog", "create backlog issue", "backlog add", "new issue for backlog", or wants to register a task for later — even if they don't explicitly say "backlog."
+description: Create a GitHub issue and add it to the project board's Backlog column. Use this skill when the user says "add to backlog", "create backlog issue", "backlog add", "new issue for backlog", or wants to register a task for later — even if they don't explicitly say "backlog."
 user-invocable: true
 allowed-tools: Bash, AskUserQuestion
 argument-hint: <description>
 ---
 
-Create a GitHub issue in the "Backlog" milestone for the current repo.
+Create a GitHub issue and add it to the project board's **Backlog** column.
 
 Parse `$ARGUMENTS` as the issue description. If empty, ask the user what to add.
 
@@ -66,10 +66,23 @@ Ask for **Size** using `AskUserQuestion` with options `["XS (< 1h)", "S (1-2h)",
 
 Before creating the issue, check if it could block existing open issues. This prevents silent dependency gaps that only surface when someone starts working on a blocked issue.
 
-### 4a. Fetch open issues
+### 4a. Fetch open issues from board
+
+Query the project board for items in the **Backlog** and **Todo** columns:
 
 ```bash
-gh issue list --milestone "Backlog" --state open --json number,title,body --limit 100
+PROJECT_NUMBER=$(gh project list --owner "@me" --format json | jq -r '.projects[0].number')
+gh project item-list "$PROJECT_NUMBER" --owner "@me" --format json | jq '[
+  .items[]
+  | select(.status == "Backlog" or .status == "Todo")
+  | {number: .content.number, title: .content.title, status: .status}
+]'
+```
+
+For full issue bodies (needed for dependency analysis), fetch each issue individually:
+
+```bash
+gh issue view <number> --json number,title,body
 ```
 
 ### 4b. Analyze overlap
@@ -105,7 +118,11 @@ Keep the list of approved blocked issue numbers — they will be updated in Step
 
 ## 5. Create
 
-Create with: `gh issue create --title "<title>" --body "<body>" --milestone "Backlog"`
+Create the issue:
+
+```bash
+gh issue create --title "<title>" --body "<body>"
+```
 
 ## 6. Update blocked issues
 
@@ -128,7 +145,7 @@ For each issue approved as blocked in Step 4c:
 
 This follows the same dependency format used by `/close-pr` (Step 8) for unblocking — `Depends on #N` is the canonical pattern detected by `/list-backlog`, `/list-issues`, and `/close-pr`.
 
-## 7. Add to project board
+## 7. Add to project board (mandatory)
 
 Check if a project board exists for the repo:
 
@@ -136,7 +153,9 @@ Check if a project board exists for the repo:
 gh project list --owner "@me" --format json | jq '.projects[] | {number, title}'
 ```
 
-**If a board exists:**
+**If no board exists**, prompt the user with `AskUserQuestion` offering `["Yes, create a board", "No, cancel issue creation"]`. If they choose to create one, read `references/project-board-setup.md` and set up the full board (7 status columns, Priority and Size fields). If they choose to cancel, stop — board tracking is required for all workflow skills.
+
+**Once a board exists** (or was just created):
 
 1. Add the issue to the board: `gh project item-add <project-number> --owner "@me" --url <issue-url>`
 2. Set status to **"Backlog"**
@@ -144,12 +163,10 @@ gh project list --owner "@me" --format json | jq '.projects[] | {number, title}'
 
 Read `references/project-board-operations.md` for the full command reference.
 
-**If no board exists**, skip this step — the issue is still tracked via the Backlog milestone.
-
 ## 8. Report
 
 Present:
 - Issue URL
 - Size assigned
-- Board status (added to board, or milestone-only)
+- Board column: Backlog
 - Blocked issues updated (list issue numbers, or "none")

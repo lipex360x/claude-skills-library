@@ -14,15 +14,23 @@ Turn an issue with high-level acceptance criteria into a detailed implementation
 
 Parse `$ARGUMENTS` for an issue number. Accept both direct numbers (`2`) and index references (`#2`).
 
-If no argument provided, list open issues in the "Backlog" milestone:
+If no argument provided, query the project board for issues in the **Backlog** and **Todo** columns:
 
 ```bash
-gh issue list --milestone "Backlog" --state open --json number,title -q '.[] | "#\(.number) — \(.title)"'
+PROJECT_NUMBER=$(gh project list --owner "@me" --format json | jq -r '.projects[0].number')
+gh project item-list "$PROJECT_NUMBER" --owner "@me" --format json | jq '[
+  .items[]
+  | select(.status == "Backlog" or .status == "Todo")
+  | {number: .content.number, title: .content.title, status: .status}
+  | "#\(.number) — \(.title) [\(.status)]"
+]'
 ```
 
 Present the list with `AskUserQuestion` for the user to pick one.
 
-If the milestone doesn't exist or has no issues, inform the user and stop.
+If no board exists, prompt the user with `AskUserQuestion` offering `["Yes, create a board", "No, cancel"]`. If they choose to create one, read `references/project-board-setup.md` and set up the full board (7 status columns, Priority and Size fields). If they cancel, stop — board tracking is required for all workflow skills.
+
+If the board has no items in Backlog or Todo, inform the user and stop.
 
 ### 2. Analyze the issue
 
@@ -99,7 +107,7 @@ Sizing guidelines:
 - 2-6 checkboxes per Step (TDD steps naturally have more checkboxes — test + implementation pairs)
 - Each checkbox = one focused action completable in a single work session
 
-**Mandatory split rule for backlog issues.** After drafting the plan, count the total steps. If the plan has **more than 8 steps**, it **MUST** be split into multiple smaller issues — all staying in the Backlog milestone. Backlog issues don't use Phases (they're standalone items, not parts of a larger project plan). Instead, split by logical grouping: each resulting issue should be independently completable with 3-8 steps and its own verification. Title each issue descriptively (no "Phase N" prefix). Create them sequentially, referencing related issues in the body (e.g., "Related: #12, #13"). The original issue becomes the first chunk (rewritten with its subset of steps), and new issues are created for the rest.
+**Mandatory split rule for backlog issues.** After drafting the plan, count the total steps. If the plan has **more than 8 steps**, it **MUST** be split into multiple smaller issues — all added to the project board in the "Backlog" column. Backlog issues don't use Phases (they're standalone items, not parts of a larger project plan). Instead, split by logical grouping: each resulting issue should be independently completable with 3-8 steps and its own verification. Title each issue descriptively (no "Phase N" prefix). Create them sequentially, referencing related issues in the body (e.g., "Related: #12, #13"). The original issue becomes the first chunk (rewritten with its subset of steps), and new issues are created for the rest.
 
 If `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` is enabled (value `1`), also analyze the Steps for parallelism and add an **Execution mode** section **at the top of the proposed issue body** (before What/Why). This section must be the first thing the agent reads — placing it at the bottom causes the agent to default to isolated worktree agents instead of using `TeamCreate`.
 
@@ -147,12 +155,14 @@ gh issue edit <number> --body "<approved body>" --add-assignee @me
 If the mandatory split rule triggered (8+ steps), create the additional issues:
 
 ```bash
-gh issue create --title "<descriptive title>" --body "<body with steps subset>" --milestone "Backlog"
+gh issue create --title "<descriptive title>" --body "<body with steps subset>"
 ```
+
+Add each new issue to the project board's **Backlog** column using the same board operations from Step 7 of `/add-backlog`.
 
 Add cross-references between related issues in each body (e.g., "Related: #12, #13"). Apply the same labels as the original issue.
 
-Preserve the original title and labels. The issue stays in the Backlog milestone — it will be moved to an active milestone if the project uses them.
+Preserve the original title and labels.
 
 ### 5. Create branch linked to issue
 
@@ -166,18 +176,26 @@ git push -u origin feat/<number>-<slug>
 
 Derive `<slug>` from the issue title (kebab-case, max 40 chars). The `gh issue develop` command creates the branch and links it — the subsequent `git push -u` ensures the remote tracking is set up.
 
-### 5b. Move card to "In progress"
+### 5b. Board transitions and blocker check
 
 Read `references/project-board-operations.md` for the full command reference.
 
 Find the project board for the repo (`gh project list --owner "@me"`).
 
-**If no board exists**, ask the user with `AskUserQuestion` offering `["Yes, create a board", "No, skip board tracking"]`. If they choose to create one, read `references/project-board-setup.md` and set up the full board (6 status columns, Priority and Size fields). Add the current issue to the board after creation.
+**If no board exists**, ask the user with `AskUserQuestion` offering `["Yes, create a board", "No, cancel"]`. If they choose to create one, read `references/project-board-setup.md` and set up the full board (7 status columns, Priority and Size fields). Add the current issue to the board after creation. If they cancel, stop — board tracking is required for all workflow skills.
 
-**If a board exists** (or was just created), move the issue card to **"In progress"**:
+**Check for blockers.** Before moving the card, scan the issue body for `> Blocked by #N` annotations. If any blocking issue is still open, flag it to the user:
+
+```
+⚠️ This issue is blocked by #N (<title>) which is still open. Continue anyway?
+```
+
+Use `AskUserQuestion` with options `["Yes, start anyway", "No, pick another issue"]`.
+
+**Move card to "Ready".** After the blocker check passes, move the issue card to **"Ready"** — this signals the issue is picked up and the plan is about to be proposed:
 
 1. Get the project node ID and the item ID for this issue
-2. Get the Status field ID and the "In progress" option ID
+2. Get the Status field ID and the "Ready" option ID
 3. Update the item status with `gh project item-edit`
 
 Also check if **Priority** and **Size** are set on the card. If either is missing, infer from the plan:
@@ -186,13 +204,7 @@ Also check if **Priority** and **Size** are set on the card. If either is missin
 
 Set them with `gh project item-edit`. If unsure about priority, ask the user with `AskUserQuestion` offering `["P0 (Critical)", "P1 (High)", "P2 (Medium)"]`.
 
-**Check for blockers.** Before starting work, scan the issue body for `> Blocked by #N` annotations. If any blocking issue is still open, flag it to the user:
-
-```
-⚠️ This issue is blocked by #N (<title>) which is still open. Continue anyway?
-```
-
-Use `AskUserQuestion` with options `["Yes, start anyway", "No, pick another issue"]`.
+**Move card to "In Progress".** After the plan is approved (Step 3 approval gate), move the card from **Ready → In Progress** before creating the branch. This signals active development has started.
 
 ### 6. Create tasks
 
@@ -244,7 +256,7 @@ If the issue has no Execution mode section (Agent Teams not enabled), skip this 
 
 - **Steps are work sessions.** Each Step should represent a focused work session — something you can complete, commit, and verify before moving on. Too large = lost focus. Too small = overhead.
 
-- **Backlog issues are standalone — no Phases.** Unlike project issues created by `start-new-project` (which use "Phase 1: Theme", "Phase 2: Theme"), backlog issues are self-contained items. They use Steps directly, never Phases. If a backlog item grows too large (8+ steps), split it into multiple independent backlog issues — each with a descriptive title, 3-8 steps, and its own verification. All split issues stay in the Backlog milestone and reference each other.
+- **Backlog issues are standalone — no Phases.** Unlike project issues created by `start-new-project` (which use "Phase 1: Theme", "Phase 2: Theme"), backlog issues are self-contained items. They use Steps directly, never Phases. If a backlog item grows too large (8+ steps), split it into multiple independent backlog issues — each with a descriptive title, 3-8 steps, and its own verification. All split issues are added to the board's Backlog column and reference each other.
 
 - **No local environment paths in issues.** Issue content is public and portable. Never reference local paths like `~/.brain/`, `~/.claude/`, or absolute user paths. Use paths relative to the project root (e.g., `create-skill/SKILL.md`, not `~/.brain/skills/skill-creator/SKILL.md`). This applies to checkboxes, descriptions, and any text written to the issue body.
 
