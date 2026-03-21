@@ -8,11 +8,11 @@ disable-model-invocation: false
 Close the task visibility board.
 
 1. Read `~/.brain/config/behavior.config.json` and check `task-visibility.always-open`. If already `false`, inform the user the board is already closed and stop.
-2. List all tasks with TaskGet. If any task has status `in_progress`, warn the user with AskUserQuestion offering `["Close anyway", "Cancel"]`. If cancelled, stop.
+2. List all tasks with TaskGet. If any task has status `in_progress`, warn the user with AskUserQuestion offering `["Close anyway", "Cancel"]` — because deleting in-progress tasks loses context the user may need. If cancelled, stop.
 3. Delete all tasks from the task list using TaskUpdate with status `deleted`.
 4. Set `task-visibility.always-open` to `false` in `~/.brain/config/behavior.config.json`.
 5. Read the config file again to verify the change took effect. If it didn't persist, report the error.
-6. Confirm briefly that the board is closed and how many tasks were removed.
+6. Confirm briefly that the board is closed and how many tasks were removed. Example: `"Board closed. 3 tasks removed."`
 
 ## Anti-patterns
 
