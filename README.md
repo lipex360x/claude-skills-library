@@ -34,7 +34,7 @@ Common flags: `--copy` (no symlinks), `-a claude-code` (Claude Code only), `-y` 
 
 ## Plugins
 
-Skills are organized into **8 plugin groups** by domain. Invoke any skill directly by name (e.g., `/push`, `/create-skill`). There are **36 skills** in total.
+Skills are organized into **8 plugin groups** by domain. Invoke any skill directly by name (e.g., `/push`, `/create-skill`). There are **37 skills** in total.
 
 ---
 
@@ -45,6 +45,7 @@ Skills are organized into **8 plugin groups** by domain. Invoke any skill direct
 | Skill | Description |
 |-------|-------------|
 | [add-backlog](./workflow/skills/add-backlog/) | Create a GitHub issue and add it to the project board's Backlog column. |
+| [cancel-issue](./workflow/skills/cancel-issue/) | Cancel an issue — close with reason, move to Cancelled, unblock dependents, clean up branches/PRs. |
 | [close-pr](./workflow/skills/close-pr/) | Merge the current branch's PR, write implementation summary, notify unblocked issues, and move card to Done. |
 | [grill-me](./workflow/skills/grill-me/) | Deep structured interview about a plan, feature, or project — extracts decisions, constraints, and context. |
 | [list-backlog](./workflow/skills/list-backlog/) | List backlog issues with size, priority, and dependency status in a table. |
