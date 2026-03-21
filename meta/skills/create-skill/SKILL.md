@@ -143,11 +143,22 @@ After all updates are complete (skill, READMEs, STRUCTURE.md), push both repos a
 
 This is the final step — the skill creation/update is not done until changes are pushed to GitHub.
 
+## Naming convention
+
+Skill names follow the **verb-subject** pattern: the verb describes the action, the subject describes what it acts on. This makes names scannable and consistent across the library.
+
+- `download-video` (not `video-download`)
+- `create-skill` (not `skill-creator`)
+- `review-postgres` (not `postgres-review`)
+- `check-gmail` (not `gmail-checker`)
+
+Format: lowercase, hyphens, verb first. The name must match the directory name.
+
 ## Frontmatter reference
 
 ```yaml
 ---
-name: skill-name          # Required. Lowercase + hyphens, matches directory name
+name: verb-subject        # Required. Lowercase + hyphens, verb-subject pattern, matches directory name
 description: ...          # Required. The trigger mechanism — be pushy and specific
 user-invocable: true      # Set true if the user can call it directly via /skill-name
 compatibility: ...        # Optional. Environment requirements (rarely needed)
