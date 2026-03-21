@@ -77,7 +77,7 @@ npx skills add vercel-labs/agent-skills@react-best-practices
 Learn more: https://skills.sh/vercel-labs/agent-skills/react-best-practices
 ```
 
-Ask the user which skill to install (or none). Never install without explicit user consent.
+Only present skills that passed the quality verification in Step 4. Ask the user which skill to install (or none). Never install without explicit user consent.
 
 ### Step 6: Install
 
