@@ -217,16 +217,6 @@ If the approved issue body contains a "Parallel execution plan" section, offer t
 
 If the issue has no parallel plan (Agent Teams not enabled), skip this step.
 
-### 8. Summary
-
-Present concisely:
-- Branch name
-- Issue URL (linked)
-- Project board status (card moved to "In progress", priority and size set)
-- Task count and first task suggestion
-- Total Steps and checkboxes count
-- Remind: use `closes #N` in PR descriptions
-
 ## Guidelines
 
 - **TDD is mandatory, not optional.** Every Step that introduces new behavior MUST include a test checkbox **before** the implementation checkbox — no exceptions. This is the single most important quality rule in this skill. The TDD-ordered checkboxes in the plan ARE the enforcement mechanism — when the agent executes the steps, the test-first order ensures red-green-refactor discipline naturally. No separate skill invocation is needed. Read `references/tdd-methodology.md` for the full methodology. Key principles: vertical slices (one test → one implementation → repeat, never write all tests first), test behavior through public interfaces (not implementation details), mock only at system boundaries (external APIs, not your own modules). When proposing the detailed plan, verify every step follows TDD order: test checkbox first, implementation checkbox second. If a step has no test checkbox before its implementation, it's wrong — fix it before presenting. This applies to all change types — new routes, new commands, new components, new utilities.
