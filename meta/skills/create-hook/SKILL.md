@@ -8,6 +8,13 @@ user-invocable: true
 
 Step-by-step guide for building Claude Code hooks. Hooks are bash scripts (or prompts) triggered by events — deterministic, zero-fail-rate enforcement that runs outside the LLM.
 
+## Input contract
+
+- **Required:** intent — what the hook should do (the action and when it should fire)
+- **Optional:** event (must be one of: `PreToolUse`, `PostToolUse`, `PreCompact`, `Stop`, `SubagentStop`, `SessionStart`, `SessionEnd`, `UserPromptSubmit`, `Notification`), type (`command` or `prompt`), location (`local` or `global`)
+
+If the user provides only the intent, derive the remaining inputs through the process steps below.
+
 ## Process
 
 ### 1. Understand the intent

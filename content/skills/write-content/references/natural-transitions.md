@@ -269,4 +269,10 @@ These phrases are overused in AI-generated content:
 - "This begs the question..."
 - "Let's delve into..."
 
-See the seo-audit skill's `references/ai-writing-detection.md` for a complete list of AI writing tells.
+**Additional AI tells to watch for:**
+- Overuse of "arguably," "notably," "importantly" as sentence starters
+- Symmetrical sentence structures repeated across paragraphs
+- Lists that always have exactly 3 items
+- Every paragraph being the same length
+- Hedging language: "It's important to note that," "One might argue"
+- Perfect grammar with zero colloquialisms — real humans break rules

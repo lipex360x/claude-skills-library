@@ -2,6 +2,18 @@
 
 Each branch is an exploration axis. Order adapts to the domain and block type. All applicable branches must be covered unless the user opted for a shorter session.
 
+## Table of Contents
+
+1. [Branch 1: The Block](#branch-1-the-block-always-required) (always required)
+2. [Branch 2: Desired Outcome](#branch-2-desired-outcome-always-required) (always required)
+3. [Branch 3: Root Causes](#branch-3-root-causes-always-required) (always required)
+4. [Branch 4: Context & Constraints](#branch-4-context--constraints-always-required) (always required)
+5. [Branch 5: Perspectives](#branch-5-perspectives-optional--include-for-complex-blocks) (optional)
+6. [Branch 6: Connections & Patterns](#branch-6-connections--patterns-optional--include-when-documentsresearch-provided) (optional)
+7. [Branch 7: Clarity & Action](#branch-7-clarity--action-always-required) (always required)
+- [Suggested Order by Domain](#suggested-order-by-domain)
+- [Question Count Summary](#question-count-summary)
+
 All questions, options, and signals must use the language chosen in Step 1. Examples below are in English — translate at execution time.
 
 ## Branch 1: The Block (always required)

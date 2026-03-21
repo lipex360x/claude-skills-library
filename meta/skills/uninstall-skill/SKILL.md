@@ -1,12 +1,18 @@
 ---
 name: uninstall-skill
-description: Uninstall a skill by name, local or global. Use this skill when the user says "uninstall skill", "remove skill", "delete skill", "skill uninstall", or wants to remove an installed skill — even if they don't explicitly say "uninstall."
+description: Uninstall a skill by name, local or global. Use this skill when the user says "uninstall skill", "remove skill", "delete skill", "skill uninstall", "get rid of a skill", "I don't need this skill anymore", or wants to remove an installed skill — even if they don't explicitly say "uninstall."
 user-invocable: true
 allowed-tools: Bash, AskUserQuestion, Read, Glob, Edit
 argument-hint: <skill-name>
 ---
 
 The user wants to uninstall the skill: `$ARGUMENTS`
+
+## Input contract
+
+| Input | Source | Required | Validation | On invalid |
+|-------|--------|----------|------------|------------|
+| `skill-name` | `$ARGUMENTS` | yes | Must match a directory in `.claude/skills/` (local) or `skills-library/*/skills/` (global) | Fuzzy search similar names and present via AUQ; if no matches, report not found |
 
 ## 1. Locate the skill
 
@@ -61,9 +67,11 @@ If no write access, report the error and stop — don't attempt `sudo` or workar
 
 ## 4. Remove
 
-Delete the skill directory:
+Double-check the resolved path before deleting — confirm it points to a skill directory (contains SKILL.md) and not a parent or unrelated path, because a wrong target with `rm -rf` is unrecoverable.
 
 ```bash
+# Safety: verify the path contains SKILL.md before deleting
+test -f <skill-path>/SKILL.md || echo "ABORT: path does not contain SKILL.md"
 rm -rf <skill-path>
 ```
 

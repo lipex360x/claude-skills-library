@@ -8,14 +8,19 @@ user-invocable: true
 
 Generate a continuation prompt the user can paste into a new Claude Code conversation to resume work seamlessly.
 
+## Input contract
+
+Requires an active conversation with work history (commits, decisions, or pending tasks). If the conversation is minimal (e.g., user just started and wants to hand off immediately), generate a lightweight prompt with branch/issue state only and note that no conversation context was available.
+
 ## Steps
 
 1. **Analyze the full conversation** — this is the most important source. Extract: what was discussed, decisions made, what the user asked for next, pending requests or deferred ideas. Focus on context and situational awareness, not action items — the goal is to inform the next session, not command it.
-2. Run `git status -u` for uncommitted changes
-3. Run `git log --oneline -5` for recent work
+2. Run `git status -u` for uncommitted changes. If not a git repo, skip steps 2-5 and note this in the prompt.
+3. Run `git log --oneline -5` for recent work. If no commits exist on the branch, note that the branch is fresh.
 4. Run `git diff --stat` for modified files
-5. Check the current branch and its related issue
+5. Check the current branch and its related issue. If no issue is identifiable, skip the issue section.
 6. Read the GitHub issue (if identifiable) to find pending checkboxes
+7. **Review before output** — Check the generated prompt against the anti-patterns list: Is it under ~40 lines? No code blocks or diffs pasted inline? No imperative language? Includes branch/issue context? Captures conversation decisions? If any check fails, revise before presenting.
 
 ## Output format
 
@@ -63,6 +68,8 @@ Branch `feature/foo` (issue #N). Working tree dirty/clean — N files modified.
 - After generating, copy to clipboard (use `pbcopy` on macOS, `xclip` on Linux, or inform the user if neither is available) and confirm.
 
 - Show the prompt in a fenced code block so the user can review it.
+
+- **Length gate.** If the prompt exceeds ~40 lines, summarize further before presenting. Point to files and issues instead of inlining detail.
 
 ## Anti-patterns
 

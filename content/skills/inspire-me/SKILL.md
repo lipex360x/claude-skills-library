@@ -12,7 +12,7 @@ Structured exploration session that unblocks thinking on any topic. Not limited 
 
 `/inspire-me` or `/inspire-me <brief description of what's blocking you>`
 
-If invoked without an argument, ask for the initial description. If invoked with an argument, use it as the starting point.
+If invoked without an argument, ask for the initial description. If invoked with an argument, use it as the starting point. If the argument looks like a file path (starts with `/`, `~`, or `./`), ask the user: "That looks like a file path — did you mean to share a document, or is that your block description?" If it's a single word, accept it but ask for more context in Step 2.
 
 ## Steps
 
@@ -92,6 +92,8 @@ Use `AskUserQuestion`:
 When consuming documents, extract: key themes, contradictions, patterns, actionable insights, and open questions. Cross-reference document content with the user's block to find connections they might have missed.
 
 When researching, search for: frameworks for thinking about the topic, common patterns others have faced, expert perspectives, and practical strategies. Store every URL consulted.
+
+**Fallback for tool failures:** If `WebSearch` returns no results or fails, inform the user and proceed with interview-only mode — the session is still valuable without external research. If `WebFetch` fails on a URL, skip it and note it in the output. If a user-provided document path is unreadable, tell the user the path couldn't be read and ask for a corrected path or offer to continue without it.
 
 ### 5. Conduct the exploration
 

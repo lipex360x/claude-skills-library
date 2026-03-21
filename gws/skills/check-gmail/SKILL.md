@@ -23,6 +23,22 @@ user-invocable: true
 
 Scan the Gmail inbox, find senders that slip through existing filters, and fix the gaps — all in one session.
 
+## Prerequisites
+
+This skill depends on external infrastructure components that must be set up before use:
+
+- **GWS wrapper** (`~/.brain/integrations/gws/gws-claude.sh`) — OAuth-aware CLI wrapper that bypasses macOS Keyring
+- **Auth script** (`~/.brain/integrations/gws/gws-auth.sh`) — Re-authenticates when tokens expire
+- **Changelog** (`~/.brain/integrations/gws/gmail-changelog.json`) — Persistent filter state for gap detection across sessions
+- **GWS rules** (`~/.brain/rules/gws.md`) — Integration configuration and conventions
+
+Without these, the skill cannot authenticate or track filter state.
+
+## Input contract
+
+- **Required**: none — scans inbox by default
+- **Optional**: `maxResults` (integer, default 50) — number of inbox messages to fetch in the scan
+
 ## Key paths
 
 - **Wrapper**: `~/.brain/integrations/gws/gws-claude.sh` (NEVER bare `gws`)
@@ -146,6 +162,15 @@ Read `references/gws-cli-patterns.md` for the exact create command with `--param
 Launch ALL creates in a single message. Capture the response — it contains the new `filter_id`.
 
 Never mix delete and create for the same filter in the same round.
+
+4. **Verify created filters** — After all creates complete, list filters to confirm each new `filter_id` exists:
+
+```bash
+~/.brain/integrations/gws/gws-claude.sh gmail users settings filters list \
+  --params '{"userId": "me"}'
+```
+
+Check that every expected `filter_id` from the create responses appears in the list. If any are missing, report the failure to the user before proceeding.
 
 ### Phase 5: Message labeling
 

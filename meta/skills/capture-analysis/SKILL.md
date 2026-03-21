@@ -28,7 +28,12 @@ Purpose: project-agnostic learnings to feed back into skills.
 
 ### 2. Parse the input
 
-If `$ARGUMENTS` is `remove <N>` or `remover <N>`, go to the **Remove entry** flow below.
+**Input contract:**
+- **No arguments** → prompt the user for what to capture.
+- **Free text** → extract the learning (main flow below).
+- **`remove <N>` or `remover <N>`** → go to the **Remove entry** flow. `N` must be a positive integer matching an existing entry number. If `N` is not a number, out of range, or the file has no entries, tell the user what went wrong and list valid entry numbers (or state the file is empty).
+
+If `$ARGUMENTS` matches the remove pattern, go to the **Remove entry** flow below.
 
 Otherwise, extract from the user's description:
 - **What happened** — the concrete trigger situation
@@ -73,11 +78,12 @@ Tell the user: entry number, title, and total entry count. One line.
 
 When the user says `/capture-analysis remove N` or marks an item as implemented:
 
-1. Read the file, identify entry N.
-2. Remove that entry.
-3. Renumber remaining entries sequentially (no gaps).
-4. If no entries remain, delete the file entirely (`rm analysis.md`).
-5. Confirm: "Removed entry N: [title]. [M entries remaining / File removed.]"
+1. Read the file. If the file doesn't exist or has no entries, tell the user: "No analysis file found (or no entries to remove)." and stop.
+2. Validate N: must be a positive integer within the range of existing entries. If invalid, list available entry numbers and stop.
+3. Identify and remove entry N.
+4. Renumber remaining entries sequentially (no gaps).
+5. If no entries remain, delete the file entirely (`rm analysis.md`).
+6. Confirm: "Removed entry N: [title]. [M entries remaining / File removed.]"
 
 ## Guidelines
 

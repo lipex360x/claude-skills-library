@@ -19,7 +19,8 @@ skills-library/
             ├── SKILL.md              # Required. Frontmatter + instructions (<500 lines)
             ├── README.md             # Public-facing docs (install, usage, triggers)
             ├── references/           # Optional. Detailed guides loaded on demand
-            └── templates/            # Optional. Output formats, starter structures
+            ├── templates/            # Optional. Output formats, starter structures
+            └── command/              # Optional. Slash command entry points
 ```
 
 ## Plugins (8)

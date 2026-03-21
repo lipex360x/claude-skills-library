@@ -111,7 +111,7 @@ Parse all checkboxes in the linked issue body (`- [ ]` unchecked, `- [x]` checke
 
 ### 4b. Check test markers
 
-Grep test files for `.fixme`, `.skip`, `.todo`, and `only` markers. Flag any found — do not proceed until resolved or explicitly approved.
+Grep test files (patterns: `**/*.test.{ts,js,tsx,jsx}`, `**/*.spec.{ts,js,tsx,jsx}`) for `.fixme`, `.skip`, `.todo`, and `only` markers. Flag any found — do not proceed until resolved or explicitly approved.
 
 ## 5. Move card to "In review"
 
@@ -140,8 +140,16 @@ Report:
 
 After reporting, use `AskUserQuestion` with options `["Yes, merge now", "No, wait for review"]`.
 
-- **"Yes, merge now"** → invoke `/close-pr`
+- **"Yes, merge now"** → invoke `/close-pr`. If `/close-pr` is unavailable, run `gh pr merge --merge --delete-branch` directly and move the issue card to "Done".
 - **"No, wait for review"** → end normally
+
+## Anti-patterns — avoid these
+
+- **Silently dropping unchecked items.** Every unchecked checkbox must be explicitly resolved (move, skip, mark done, or create backlog). Never ignore them.
+- **Creating PRs with test markers.** `.skip`, `.only`, `.fixme`, `.todo` in test files must be resolved before the PR is created.
+- **Force-pushing to get around conflicts.** Resolve conflicts properly — never force-push to make them disappear.
+- **Generic PR summaries.** "Various fixes" or "Updates" are not acceptable. The summary must describe the actual changes with specific bullet points.
+- **Local paths in PR body.** Never reference `~/.brain/`, `/Users/...`, or any machine-specific absolute paths in PR content or issue comments.
 
 ## Guidelines
 

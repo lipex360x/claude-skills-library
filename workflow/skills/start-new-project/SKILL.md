@@ -95,6 +95,7 @@ Rules for the execution plan:
 - **Mark blocked teammates** — if a teammate depends on another's output, note it explicitly (e.g., "blocked until backend completes").
 - **Teammates inherit the user's model by default.** Optionally suggest Sonnet for teammates if the user wants to optimize for speed or cost. Don't default to a cheaper model — let the user decide.
 - **Keep it practical** — 2-4 teammates max. More creates coordination overhead that outweighs the parallelism benefit.
+- **Specify tool access per teammate** — each `TeamCreate` invocation must list the tools the teammate needs (e.g., `Bash`, `Read`, `Edit`, `Write`, `Glob`, `Grep`). Omitting the tool list causes teammates to inherit defaults that may lack critical tools (e.g., `Bash` for running tests) or include unnecessary ones. Match tools to the teammate's responsibility — a frontend teammate needs `Bash` for builds, a docs teammate may only need `Read` + `Write`.
 
 If Agent Teams is not enabled, skip the Execution mode section entirely — do not include it with a "not enabled" note.
 
@@ -138,6 +139,8 @@ If milestones were created in Step 5, assign issues to them:
 gh issue edit <number> --milestone "<milestone name>"
 ```
 
+**Error recovery:** If issue creation fails mid-flow (e.g., after creating 2 of 4 issues), report what was successfully created (issue numbers and URLs), then suggest manual completion — provide the `gh issue create` commands for the remaining issues so the user can run them. Do not retry silently because duplicate issues are harder to clean up than resuming from where it stopped.
+
 **Note:** Board item assignment (primary tracking mechanism) happens in Step 7 after the project board is created.
 
 ### 7. Create project board
@@ -152,6 +155,8 @@ Always create a GitHub Project board for every new project — even with a singl
 4. **Create Size field** — single-select with options: `XS`, `S`, `M`, `L`, `XL`
 5. **Add issues to the project** — `gh project item-add` for each issue created in Step 6. This is the primary tracking mechanism — board columns indicate status, not milestones
 6. **Set initial field values** — set status to "Backlog", priority and size based on the plan (infer from step count and complexity, or ask the user during the approval gate if uncertain)
+
+**Error recovery:** If any board setup step fails (project creation, field configuration, item addition), report what succeeded and what failed. Provide the exact `gh` commands for the failed steps so the user can retry manually or fix permissions. Board setup failures should not block the branch creation in Step 8 — the issues already exist and can be added to the board later.
 
 **Priority and Size assignment:** When creating issues (Step 6), determine priority and size for each:
 - **Priority** — P0 for blocking/foundational work (scaffolding, schema), P1 for core features, P2 for nice-to-haves and polish

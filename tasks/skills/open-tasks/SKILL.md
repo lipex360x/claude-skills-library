@@ -11,7 +11,7 @@ Reopen the task visibility board.
 2. Set `task-visibility.always-open` to `true`.
 3. Read the config again to verify the change took effect. If the value is not `true`, report the failure.
 4. Resume creating and tracking tasks as normal.
-5. Confirm briefly that the board is open.
+5. Confirm with: `✅ Task board is open. Tasks will be created for non-trivial work.`
 
 ## Anti-patterns
 

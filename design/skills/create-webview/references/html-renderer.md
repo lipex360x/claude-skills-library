@@ -2,6 +2,28 @@
 
 Detailed guide for Phase 3 — building the dynamic HTML slide renderer from JSON data.
 
+## Table of Contents
+
+- [Architecture](#architecture)
+  - [Function Array Pattern](#function-array-pattern)
+  - [Null Guard Pattern](#null-guard-pattern)
+- [Helper Functions](#helper-functions)
+  - [el(tag, attrs, children)](#eltag-attrs-children)
+  - [slide(opts)](#slideopts)
+  - [header(tag, title, subtitle)](#headertag-title-subtitle)
+  - [nextSlide()](#nextslide)
+- [Component Patterns](#component-patterns)
+  - [Metric Cards](#metric-cards)
+  - [Bar Charts](#bar-charts)
+  - [Timeline](#timeline)
+  - [Detail Cards](#detail-cards)
+  - [Data Tables](#data-tables)
+  - [Split Layout](#split-layout)
+- [Multi-slide Pagination](#multi-slide-pagination)
+- [Factory Pattern for Repeated Sections](#factory-pattern-for-repeated-sections)
+- [Typography Hierarchy](#typography-hierarchy)
+- [CSS Naming Conventions](#css-naming-conventions)
+
 ## Architecture
 
 The renderer follows a function-array pipeline pattern:

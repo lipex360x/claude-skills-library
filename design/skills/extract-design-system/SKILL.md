@@ -2,6 +2,7 @@
 name: extract-design-system
 description: Analyze a design image and create a full design system project with separated artboards (foundations, components, sections) via MCP tools. Use this skill whenever the user provides a reference image, screenshot, or mockup and wants to extract a design system, create artboards, build a component library, or reverse-engineer visual patterns from an existing design — even if they don't explicitly say "design system."
 user-invocable: true
+argument-hint: "[project-slug]"
 ---
 
 # System Design — Hub-Centric Builder
@@ -10,15 +11,42 @@ Extract a design system from a reference image and create a complete project wit
 
 ## Usage
 
-The user places reference images in the `design/` folder. If an argument is provided (e.g. `/system-design my-project`), use it as the project slug. Otherwise, infer from the image filename or ask.
+The user places reference images in the `design/` folder. If an argument is provided (e.g. `/extract-design-system my-project`), use it as the project slug. Otherwise, infer from the image filename or ask.
+
+## Prerequisites
+
+This skill depends on MCP tools from a **web-based design system server** (e.g. a local dev server with artboard management). The following tools must be available:
+
+| MCP Tool | Purpose |
+|---|---|
+| `create_project` | Create a new design system project |
+| `navigate` | Open the project hub in the browser |
+| `create_artboards` | Batch-create artboard files with shimmer placeholders |
+| `get_screenshot()` | Capture a screenshot of the current browser view |
+
+**Pre-flight check:** Before starting Phase A, verify these tools are available. If any tool is missing, stop and tell the user which MCP server needs to be configured.
+
+## Deliverables
+
+The skill produces the following output files inside the project directory:
+
+- **`tokens.css`** — CSS custom properties extracted from the reference (colors, typography, spacing)
+- **Artboard HTML files** — one per artboard (e.g. `foundations.html`, `components.html`, `hero-navigation.html`, `content-sections.html`, `footer-cta.html`). See `references/artboard-guidelines.md` for the standard filenames
+- **Project manifest** — created by `create_artboards`, tracks artboard status and metadata
 
 ## Steps
+
+### 0. Pre-flight
+
+Verify that the required MCP tools (`create_project`, `navigate`, `create_artboards`, `get_screenshot`) are available. If any is missing, stop and tell the user which MCP server to configure — do not proceed with a partial toolset.
 
 ### 1. Discover and analyze the reference image
 
 ```
 Glob: design/**/*.{png,jpg,jpeg,webp}
 ```
+
+If no images are found, stop and tell the user: "No reference images found in `design/`. Place at least one image (PNG, JPG, or WebP) in the `design/` folder and try again."
 
 Read all images. Analyze as a **design reference** — the goal is to reverse-engineer the visual language (colors, typography, spacing, component patterns), not to clone the page content.
 
@@ -62,11 +90,19 @@ Wait for all setup calls to complete before proceeding.
 
 **Why curl, not MCP?** Subagents don't reliably inherit MCP tools from the parent process. The HTTP API is the same endpoint the MCP tool calls internally — `curl` cuts the intermediary and works 100% of the time.
 
+**Error handling:**
+- If `create_project` or `create_artboards` fails in Phase A, stop and report the error — do not launch agents against a broken setup.
+- If an agent fails in Phase B (curl error, crash, timeout), report which artboard failed. The user can re-run individual agents without restarting the whole build.
+
 ### 6. Final verification
 
 After all agents complete:
 1. All thumbnails should be visible on the hub
 2. Take a screenshot via `get_screenshot()` and present to the user
+
+### 7. Refinement
+
+After presenting the screenshot, ask the user if any artboard needs adjustments. Use `AskUserQuestion` with options like `["Looks good — done", "Adjust an artboard"]`. If the user wants changes, re-launch only the affected agent(s) with updated instructions — no need to rebuild the entire project. Repeat until the user approves.
 
 ## Guidelines
 

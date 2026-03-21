@@ -111,21 +111,30 @@ If an issue was found in Step 5 and **all checkboxes are now checked** (0 remain
 
 Use `AskUserQuestion` with options `["Yes, open PR", "No, not yet"]`.
 
-- **"Yes, open PR"** → invoke `/open-pr`
+- **"Yes, open PR"** → invoke `/open-pr`. If the skill is unavailable, tell the user to run `/open-pr` manually
 - **"No, not yet"** → end normally
 
 If there are still open checkboxes, skip this step entirely.
 
+## Avoid these
+
+- **Force-pushing** — rewrites shared history; others pulling the branch will get conflicts or lose work.
+- **Amending after hook failure** — the failed commit never landed, so `--amend` modifies the *previous* commit, potentially destroying unrelated work.
+- **Staging secrets** (`.env`, `*.key`, `*.pem`, `credentials.json`, files with `API_KEY=`/`SECRET=`/`PASSWORD=`) — the scan in step 3 catches common patterns; pre-commit hooks are the second line of defense.
+- **Committing unrelated files in one commit** — defeats `git bisect` and makes reverts dangerous. Group by concern (step 2).
+- **Skipping issue update when the branch has an issue** — the issue is the source of truth for progress. If `gh` is available and an issue exists, always attempt the update.
+- **Auto-editing ARCHITECTURE.md** — only add a note to the commit message body (step 6 of Guidelines). The file owner decides what to change.
+
 ## Guidelines
-
-- **Never force-push.** If the push is rejected, explain why and ask the user.
-
-- **Never amend.** Each push creates a new commit. Amending published commits rewrites history others may depend on. Amending after a hook failure modifies the wrong commit.
-
-- **Never stage secrets.** The scan in step 3 catches common patterns. If something slips through, the user's pre-commit hooks are the second line of defense.
 
 - **No gates by default.** The default flow is fully automated — draft message, stage, commit, push, update issue. Only stop and ask via `AskUserQuestion` when something unexpected happens (secrets detected, push rejected, ambiguous checkbox matches). The `--confirm` flag adds an explicit approval step for the commit message when the user wants it.
 
 - **Graceful degradation.** If `gh` is not available, skip the issue update step. If the branch has no issue, skip it. If the issue body can't be parsed, skip it. The core job (commit + push) always completes.
 
-- **ARCHITECTURE.md drift detection.** Before committing, check if staged changes introduce patterns that should be reflected in `ARCHITECTURE.md` (if the file exists). Signals: new route (`page.tsx`/`route.ts` in a new directory), new dependency in `package.json`/`Cargo.toml`/`go.mod`, new migration file (schema change), new file in a location that doesn't match any documented pattern. If ARCHITECTURE.md doesn't exist, skip this check entirely. If drift is detected, append a note to the **commit message body** (not the title): `Note: ARCHITECTURE.md may need updating (new route: /payments, new dep: recharts)`. This makes the reminder permanent in git history and visible to anyone reading the log. Do NOT auto-edit ARCHITECTURE.md or block the commit — this is informational only.
+- **ARCHITECTURE.md drift detection.** Before committing, check if staged changes introduce patterns that should be reflected in `ARCHITECTURE.md` (if the file exists):
+  - New route (`page.tsx`/`route.ts` in a new directory)
+  - New dependency in `package.json`/`Cargo.toml`/`go.mod`
+  - New migration file (schema change)
+  - New file in a location that doesn't match any documented pattern
+
+  If ARCHITECTURE.md doesn't exist, skip this check entirely. If drift is detected, append a note to the **commit message body** (not the title): `Note: ARCHITECTURE.md may need updating (new route: /payments, new dep: recharts)`. Do NOT auto-edit ARCHITECTURE.md or block the commit — this is informational only.

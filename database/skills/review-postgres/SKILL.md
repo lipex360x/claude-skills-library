@@ -29,7 +29,7 @@ If the input is ambiguous, ask the user to share the relevant SQL or schema befo
 
 ### 1. Identify scope
 
-Determine what the user needs reviewed. Read the provided SQL, schema, migration, or description. Classify each item by the rule categories below to decide which reference files to load.
+Determine what the user needs reviewed. Read the provided SQL, schema, migration, or description. Classify each item by the rule categories below to decide which reference files to load. If the input is not SQL or schema-related (e.g., an ORM model or application code), extract the database-relevant parts or ask the user to provide the generated SQL. If no rule categories match the identified scope, inform the user and suggest what input would help.
 
 ### 2. Load relevant rules
 

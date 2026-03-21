@@ -70,7 +70,7 @@ Avoid the default light-blue-on-white that screams "AI-generated diagram."
 
 ## Typography in Excalidraw
 
-All text uses `fontFamily: 5` (Excalifont), but you control hierarchy through:
+Default to `fontFamily: 1` (Virgil) for the hand-drawn sketch feel that defines Excalidraw. Use `2` (Helvetica) when clean readability matters, `3` (Cascadia) for code or monospace contexts. Control hierarchy through:
 
 - **Title**: 28-32px, bold weight simulation through element emphasis
 - **Node labels**: 18-22px, centered in elements
