@@ -2,6 +2,13 @@
 name: create-hook
 description: Guide the user through creating or improving Claude Code hooks — from choosing the right event to writing the script and registering in settings.json. Use this skill when the user mentions "create a hook", "new hook", "add a hook", "improve a hook", "PostToolUse", "PreToolUse", "PreCompact", "SessionStart", or wants event-driven automation — even if they don't explicitly say "hook."
 user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - AskUserQuestion
 ---
 
 # Create Hook

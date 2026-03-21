@@ -3,6 +3,11 @@ name: close-tasks
 description: Close the task visibility board and stop task tracking for the session. Use this skill when the user says "close tasks", "stop tracking", "tv close", "hide tasks", or wants to disable the task board — even if they don't explicitly say "close."
 user-invocable: true
 disable-model-invocation: false
+allowed-tools:
+  - Read
+  - TaskGet
+  - TaskUpdate
+  - AskUserQuestion
 ---
 
 Close the task visibility board.

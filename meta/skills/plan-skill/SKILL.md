@@ -2,6 +2,12 @@
 name: plan-skill
 description: Plan and spec out a Claude Code skill from raw input — a document, conversation, verbal idea, or rough notes. Produces a structured spec file that /create-skill consumes directly. Use this skill whenever the user says "plan a skill", "spec for a skill", "structure this idea into a skill", "prepare input for create-skill", "think through a skill before building it", or describes a skill idea they want to formalize — even if they don't explicitly say "plan".
 user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - AskUserQuestion
+  - WebSearch
+  - WebFetch
 ---
 
 # Plan Skill

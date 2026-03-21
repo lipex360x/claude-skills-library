@@ -2,6 +2,16 @@
 name: create-skill
 description: Guide the user through creating, reviewing, or improving Claude Code skills — from structuring SKILL.md files to writing effective descriptions, designing progressive disclosure, and launching subagents. Use this skill whenever the user mentions "create a skill", "improve a skill", "update a skill", "skill quality", "skill best practices", "how to write a skill", or wants to build or update a /command — even if they don't explicitly say "skill."
 user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - Grep
+  - Agent
+  - AskUserQuestion
+  - Skill
 ---
 
 # Create Skill

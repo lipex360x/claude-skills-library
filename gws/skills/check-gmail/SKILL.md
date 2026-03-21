@@ -17,6 +17,11 @@ metadata:
     - inbox
     - gws
 user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - AskUserQuestion
 ---
 
 # check-gmail

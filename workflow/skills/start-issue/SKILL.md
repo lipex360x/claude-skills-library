@@ -2,6 +2,20 @@
 name: start-issue
 description: Pull an issue and start implementation — reads the issue, expands acceptance criteria into a detailed step-by-step plan with checkboxes, rewrites the issue, creates branch and tasks. Use this skill when the user says "start issue", "work on issue #N", "pull from backlog", "start #N", or wants to begin implementing an issue — even if they don't explicitly say "issue."
 user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - Grep
+  - Agent
+  - AskUserQuestion
+  - TaskCreate
+  - TaskUpdate
+  - TeamCreate
+  - WebSearch
+  - WebFetch
 ---
 
 # Start Issue

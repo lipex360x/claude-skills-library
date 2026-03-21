@@ -18,6 +18,12 @@ metadata:
     - webview
 argument-hint: "[data-sources-or-description]"
 user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Agent
+  - AskUserQuestion
 ---
 
 # Create Webview

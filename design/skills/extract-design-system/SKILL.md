@@ -3,6 +3,13 @@ name: extract-design-system
 description: Analyze a design image and create a full design system project with separated artboards (foundations, components, sections) via MCP tools. Use this skill whenever the user provides a reference image, screenshot, or mockup and wants to extract a design system, create artboards, build a component library, or reverse-engineer visual patterns from an existing design — even if they don't explicitly say "design system."
 user-invocable: true
 argument-hint: "[project-slug]"
+allowed-tools:
+  - Read
+  - Write
+  - Glob
+  - Agent
+  - AskUserQuestion
+  - TaskCreate
 ---
 
 # System Design — Hub-Centric Builder

@@ -2,6 +2,12 @@
 name: find-skills
 description: Discover and install agent skills from the open skills ecosystem. Use when the user says "find a skill", "is there a skill for X", "search skills", "how do I do X", "can you do X", "extend capabilities", "add a skill", or wants to search for tools, templates, or workflows — even if they don't explicitly say "find" or "skill."
 user-invocable: true
+allowed-tools:
+  - Read
+  - Bash
+  - AskUserQuestion
+  - WebSearch
+  - WebFetch
 ---
 
 # Find Skills

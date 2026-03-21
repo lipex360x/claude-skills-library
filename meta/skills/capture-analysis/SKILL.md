@@ -2,6 +2,10 @@
 name: capture-analysis
 description: Capture skill gaps, workflow frictions, and pattern improvements as structured entries in an analysis file. Use when the user says "/capture-analysis", "analisa isso", "estuda isso", "documenta essa melhoria", "adiciona no analysis", "lessons learned", or wants to record a finding for future skill updates — even if they don't explicitly say "analysis."
 user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Glob
 ---
 
 # Analysis

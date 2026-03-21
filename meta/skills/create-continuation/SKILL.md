@@ -2,6 +2,11 @@
 name: create-continuation
 description: Generate a continuation prompt to paste into a new Claude Code conversation. Use this skill when the user wants to switch sessions, is hitting context limits, needs to hand off work to a fresh window, says "let's continue later", "save context", "continuation prompt", or asks to prepare a handoff for a new conversation — even if they don't explicitly say "continuation" or "handoff."
 user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Glob
+  - Grep
 ---
 
 # Prompt Continue

@@ -2,6 +2,11 @@
 name: inspire-me
 description: Guided exploration session to unblock thinking on any topic — career, relationships, creativity, business, health, or any life area. Helps clarify mental blocks through structured questioning, optional document analysis, and web research. Use when the user says "inspire me", "me inspira", "estou travado", "mental block", "can't decide", "preciso clarear a mente", "help me think through this", "I'm stuck", or wants to work through a block — even if they don't explicitly say "inspire."
 user-invocable: true
+allowed-tools:
+  - Read
+  - AskUserQuestion
+  - WebSearch
+  - WebFetch
 ---
 
 # Inspire Me

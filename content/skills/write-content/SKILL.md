@@ -1,6 +1,11 @@
 ---
 name: write-content
 description: Help the user create compelling written content and marketing copy — LinkedIn posts, articles, social media, memos, emails, landing pages, headlines, CTAs, value propositions — that sounds authentically like them and drives action. Use when the user says "write a post", "review this text", "polish this draft", "write copy for", "improve this copy", "rewrite this page", "marketing copy", "headline help", "CTA copy", "value proposition", "tagline", "hero section", "make this more compelling", or wants content that is clear, concise, and persuasive — even if they don't explicitly say "written" or "copywriting."
+allowed-tools:
+  - Read
+  - Write
+  - Glob
+  - AskUserQuestion
 ---
 
 # Written

@@ -1,6 +1,13 @@
 ---
 name: capture-voice
 description: Analyzes the current conversation to capture the user's writing voice for content generation — posts, articles, social media that sound like them, not AI-generated. Use this skill when the user runs /capture-voice, when triggered by the PreCompact hook, or whenever voice profile analysis is needed. Also use it when the user asks to update or check their voice profile, says "meu estilo", "como eu falo", "aprenda meu jeito", or wants content that sounds like them — even if they don't explicitly say "voice" or "myvoice."
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Agent
 ---
 
 # MyVoice

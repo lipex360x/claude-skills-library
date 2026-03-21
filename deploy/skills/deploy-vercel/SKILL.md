@@ -1,6 +1,10 @@
 ---
 name: deploy-vercel
 description: Deploy, manage, and develop projects on Vercel from the command line. Use when deploying to Vercel, configuring domains, setting up environment variables, managing CI/CD pipelines, running local dev with `vercel dev`, or troubleshooting deployment issues — even if they don't explicitly say "Vercel."
+allowed-tools:
+  - Read
+  - Bash
+  - AskUserQuestion
 ---
 
 # Vercel CLI Skill

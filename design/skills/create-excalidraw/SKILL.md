@@ -3,6 +3,11 @@ name: create-excalidraw
 description: 'Generate Excalidraw diagrams from natural language descriptions. Use when asked to "create a diagram", "make a flowchart", "visualize a process", "draw a system architecture", "create a mind map", "generate an Excalidraw file", "draw this", "diagram this", or wants any kind of visual diagram — even if they don''t explicitly say "Excalidraw." Supports flowcharts, relationship diagrams, mind maps, architecture, data flow, swimlane, class, sequence, and ER diagrams. Outputs .excalidraw JSON files.'
 user-invocable: true
 argument-hint: '<diagram description>'
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - AskUserQuestion
 ---
 
 # Create Excalidraw

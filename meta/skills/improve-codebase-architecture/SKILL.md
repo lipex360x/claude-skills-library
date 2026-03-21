@@ -2,6 +2,14 @@
 name: improve-codebase-architecture
 description: Explore a codebase for architectural friction, surface shallow modules and coupling issues, and propose deep-module refactors as GitHub issue RFCs. Use when the user says "improve architecture", "refactor modules", "codebase review", "make code agent-friendly", "deep modules", "module boundaries", "architectural friction", "simplify codebase", or wants to restructure code for better testability and maintainability — even if they don't explicitly say "architecture."
 user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - Grep
+  - Agent
+  - AskUserQuestion
 ---
 
 # Improve Codebase Architecture
