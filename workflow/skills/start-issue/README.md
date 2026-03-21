@@ -16,7 +16,7 @@ Turns an issue with high-level acceptance criteria into a detailed implementatio
 ## How it works
 
 1. **Select issue** — picks from Backlog milestone by number or presents a list for selection
-2. **Analyze the issue** — fetches issue details and reads the codebase (ARCHITECTURE.md first, then exploration if needed); detects CDP config for web projects; checks Agent Teams availability
+2. **Analyze the issue** — fetches issue details and reads issue comments for actionable context (file paths, scope transfers, partial completion notes), then reads the codebase (ARCHITECTURE.md first, then exploration narrowed by comment insights if available); detects CDP config for web projects; checks Agent Teams availability
 3. **Propose the detailed plan** — expands acceptance criteria into Steps with concrete checkboxes, file paths, and TDD order. Splits into multiple issues if 8+ steps. Adds Agent Teams execution mode if enabled
 4. **Update the issue** — rewrites the issue body with the approved plan (creates additional issues if split)
 5. **Create branch** — `feat/<number>-<slug>` from main

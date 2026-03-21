@@ -59,7 +59,26 @@ Extract:
 - **What/Why** — context for planning
 - **Acceptance criteria** — the high-level checkboxes to expand into detailed steps
 
-Also analyze the **current codebase** to inform the plan. **Start by checking for `ARCHITECTURE.md` at the project root.** If it exists, read it first — it contains stack, layers, patterns, schema, auth model, and routes, eliminating the need for expensive exploration (~2k tokens vs ~53k). Only spawn an exploration agent if ARCHITECTURE.md is missing, incomplete, or appears stale (e.g., routes in the file don't match `src/app/` directory).
+**Read issue comments for context.** After fetching the issue body, fetch comments before analyzing the codebase:
+
+```bash
+gh issue view <number> --json comments --jq '.comments[] | {author: .author.login, body: .body}'
+```
+
+If the issue has comments, scan them for actionable context:
+- **File paths** — explicit references to files or directories (e.g., `workflow/skills/push/SKILL.md`)
+- **Scope transfers** — notes from `/open-pr` or `/close-pr` indicating what was done or what remains
+- **Partial completion notes** — comments from previous branches describing completed work or abandoned approaches
+- **Blocker resolutions** — updates about resolved blockers that change the implementation approach
+- **Implementation hints** — suggestions, code snippets, or architecture decisions from collaborators
+
+Store the extracted context as **comment insights** — a structured summary of what the comments reveal. These insights feed directly into the codebase analysis phase: if comments already point to specific files, patterns, or completed work, the exploration scope can be narrowed significantly.
+
+If the issue has no comments, skip this step and proceed to codebase analysis with full exploration scope.
+
+**Analyze the current codebase** to inform the plan, using comment insights to narrow exploration scope. **Start by checking for `ARCHITECTURE.md` at the project root.** If it exists, read it first — it contains stack, layers, patterns, schema, auth model, and routes, eliminating the need for expensive exploration (~2k tokens vs ~53k). Only spawn an exploration agent if ARCHITECTURE.md is missing, incomplete, or appears stale (e.g., routes in the file don't match `src/app/` directory).
+
+**Apply comment insights to narrow exploration.** If comment insights identified specific file paths or directories, target those first instead of a full codebase scan. If comments provide sufficient context about the relevant code areas (e.g., "all changes are in `workflow/skills/push/`"), reduce the exploration agent scope to those areas or skip exploration entirely when the comments plus ARCHITECTURE.md already provide enough context for concrete checkboxes. When the issue has no comments or comments contain no actionable context, fall back to the current full-scan behavior unchanged.
 
 **If ARCHITECTURE.md doesn't exist, create it.** This is the first issue being worked on — the codebase has no knowledge cache yet. Explore the codebase (read package.json, directory structure, key config files, existing routes/schema), then generate `ARCHITECTURE.md` at the project root using the same structure as `start-new-project` (stack, layers, patterns by canonical example, schema summary, auth model, routes). This file is the **living context document** — `/close-pr` will update it after each merge, and every subsequent `/start-backlog` will read it first. Creating it now pays for itself immediately: the plan you're about to write will be more concrete, and every future session starts with context instead of re-exploration.
 
