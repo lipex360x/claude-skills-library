@@ -129,7 +129,10 @@ If Agent Teams is not enabled, skip the Execution mode section entirely — do n
 
 Before presenting, review the plan with a critical eye: tighten vague checkboxes, remove redundancy, ensure TDD order, verify file paths are concrete. The question is "how can I make this plan more precise?" — not "what else can I add?"
 
-**Wait for the user's approval before proceeding.** This is the only approval gate. The user may request changes — iterate until they approve.
+Present the plan and use `AskUserQuestion` with options `["Aprovado", "Quero ajustar"]`. This is the only approval gate.
+
+- **"Aprovado"** — proceed directly to Step 4. No further confirmation needed.
+- **"Quero ajustar"** — ask the user what to change (free text follow-up), apply the requested changes to the plan, then present the updated plan and the same `AskUserQuestion` again. Repeat until the user selects "Aprovado".
 
 ### 4. Update the issue (or create additional issues)
 
