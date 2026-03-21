@@ -2,43 +2,38 @@
 
 Plugin: workflow
 Audited: 2026-03-21
-Checklist version: current (runtime read)
 
 ## Results
 
 | # | Check | Status | Finding |
 |---|-------|--------|---------|
-| 1 | Description: pushy triggers | ✅ pass | 7 trigger phrases including PT-BR variants ("me entrevista", "quero detalhar isso", "vamos aprofundar"), plus "even if they don't explicitly say 'grill'" |
-| 2 | Description: WHAT + WHEN | ✅ pass | Clear action ("Deep structured interview... to generate PRD input") + multiple trigger contexts |
-| 3 | Description: "even if" pattern | ✅ pass | Present: "even if they don't explicitly say 'grill'" |
-| 4 | SKILL.md: under 500 lines | ✅ pass | 103 lines, lean |
-| 5 | SKILL.md: imperative form | ✅ pass | "Choose interview language", "Capture the starting point", "Conduct the interview" |
-| 6 | SKILL.md: constraints reasoned | ✅ pass | Options contextualized with reasoning ("Options must reflect what has already been discussed"), anti-patterns explained with rationale |
-| 7 | SKILL.md: numbered steps | ✅ pass | 6 numbered steps with clear headers |
-| 8 | SKILL.md: output formats | ✅ pass | References `templates/grill-output.md` for output template, output path specified (`.claude/grill-output.md`) |
-| 9 | SKILL.md: input contract | ⚠️ partial | Usage section mentions optional argument but no formal input contract table with validation rules and type expectations |
-| 10 | Quality: repeated at key points | ✅ pass | Quality rules reinforced in interview rules (lines 54-65) and guidelines section (lines 86-103) |
-| 11 | Quality: anti-patterns named | ✅ pass | 5 specific anti-patterns listed (lines 98-103): open-ended questions without options, generic options, skipping branches, generating without checkpoint, mixing interview with solutioning |
-| 12 | Quality: refinement step | ✅ pass | Step 5 "Alignment checkpoint" serves as explicit refinement/polish gate with options to adjust |
-| 13 | Quality: error handling | ⚠️ partial | No explicit error handling for tool failures (e.g., what if AskUserQuestion fails, or codebase detection gives ambiguous results). Graceful degradation not addressed |
-| 14 | Testing: invoked with realistic input | N/A | Cannot verify from file content alone — requires manual confirmation |
-| 15 | Testing: activation tested (3+ phrases) | N/A | Cannot verify from file content alone |
-| 16 | Testing: failure modes checked | N/A | Cannot verify from file content alone |
-| 17 | Subagents: applicable? | N/A | No subagents used |
-| 18 | Structure: standard layout | ✅ pass | SKILL.md + references/interview-branches.md + templates/grill-output.md + README.md |
-| 19 | Structure: references depth | ✅ pass | One level deep (references/interview-branches.md) |
-| 20 | Structure: large refs have TOC | N/A | Would need to check reference file size |
-| 21 | Structure: self-contained | ✅ pass | No cross-skill dependencies detected |
-| 22 | Structure: README generated | ✅ pass | README.md exists |
-| 23 | Compliance: CLAUDE.md compliance | ✅ pass | No `disable-model-invocation: true`, verb-subject naming ("grill-me"), user-invocable: true |
+| 1 | Description: pushy enough? | ✅ | 6 trigger phrases including Portuguese ("me entrevista", "quero detalhar isso") and English ("stress-test this idea", "let's flesh this out") |
+| 2 | Description: WHAT + WHEN? | ✅ | "Deep structured interview... extracts decisions, constraints, and context to generate PRD input" + triggers |
+| 3 | Description: "even if" pattern? | ✅ | "even if they don't explicitly say 'grill'" |
+| 4 | Body: under 500 lines? | ✅ | 103 lines |
+| 5 | Body: imperative form? | ✅ | "Choose interview language", "Capture the starting point", "Conduct the interview" |
+| 6 | Body: constraints reasoned? | ✅ | Guidelines explain WHY: "Smart options demonstrate competence" (line 89), "Depth > breadth" (line 91), "Don't invent decisions" (line 93), "Codebase as oracle" (line 97) |
+| 7 | Body: numbered steps? | ✅ | 6 numbered steps |
+| 8 | Body: output formats defined? | ✅ | Step 6 references `templates/grill-output.md` which defines a complete structured template (74 lines) |
+| 9 | Body: input contract? | ✅ | Lines 13-15: "/grill-me or /grill-me <brief description>" with behavior for both cases |
+| 10 | Quality: repeated at key points? | ✅ | "Every question uses AskUserQuestion with options" repeated as Rule 1 (line 54) and reinforced in anti-patterns (line 99) |
+| 11 | Quality: anti-patterns named? | ✅ | Lines 98-103: 5 explicit anti-patterns including "Open-ended questions without options", "Generic options", "Skipping branches", "Generating output without checkpoint", "Mixing interview with solutioning" |
+| 12 | Quality: refinement step? | ✅ | Step 5 "Alignment checkpoint" with 3 options including "Need to adjust" which loops back |
+| 13 | Quality: error handling? | ⚠️ | Step 3 handles greenfield vs existing codebase detection. No handling for: user abandoning mid-interview, AskUserQuestion failures, codebase too large to explore |
+| 14 | Testing: invoked with realistic input? | N/A | Audit-only |
+| 15 | Testing: activation tested (3+ phrases)? | N/A | Audit-only |
+| 16 | Testing: failure modes checked? | N/A | Audit-only |
+| 17 | Subagents: applicable? | N/A | No subagents |
+| 18 | Structure: standard layout? | ✅ | SKILL.md, references/, templates/, README.md — full standard layout |
+| 19 | Structure: references one level deep? | ✅ | Single reference: interview-branches.md |
+| 20 | Structure: large refs have TOC? | ✅ | interview-branches.md (124 lines) has clear branch headers serving as TOC |
+| 21 | Structure: self-contained? | ✅ | No cross-skill dependencies. Mentions "/write-a-prd" only as a suggestion to the user (line 80), not a dependency |
+| 22 | Structure: README generated? | ✅ | README.md exists |
+| 23 | Compliance: CLAUDE.md? | ✅ | English, no local paths, project-agnostic |
 
-## Score: 15/19 (applicable items)
+## Score: 18/20
 
 ## Priority fixes (ordered by impact)
 
-1. **Add formal input contract table** — SKILL.md has a Usage section but lacks the structured input contract table (Input | Source | Required | Validation | On invalid) that other skills use. The argument is described informally in "Usage" and Step 2.
-2. **Add error handling patterns** — No explicit handling for tool failures or ambiguous codebase detection results. Add graceful degradation guidance for when AskUserQuestion or codebase exploration fails.
-
-## Recommended action
-
-- [ ] Run `/create-skill grill-me` with this report to apply fixes
+1. **Minor: error handling** — Add guidance for mid-interview abandonment (save partial progress to grill-output.md with a "partial" marker) and codebase exploration limits (set a token budget for code reading).
+2. **Minor: allowed-tools missing** — Header has no `allowed-tools` field. Should declare `AskUserQuestion, Bash, Read, Glob, Grep` to match the skill's needs (codebase exploration in Step 3).

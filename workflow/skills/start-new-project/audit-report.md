@@ -2,45 +2,42 @@
 
 Plugin: workflow
 Audited: 2026-03-21
-Checklist version: current (runtime read)
 
 ## Results
 
 | # | Check | Status | Finding |
 |---|-------|--------|---------|
-| 1 | Description: pushy triggers | ✅ pass | 7 trigger phrases ("start a new project", "new project", "let's build X", "plan a project", "create an issue for X", "I want to build", "project idea wanting structured planning") |
-| 2 | Description: WHAT + WHEN | ✅ pass | Clear action ("Plan and scaffold a new project from a prompt") + triggers covering both planning and execution |
-| 3 | Description: "even if" pattern | ✅ pass | Present: "even if they don't explicitly say 'new project'" |
-| 4 | SKILL.md: under 500 lines | ✅ pass | 269 lines |
-| 5 | SKILL.md: imperative form | ✅ pass | "Check for grill-me output", "Parse the prompt", "Ask clarifying questions", "Propose the phase structure", "Create the GitHub issues" |
-| 6 | SKILL.md: constraints reasoned | ✅ pass | Extensively reasoned: mandatory split rule ("buries progress, makes milestone tracking useless", line 73), TDD reasoning ("TDD-ordered checkboxes ARE the enforcement mechanism", line 199), ARCHITECTURE.md reasoning ("~2k tokens vs ~53k tokens", line 252), no workarounds reasoning ("invisible tech debt that compounds", line 254) |
-| 7 | SKILL.md: numbered steps | ✅ pass | 9 numbered steps with clear headers |
-| 8 | SKILL.md: output formats | ✅ pass | Issue template format defined (phases, steps, checkboxes). References templates/issue-template.md. Summary format in Step 9 |
-| 9 | SKILL.md: input contract | ⚠️ partial | Step 1 checks for grill-me output and Step 2 parses the prompt. But no formal input contract table. The skill accepts a bare invocation or description as argument — this should be formalized |
-| 10 | Quality: repeated at key points | ✅ pass | TDD mandatory repeated in guidelines (line 199) with detailed reasoning. No workarounds repeated (line 254). File paths, English content, and split rules all reinforced in both steps and guidelines |
-| 11 | Quality: anti-patterns named | ✅ pass | 9 explicit anti-patterns listed (lines 260-269): checkboxes without TDD order, generic checkboxes, mixed concerns, missing verification, monolithic issues, front-loading detail, local paths, workarounds, unnecessary comments |
-| 12 | Quality: refinement step | ✅ pass | Two explicit approval gates: Step 3 (clarifying questions) and Step 4 ("review the plan with a critical eye... iterate until they approve") |
-| 13 | Quality: error handling | ⚠️ partial | Step 1 handles missing grill-output with AUQ. Step 2 handles missing argument. But: no handling for gh CLI failures during issue creation, milestone creation failures, label creation conflicts, branch already exists |
-| 14 | Testing: invoked with realistic input | N/A | Cannot verify from file content alone |
-| 15 | Testing: activation tested (3+ phrases) | N/A | Cannot verify from file content alone |
-| 16 | Testing: failure modes checked | N/A | Cannot verify from file content alone |
-| 17 | Subagents: applicable? | ⚠️ partial | Agent Teams integration documented (lines 75-98) with teammate spawning rules. But tool access for teammates not explicit in frontmatter (no `allowed-tools` declared at all) |
-| 18 | Structure: standard layout | ✅ pass | SKILL.md + 5 references + 6 templates + README.md. Comprehensive structure |
-| 19 | Structure: references depth | ✅ pass | One level deep (all in references/) |
-| 20 | Structure: large refs have TOC | N/A | Would need to check each reference file size |
-| 21 | Structure: self-contained | ✅ pass | All references are local. Templates included in skill directory |
-| 22 | Structure: README generated | ✅ pass | README.md exists |
-| 23 | Compliance: CLAUDE.md compliance | ⚠️ partial | No `allowed-tools` in frontmatter. Skill uses Bash, Read, AskUserQuestion, potentially Agent/TeamCreate but none declared. No `disable-model-invocation` (correct default). Naming follows verb-subject convention |
+| 1 | Description: pushy enough? | ✅ | 7 trigger phrases: "start a new project", "new project", "let's build X", "plan a project", "create an issue for X", "I want to build" |
+| 2 | Description: WHAT + WHEN? | ✅ | "Plan and scaffold a new project from a prompt. Asks clarifying questions, proposes a phased GitHub issue structure" + triggers |
+| 3 | Description: "even if" pattern? | ✅ | "even if they don't explicitly say 'new project'" |
+| 4 | Body: under 500 lines? | ✅ | 267 lines |
+| 5 | Body: imperative form? | ✅ | "Check for grill-me output", "Parse the prompt", "Ask clarifying questions", "Propose the phase structure" |
+| 6 | Body: constraints reasoned? | ✅ | Extensive reasoning: TDD explained (line 197), test isolation explained (lines 199-203), E2E through UI explained (line 205), docker-compose explained (line 199), ARCHITECTURE.md explained (line 250), no workarounds explained (line 252), mandatory split explained (line 73) |
+| 7 | Body: numbered steps? | ✅ | 9 numbered steps |
+| 8 | Body: output formats defined? | ✅ | Step 4 references templates/issue-template.md. Summary in Step 9 defines 8 report items. Phase structure format fully defined |
+| 9 | Body: input contract? | ✅ | Step 1 checks for grill-output. Step 2 parses user prompt for name/stack/scope/domain. Handles bare invocation (line 38) |
+| 10 | Quality: repeated at key points? | ✅ | TDD repeated in Step 4 and Guidelines. "Don't over-plan" in guidelines. Mandatory split rule in Step 4 and guidelines. CDP emphasized in Steps 4 and guidelines |
+| 11 | Quality: anti-patterns named? | ✅ | Lines 258-267: 8 explicit anti-patterns including "Checkboxes without TDD order", "Generic checkboxes", "Mixed concerns", "Missing verification", "Monolithic issues", "Front-loading detail", "Local paths", "Workarounds" |
+| 12 | Quality: refinement step? | ✅ | Step 4: "Before presenting, review the plan with a critical eye" + two approval gates (Step 3 answers + Step 4 structure) |
+| 13 | Quality: error handling? | ⚠️ | Step 1 handles missing grill-output. Step 2 handles missing argument. No handling for: existing repo with conflicting branch names, gh CLI failures during issue/board creation, milestone creation failures |
+| 14 | Testing: invoked with realistic input? | N/A | Audit-only |
+| 15 | Testing: activation tested (3+ phrases)? | N/A | Audit-only |
+| 16 | Testing: failure modes checked? | N/A | Audit-only |
+| 17 | Subagents: agent context? | ✅ | Execution mode section (lines 75-98) defines teammate structure with dependency graph |
+| 18 | Subagents: tool access explicit? | ⚠️ | No explicit tool list for teammates. Same gap as start-issue |
+| 19 | Subagents: two-phase build? | N/A | Not applicable |
+| 20 | Subagents: race conditions mitigated? | ✅ | Sequential prefix + blocked teammates + explicit dependency tracking (lines 93-97) |
+| 21 | Structure: standard layout? | ✅ | SKILL.md, references/, templates/, README.md — full layout with 4 references and 6 templates |
+| 22 | Structure: references one level deep? | ✅ | All 4 references at one level |
+| 23 | Structure: large refs have TOC? | ✅ | phase-planning-guide.md (210 lines) has TOC. cdp-best-practices.md (245 lines) has numbered sections. tdd-methodology.md (192 lines) has TOC |
+| 24 | Structure: self-contained? | ✅ | All references are local copies. No cross-skill imports. Mentions /grill-me as a workflow suggestion (line 25), not a dependency |
+| 25 | Structure: README generated? | ✅ | README.md exists |
+| 26 | Compliance: CLAUDE.md? | ✅ | English, no local paths, project-agnostic |
 
-## Score: 15/19 (applicable items)
+## Score: 20/22
 
 ## Priority fixes (ordered by impact)
 
-1. **Add `allowed-tools` to frontmatter** — Skill uses Bash, Read, AskUserQuestion, and potentially TeamCreate but none are declared. This is important given the subagent integration.
-2. **Add formal input contract table** — Multiple input paths (bare invocation, description argument, grill-output file) should be formalized with validation rules.
-3. **Expand error handling** — Missing graceful degradation for: gh CLI issue creation failures, milestone conflicts, label conflicts, branch already exists scenarios.
-4. **Make teammate tool access explicit** — Agent Teams section describes teammate responsibilities but doesn't specify which tools each teammate gets.
-
-## Recommended action
-
-- [ ] Run `/create-skill start-new-project` with this report to apply fixes
+1. **Subagent tool access** — Same gap as start-issue: TeamCreate invocations should specify tool access for teammates.
+2. **Error handling for gh CLI** — Add graceful degradation if issue creation fails mid-flow (e.g., after creating 2 of 4 issues). Should report what was created and suggest manual completion.
+3. **Minor: Guidelines density** — Guidelines section (lines 197-267) is 70 lines. The longest guidelines (test isolation, CDP, DDD) could be extracted to references with Read tool instructions to reduce cognitive load.

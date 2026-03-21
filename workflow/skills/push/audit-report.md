@@ -2,43 +2,39 @@
 
 Plugin: workflow
 Audited: 2026-03-21
-Checklist version: current (runtime read)
 
 ## Results
 
 | # | Check | Status | Finding |
 |---|-------|--------|---------|
-| 1 | Description: pushy triggers | ✅ pass | 5 trigger phrases ("push", "commit and push", "ship it", "/push", "finalize work and sync issue tracking"), supports flags (-y, -nh) |
-| 2 | Description: WHAT + WHEN | ✅ pass | Clear action ("Commit, push, and update GitHub issue checkboxes") + multiple trigger contexts |
-| 3 | Description: "even if" pattern | ✅ pass | Present: "even if they don't explicitly mention the issue" |
-| 4 | SKILL.md: under 500 lines | ✅ pass | 118 lines |
-| 5 | SKILL.md: imperative form | ✅ pass | "Gather state", "Analyze and group changes", "Stage and commit" |
-| 6 | SKILL.md: constraints reasoned | ✅ pass | Constraints explained with reasoning: "Never amend — amending after a hook failure modifies the wrong commit" (line 67), "Never force-push" with explanation (line 76), secrets scan rationale (line 113) |
-| 7 | SKILL.md: numbered steps | ✅ pass | 6 numbered steps with clear headers |
-| 8 | SKILL.md: output formats | ✅ pass | Step 6 defines concise summary format with specific fields (commit hash, push status, checkboxes updated, remaining count) |
-| 9 | SKILL.md: input contract | ⚠️ partial | Flags section documents -y and -nh, but no formal input contract table with validation rules. Missing explicit handling for invalid flag combinations or unrecognized flags |
-| 10 | Quality: repeated at key points | ✅ pass | Key constraints ("never amend", "never force-push", "never stage secrets") stated in steps AND reinforced in guidelines |
-| 11 | Quality: anti-patterns named | ✅ pass | Implicit through guidelines: force-pushing, amending, staging secrets. Could be more explicitly listed as anti-patterns section |
-| 12 | Quality: refinement step | ✅ pass | Commit message approval gate serves as refinement/review step (Step 2), skippable with -y |
-| 13 | Quality: error handling | ✅ pass | Hook failure handling (line 67: fix, re-stage, new commit), push rejection handling (line 76: explain, suggest rebase, ask user), graceful degradation for missing gh CLI (line 116) |
-| 14 | Testing: invoked with realistic input | N/A | Cannot verify from file content alone |
-| 15 | Testing: activation tested (3+ phrases) | N/A | Cannot verify from file content alone |
-| 16 | Testing: failure modes checked | N/A | Cannot verify from file content alone |
-| 17 | Subagents: applicable? | N/A | No subagents used |
-| 18 | Structure: standard layout | ✅ pass | SKILL.md + references/issue-update-guide.md + README.md |
-| 19 | Structure: references depth | ✅ pass | One level deep |
-| 20 | Structure: large refs have TOC | N/A | Would need to check reference file size |
-| 21 | Structure: self-contained | ✅ pass | No cross-skill dependencies |
-| 22 | Structure: README generated | ✅ pass | README.md exists |
-| 23 | Compliance: CLAUDE.md compliance | ⚠️ partial | No `allowed-tools` in frontmatter. The skill uses Bash and Read implicitly but doesn't declare them. No `disable-model-invocation` (correct default per CLAUDE.md rules) |
+| 1 | Description: pushy enough? | ✅ | 5 trigger phrases: "push", "commit and push", "ship it", "/push". Also mentions issue sync |
+| 2 | Description: WHAT + WHEN? | ✅ | "Commit, push, and update GitHub issue checkboxes in one command" + flag descriptions + triggers |
+| 3 | Description: "even if" pattern? | ✅ | "even if they don't explicitly mention the issue" |
+| 4 | Body: under 500 lines? | ✅ | 131 lines |
+| 5 | Body: imperative form? | ✅ | "Run these in parallel", "Analyze all changes", "Stage and commit" |
+| 6 | Body: constraints reasoned? | ✅ | Guidelines (lines 119-131) explain WHY for each: never force-push (others depend on history), never amend (modifies wrong commit after hook failure), never stage secrets, no gates by default (user chose automation), graceful degradation, ARCHITECTURE.md drift |
+| 7 | Body: numbered steps? | ✅ | 7 numbered steps |
+| 8 | Body: output formats defined? | ✅ | Step 6 defines summary format: commit hash/message, push status, checkboxes updated, remaining count |
+| 9 | Body: input contract? | ✅ | Flags section (lines 13-16) defines `--confirm` and `-nh`. Step 1 handles clean working tree |
+| 10 | Quality: repeated at key points? | ✅ | "Never force-push" in both Step 4 and Guidelines. "Never amend" in Step 3 and Guidelines. Secret scanning in Step 3 and Guidelines |
+| 11 | Quality: anti-patterns named? | ⚠️ | Guidelines serve as implicit anti-patterns ("Never force-push", "Never amend", "Never stage secrets") but no dedicated "Avoid these" section with the full list |
+| 12 | Quality: refinement step? | ✅ | `--confirm` flag provides optional refinement. Step 2 "If something looks wrong... stop and present via AskUserQuestion" |
+| 13 | Quality: error handling? | ✅ | Step 3 handles hook failures (new commit, never amend). Step 4 handles push rejection (explain, suggest rebase, ask user). Step 5 handles missing issue (skip gracefully). Guidelines: graceful degradation if gh unavailable |
+| 14 | Testing: invoked with realistic input? | N/A | Audit-only |
+| 15 | Testing: activation tested (3+ phrases)? | N/A | Audit-only |
+| 16 | Testing: failure modes checked? | N/A | Audit-only |
+| 17 | Subagents: applicable? | N/A | No subagents |
+| 18 | Structure: standard layout? | ✅ | SKILL.md, references/, README.md |
+| 19 | Structure: references one level deep? | ✅ | Single reference: issue-update-guide.md |
+| 20 | Structure: large refs have TOC? | ✅ | issue-update-guide.md (114 lines) has clear sections with headers |
+| 21 | Structure: self-contained? | ⚠️ | Line 113 invokes `/open-pr` when all checkboxes complete. Same pattern as open-pr invoking /close-pr — intentional workflow chain but creates cross-skill dependency |
+| 22 | Structure: README generated? | ✅ | README.md exists |
+| 23 | Compliance: CLAUDE.md? | ✅ | English, no local paths, project-agnostic |
 
-## Score: 16/19 (applicable items)
+## Score: 17/20
 
 ## Priority fixes (ordered by impact)
 
-1. **Add `allowed-tools` to frontmatter** — Skill uses Bash (git commands, gh CLI), Read (for issue bodies), but doesn't declare them in frontmatter. Other workflow skills like close-pr and open-pr declare their tools.
-2. **Add formal input contract table** — Flags are documented but lack a structured input contract table with validation rules for invalid inputs.
-
-## Recommended action
-
-- [ ] Run `/create-skill push` with this report to apply fixes
+1. **Add explicit anti-patterns section** — Consolidate into a dedicated list: force-pushing, amending after hook failure, staging secrets, committing unrelated files in one commit, skipping issue update when branch has an issue, auto-editing ARCHITECTURE.md (vs just noting drift).
+2. **Cross-skill invocation** — Line 113 calls `/open-pr`. Add fallback behavior: if the skill is unavailable, suggest the user run it manually.
+3. **Minor: ARCHITECTURE.md drift detection** — Line 131 is a dense paragraph. Consider extracting to a dedicated sub-step or reference for clarity.
