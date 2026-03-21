@@ -140,6 +140,7 @@ Skills are organized into **8 plugin groups** by domain. Invoke any skill direct
 | [find-skills](./meta/skills/find-skills/) | Discover and install agent skills from the open ecosystem. |
 | [improve-codebase-architecture](./meta/skills/improve-codebase-architecture/) | Explore a codebase for architectural friction and propose deep-module refactors as GitHub issue RFCs. |
 | [install-skill](./meta/skills/install-skill/) | Install a skill from an npx skills link — syncs skills-library, checks for duplicates, and supports local or global selection. |
+| [sync-claude](./meta/skills/sync-claude/) | Synchronize the Claude Code environment (skills-library + .brain) across machines — pull, rebuild symlinks, verify. |
 | [uninstall-skill](./meta/skills/uninstall-skill/) | Uninstall a skill by name, local or global. |
 
 [Back to top](#claude-skills-library)
