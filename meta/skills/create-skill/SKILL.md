@@ -18,6 +18,32 @@ This skill handles both **new skills** and **updates to existing skills**. When 
 
 ### 1. Understand the intent
 
+#### 1.0 Spec detection (automatic)
+
+Before asking intent questions, check if a `/plan-skill` spec is available:
+
+1. **Check args** — If the user passed a file path as an argument, try to read it as a spec.
+2. **Check downloads/** — If no args, glob for `downloads/*-spec.md`. If multiple matches, present them via `AskUserQuestion` and let the user pick (or choose "none — start fresh").
+3. **Validate** — A valid spec must contain these headers: `## Meta`, `## Purpose`, `## Trigger`, `## Workflow`, `## Guardrails`, `## Decisions Log`. If any is missing, warn and fall back to normal flow.
+
+When a valid spec is found, present a summary table to the user:
+
+```
+| Field       | Value from spec       |
+|-------------|-----------------------|
+| Name        | (from Meta)           |
+| Plugin      | (from Meta)           |
+| Invocable   | (from Meta)           |
+| Purpose     | (first line of Purpose > What it does) |
+| Scope       | (first line of Purpose > What it does NOT do) |
+```
+
+Use `AskUserQuestion` with options `["Confirm — use this spec", "Reject — start fresh"]`. If confirmed, load all spec decisions as defaults and skip to Step 1.1 (scope classification is usually N/A with a spec unless the user adds extra requests). If rejected, proceed with normal flow below.
+
+Read `references/spec-contract.md` for the full mapping of spec sections to create-skill steps and which steps can be accelerated vs. which are never skippable.
+
+#### 1.0a Normal flow (no spec)
+
 Ask the user:
 - What should the skill do? (the core action)
 - When should it activate? (trigger contexts)
