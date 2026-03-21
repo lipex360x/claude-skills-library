@@ -1,19 +1,19 @@
 ---
 name: push
-description: Commit, push, and update GitHub issue checkboxes in one command. Analyzes changes, drafts a conventional commit message, stages, commits (with husky management), pushes, then reviews and updates the open issue for the current branch. Supports -y flag to auto-approve commit message and -nh flag to skip husky. Use when the user says "push", "commit and push", "ship it", "/push", or wants to finalize work and sync issue tracking — even if they don't explicitly mention the issue.
+description: Commit, push, and update GitHub issue checkboxes in one command. Analyzes changes, drafts a conventional commit message, stages, commits (with husky management), pushes, then reviews and updates the open issue for the current branch. Supports --confirm flag to require commit message approval and -nh flag to skip husky. Use when the user says "push", "commit and push", "ship it", "/push", or wants to finalize work and sync issue tracking — even if they don't explicitly mention the issue.
 user-invocable: true
 ---
 
 # Push
 
-Stage, commit, push, and update the related GitHub issue — all in one command. Single approval gate: the commit message. Everything else is automated.
+Stage, commit, push, and update the related GitHub issue — all in one command. Default behavior: draft the commit message and proceed immediately. Only stop and ask when something goes wrong.
 
 ## Flags
 
-- **`-y`** — auto-approve the commit message. Skip the confirmation gate — draft the message and commit immediately. Useful for small, obvious changes where review adds no value.
+- **`--confirm`** — require explicit approval of the commit message before committing. Use when you want to review the message before it goes in.
 - **`-nh`** — skip husky entirely (uses `--no-verify` on every commit). Without this flag, the default behavior is: husky runs on the first commit of each `/push` invocation, `--no-verify` on subsequent commits within the same push (if multiple commits are grouped by concern).
 
-Flags can be combined: `/push -y -nh`
+Flags can be combined: `/push --confirm -nh`
 
 ## Steps
 
@@ -33,16 +33,18 @@ If the working tree is clean (no staged or unstaged changes, no untracked files 
 
 ### 2. Analyze and group changes
 
-Analyze all changes (staged + unstaged) and group them by concern. If changes touch unrelated topics (e.g., a new feature + a rename + a cleanup), create **separate commits** for each — one commit per concern. This applies even with `-y`.
+Analyze all changes (staged + unstaged) and group them by concern. If changes touch unrelated topics (e.g., a new feature + a rename + a cleanup), create **separate commits** for each — one commit per concern.
 
 For each group, draft a **Conventional Commits** message in English:
 - Prefixes: `feat:`, `fix:`, `refactor:`, `chore:`, `test:`, `docs:`, `style:`
 - Focus on **why**, not **what** — the diff shows what changed
 - One line subject (under 72 chars), optional body for complex changes
 
-**If `-y` flag is set** → proceed directly to step 3 with the drafted messages. No confirmation needed.
+**Default behavior** → proceed directly to step 3 with the drafted messages. No confirmation needed.
 
-**Otherwise** → present the commit plan (which files go in which commit) to the user and **wait for approval**. This is the only confirmation gate. The user may edit or reject it.
+**If `--confirm` flag is set** → present the commit plan (which files go in which commit) to the user and **wait for approval** before proceeding.
+
+**If something looks wrong** (e.g., secrets detected, unexpected files, ambiguous grouping), stop and present the issue via `AskUserQuestion` with actionable options. Do NOT proceed silently when there's a problem — but do NOT stop for routine commits.
 
 ### 3. Stage and commit
 
@@ -103,6 +105,17 @@ Present concisely:
 - Checkboxes updated (if any)
 - Remaining open checkboxes count
 
+### 7. Suggest PR (if all checkboxes done)
+
+If an issue was found in Step 5 and **all checkboxes are now checked** (0 remaining), suggest opening a PR:
+
+Use `AskUserQuestion` with options `["Yes, open PR", "No, not yet"]`.
+
+- **"Yes, open PR"** → invoke `/open-pr`
+- **"No, not yet"** → end normally
+
+If there are still open checkboxes, skip this step entirely.
+
 ## Guidelines
 
 - **Never force-push.** If the push is rejected, explain why and ask the user.
@@ -111,7 +124,7 @@ Present concisely:
 
 - **Never stage secrets.** The scan in step 3 catches common patterns. If something slips through, the user's pre-commit hooks are the second line of defense.
 
-- **Single gate.** The commit message (step 2) is the only point where the user must approve — unless `-y` is passed, which skips it entirely. Everything else — staging, pushing, issue updates — is automated. This keeps the flow fast while maintaining control over what goes into the commit log.
+- **No gates by default.** The default flow is fully automated — draft message, stage, commit, push, update issue. Only stop and ask via `AskUserQuestion` when something unexpected happens (secrets detected, push rejected, ambiguous checkbox matches). The `--confirm` flag adds an explicit approval step for the commit message when the user wants it.
 
 - **Graceful degradation.** If `gh` is not available, skip the issue update step. If the branch has no issue, skip it. If the issue body can't be parsed, skip it. The core job (commit + push) always completes.
 
