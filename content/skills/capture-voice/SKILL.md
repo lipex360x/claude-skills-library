@@ -7,15 +7,28 @@ description: Analyzes the current conversation to capture the user's writing voi
 
 Capture the user's **writing voice** from conversations and persist it to a voice profile. The goal: generate content (posts, articles, social media) that sounds like the user wrote it — not like an AI wrote it.
 
+## Input contract
+
+- **Conversation context** (required) — at least 3 user messages with substantive text (not just commands or one-word approvals). If fewer than 3 analyzable messages exist, inform the user and stop — there is not enough signal to extract patterns.
+- **Voice profile path** (optional) — path to the existing profile file. Default: the user's memory directory (e.g., `memory/voice-profile.md`). If the file doesn't exist, create it from `templates/voice-profile.md`.
+
 ## Instructions
 
-Run this as a **background agent**. Do NOT block the main conversation.
+Run this as a **background agent** with tools: `Read`, `Write`, `Edit`, `Glob`, `Grep`. Do NOT block the main conversation.
 
-### 1. Load existing profile
+Before starting, check if another capture-voice agent is already running by looking for a lock indicator in the profile's frontmatter (`locked: true`). If locked, skip this run — concurrent writes corrupt the profile.
 
-Read the current voice profile from `~/.brain/memory/voice-profile.md`. If the file doesn't exist, create it from `templates/voice-profile.md`.
+### 1. Acquire lock and load profile
 
-### 2. Analyze conversation
+Set `locked: true` in the profile's frontmatter (or create the profile from `templates/voice-profile.md` with `locked: true`). This prevents concurrent runs from colliding.
+
+Pass to the agent: the full conversation history, the profile file path, and the template path.
+
+### 2. Validate input
+
+Count user messages with substantive text (exclude single-word responses, tool commands, and approvals like "sim", "ok", "approved"). If fewer than 3, release the lock (`locked: false`), inform the user there isn't enough conversation to analyze, and stop.
+
+### 3. Analyze conversation
 
 Scan all user messages in this conversation. Focus on **writing style markers that would appear in published content** — not on how they interact with tools or Claude.
 
@@ -34,7 +47,7 @@ Each observation must be specific enough that another AI could write a post in t
 - How they approve/reject Claude's proposals
 - Tool preferences or workflow habits
 
-### 3. Deduplicate and validate
+### 4. Deduplicate and validate
 
 Compare findings against the existing profile:
 
@@ -42,15 +55,21 @@ Compare findings against the existing profile:
 - **Only seen once?** Skip it — require at least 2 messages showing the same pattern before recording. One-off phrasing is noise, not signal.
 - **Contradicts existing?** Note the evolution (e.g., "Antes usava X, agora prefere Y") rather than deleting the old entry.
 
-If no genuinely new patterns found, stop here. Do not create empty changelog entries.
+If no genuinely new patterns found, release the lock and stop here. Do not create empty changelog entries.
 
-### 4. Consolidate before appending
+### 5. Consolidate before appending
 
 Before adding new observations, scan each section for entries that overlap or could be merged. Combine redundant entries into a single, sharper observation — the profile should stay lean, not grow indefinitely. This prevents bloat from multiple runs capturing variations of the same pattern.
 
-### 5. Write updates
+### 6. Draft and validate updates
 
-Merge new observations into the relevant profile sections. Each entry:
+Draft the proposed changes without writing them yet. For each new or modified entry, validate against the quality test: "Se eu usar só esse perfil para escrever um post, vai soar como o usuário escreveu?" Discard entries that fail this test — they are too vague or too generic.
+
+Review the draft as a whole: does it introduce contradictions with existing entries? Does it duplicate existing observations in different words? Trim until every entry earns its place.
+
+### 7. Write updates and release lock
+
+Merge validated observations into the relevant profile sections. Each entry:
 
 - One line, concise and specific
 - Written in **Portuguese** — the profile must sound natural for pt-BR content generation
@@ -59,8 +78,9 @@ Merge new observations into the relevant profile sections. Each entry:
 Then:
 - Add a changelog entry using `### YYYY-MM-DD HH:MM` format (24h, local time) summarizing what was added or consolidated
 - Update the `updated` field in the frontmatter to today's date
+- Set `locked: false` in the frontmatter to release the lock
 
-Each observation must pass this test: "Se eu usar só esse perfil para escrever um post, vai soar como o usuário escreveu?" If not, it's too vague — sharpen or discard.
+If the write fails for any reason (file permission, disk full), log the error to the user and ensure `locked: false` is set — never leave a stale lock.
 
 ## Anti-patterns
 
