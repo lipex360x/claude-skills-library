@@ -8,6 +8,8 @@ allowed-tools: Bash
 
 List all open issues for the current repo, grouped by project board status column and sorted by priority.
 
+**Input:** No arguments. Lists all open issues for the current repo.
+
 Read `references/project-board-operations.md` for board query patterns and column definitions.
 
 ## 1. Detect repo URL
@@ -24,7 +26,7 @@ Find the project board for the current repo:
 PROJECT_NUMBER=$(gh project list --owner "@me" --format json | jq -r '.projects[] | select(.title | test("<repo-name>"; "i")) | .number')
 ```
 
-If no board is found, say "No project board found for this repo." and stop.
+If no board is found, say "No project board found for this repo." and stop. If `gh` fails (auth, network), show the raw error and stop — don't guess.
 
 ## 3. Fetch board items
 
@@ -44,6 +46,8 @@ Fetch all open issues:
 gh issue list --state open --json number,title,labels,body --limit 100
 ```
 
+If the result contains exactly 100 issues, warn the user: "⚠️ Showing first 100 open issues — there may be more." If there are zero open issues, say "No open issues found." and stop.
+
 Cross-reference the two lists:
 - Issues on the board: use the board's `.status` as their column group
 - Issues NOT on the board: place them in a "Not on board" group
@@ -61,8 +65,8 @@ Scan the body for patterns like "Depends on #N", "After #N", "Blocked by #N", or
 
 ## 5. Group and sort
 
-- **Grouping:** Group issues by board status column in workflow order: Backlog → Todo → Ready → In Progress → In review → Done → Cancelled. Omit empty groups. Show "Not on board" last (only if there are untracked issues).
-- **Priority sorting:** Within each group, sort by priority label: P0 > P1 > P2 > P3 > unlabeled.
+- **Grouping:** Group issues by board status column in workflow order: Backlog → Todo → Ready → In Progress → In Review. Omit empty groups. Show "Not on board" last (only if there are untracked issues). This order follows the natural issue lifecycle — left-to-right mirrors how work moves through the board, so the user sees what's waiting before what's active.
+- **Priority sorting:** Within each group, sort by priority label: P0 > P1 > P2 > P3 > unlabeled. Critical issues surface first because they're what the user should act on next.
 
 ## 6. Present results as table
 
@@ -83,6 +87,13 @@ For each status group, use this format:
 
 ## 7. Suggest next issue
 
-Find the highest-priority non-blocked issue from the "Ready" column first, then "Todo", then "Backlog". After all tables, add:
+Find the highest-priority non-blocked issue from the "Ready" column first, then "Todo", then "Backlog". Never suggest a blocked issue — if all candidates are blocked, say "All remaining issues are blocked" instead of picking one. After all tables, add:
 
 `Suggested next: [#N](REPO_URL/issues/N) — Title here`
+
+## Anti-patterns
+
+- **Showing Done/Cancelled issues as open.** Only list issues in active columns (Backlog through In Review) and "Not on board". Done/Cancelled are excluded because this skill answers "what's open", not "what exists."
+- **Suggesting a blocked issue as next.** Always check blockers before suggesting — a blocked issue wastes the user's time.
+- **Truncating output silently.** If `--limit 100` caps results, warn explicitly. The user needs to know they're seeing a partial view.
+- **False-positive blocker detection.** Only treat `Blocked by #N`, `Depends on #N`, `After #N` as blockers — not every `#N` reference means a dependency.
