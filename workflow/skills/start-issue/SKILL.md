@@ -129,10 +129,12 @@ If Agent Teams is not enabled, skip the Execution mode section entirely — do n
 
 Before presenting, review the plan with a critical eye: tighten vague checkboxes, remove redundancy, ensure TDD order, verify file paths are concrete. The question is "how can I make this plan more precise?" — not "what else can I add?"
 
-Present the plan and use `AskUserQuestion` with options `["Aprovado", "Quero ajustar"]`. This is the only approval gate.
+**Include a task preview.** After the fenced code block with the plan, add a "Tasks that will be created" section listing the Step titles as bullet points. This lets the user see both the plan and the resulting tasks before approving — no separate task confirmation step.
 
-- **"Aprovado"** — proceed directly to Step 4. No further confirmation needed.
-- **"Quero ajustar"** — ask the user what to change (free text follow-up), apply the requested changes to the plan, then present the updated plan and the same `AskUserQuestion` again. Repeat until the user selects "Aprovado".
+Present the plan and use `AskUserQuestion` with options `["Approved", "I want to adjust"]`. This is the **single and only** approval gate in the entire skill flow.
+
+- **"Approved"** — proceed immediately to Step 4. Do NOT ask for any additional confirmation, acknowledgment, or "aprovado" text. Execution starts now.
+- **"I want to adjust"** — ask the user what to change (free text follow-up), apply the requested changes to the plan, then present the updated plan and the same `AskUserQuestion` again. Repeat until the user selects "Approved".
 
 ### 4. Update the issue (or create additional issues)
 
@@ -194,6 +196,8 @@ Use `AskUserQuestion` with options `["Yes, start anyway", "No, pick another issu
 
 ### 6. Create tasks
 
+Tasks were already previewed to the user in Step 3. Create them silently — no user interaction needed.
+
 Parse the Steps from the approved plan. Create a `TaskCreate` for each **Step** (not each checkbox — Steps are the right granularity for tasks).
 
 Each task:
@@ -207,7 +211,7 @@ Set up `addBlockedBy` dependencies between tasks when Steps have sequential depe
 
 If the approved issue body contains a "Parallel execution plan" section, offer to execute it:
 
-- Present the plan with `AskUserQuestion` options `["Sim, rodar com teammates", "Não, vou fazer sequencial"]`.
+- Present the plan with `AskUserQuestion` options `["Yes, run with teammates", "No, I'll go sequential"]`.
 - If approved, spawn teammates using `TeamCreate` following the plan from the issue. Teammates inherit the user's model by default — suggest Sonnet only if the user wants to optimize for speed or cost.
 - The lead completes the sequential prefix, then teammates work in parallel on their assigned Steps.
 
