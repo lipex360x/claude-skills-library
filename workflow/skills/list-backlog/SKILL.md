@@ -94,7 +94,7 @@ Backlog (N issues):
 - The `#` column must be a markdown link: `[#<number>](REPO_URL/issues/<number>)`
 - Status is empty when free, or `**Blocked** by #N, #M` listing open blockers
 
-After the table, add: `Use /start-issue <issue-number> to start working on one.`
+After the table, add: `Pick an issue number to start working on it.`
 
 ## Error handling
 
