@@ -207,15 +207,14 @@ Each task:
 
 Set up `addBlockedBy` dependencies between tasks when Steps have sequential dependencies.
 
-### 7. Spawn teammates (if parallel plan approved)
+### 7. Spawn teammates (automatic when Execution mode is present)
 
-If the approved issue body contains a "Parallel execution plan" section, offer to execute it:
+If the approved issue body contains an "Execution mode" section, spawn teammates immediately — **no second approval**. The user already approved the full plan (including the Execution mode section) in Step 3. Asking again violates the single-gate principle.
 
-- Present the plan with `AskUserQuestion` options `["Yes, run with teammates", "No, I'll go sequential"]`.
-- If approved, spawn teammates using `TeamCreate` following the plan from the issue. Teammates inherit the user's model by default — suggest Sonnet only if the user wants to optimize for speed or cost.
+- Spawn teammates using `TeamCreate` following the plan from the issue. Teammates inherit the user's model by default — suggest Sonnet only if the user wants to optimize for speed or cost.
 - The lead completes the sequential prefix, then teammates work in parallel on their assigned Steps.
 
-If the issue has no parallel plan (Agent Teams not enabled), skip this step.
+If the issue has no Execution mode section (Agent Teams not enabled), skip this step.
 
 ## Guidelines
 
