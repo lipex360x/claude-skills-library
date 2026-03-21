@@ -34,7 +34,7 @@ Common flags: `--copy` (no symlinks), `-a claude-code` (Claude Code only), `-y` 
 
 ## Plugins
 
-Skills are organized into **8 plugin groups** by domain. Invoke any skill directly by name (e.g., `/push`, `/create-skill`). There are **33 skills** in total.
+Skills are organized into **8 plugin groups** by domain. Invoke any skill directly by name (e.g., `/push`, `/create-skill`). There are **34 skills** in total.
 
 ---
 
@@ -136,6 +136,7 @@ Skills are organized into **8 plugin groups** by domain. Invoke any skill direct
 | [create-hook](./meta/skills/create-hook/) | Guide for creating or improving Claude Code hooks. |
 | [create-readme](./meta/skills/create-readme/) | Create or review a README.md for the project. |
 | [create-skill](./meta/skills/create-skill/) | Guide for creating, reviewing, and improving Claude Code skills. |
+| [plan-skill](./meta/skills/plan-skill/) | Plan and spec out a skill from raw input — produces a structured spec consumed by `/create-skill`. |
 | [find-skills](./meta/skills/find-skills/) | Discover and install agent skills from the open ecosystem. |
 | [improve-codebase-architecture](./meta/skills/improve-codebase-architecture/) | Explore a codebase for architectural friction and propose deep-module refactors as GitHub issue RFCs. |
 | [install-skill](./meta/skills/install-skill/) | Install a skill from an npx skills link — syncs skills-library, checks for duplicates, and supports local or global selection. |
