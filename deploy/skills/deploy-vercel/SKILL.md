@@ -1,66 +1,109 @@
 ---
 name: deploy-vercel
-description: Deploy, manage, and develop projects on Vercel from the command line
+description: Deploy, manage, and develop projects on Vercel from the command line. Use when deploying to Vercel, configuring domains, setting up environment variables, managing CI/CD pipelines, running local dev with `vercel dev`, or troubleshooting deployment issues — even if they don't explicitly say "Vercel."
+allowed-tools:
+  - Read
+  - Bash
+  - AskUserQuestion
 ---
 
 # Vercel CLI Skill
 
-The Vercel CLI (`vercel` or `vc`) deploys, manages, and develops projects on the Vercel platform from the command line. Use `vercel <command> -h` for full flag details on any command.
+Deploy, manage, and develop projects on the Vercel platform using the `vercel` (or `vc`) CLI. Run `vercel <command> -h` for full flag details on any command.
 
-## Critical: Project Linking
+## Input contract
 
-Commands must be run from the directory containing the `.vercel` folder (or a subdirectory of it). How `.vercel` gets set up depends on your project structure:
+| Input | Required | Description |
+|-------|----------|-------------|
+| Task type | Yes | What to do: deploy, configure env vars, set up domain, debug, local dev, CI/CD |
+| Project directory | Yes | Directory containing the project (must have `.vercel/` or be linkable) |
+| Environment | No | `preview` (default) or `production` — only for deploy tasks |
+| Team/scope | No | Vercel team — defaults to current (`vercel whoami`) |
+| Flags | No | Additional CLI flags (e.g., `--yes`, `--prebuilt`, `--env`) |
 
-- **`.vercel/project.json`**: Created by `vercel link`. Links a single project. Fine for single-project repos, and can work in monorepos if there's only one project.
-- **`.vercel/repo.json`**: Created by `vercel link --repo`. Links a repo that may contain multiple projects. Always a good idea when any project has a non-root directory (e.g., `apps/web`).
+## Steps
+
+### 1. Identify task and verify linking
+
+Determine the task type from the user's request and verify the project is linked:
+
+1. Check `.vercel/` exists in the project directory
+2. If missing, run `vercel link` (single project) or `vercel link --repo` (monorepo)
+3. Confirm the correct team with `vercel whoami`
+4. Route to the correct reference file using the Decision Tree below
+
+**Before proceeding, verify the link type matches the project structure** — `project.json` for single projects, `repo.json` for monorepos with multiple projects. A mismatch causes silent deployment failures because commands target the wrong project.
+
+### 2. Read the relevant reference and execute
+
+Read the reference file for the identified task type, then execute the commands:
+
+- **Deploy** → Read `references/deployment.md`
+- **Local development** → Read `references/local-development.md`
+- **Environment variables** → Read `references/environment-variables.md`
+- **CI/CD automation** → Read `references/ci-automation.md`
+- **Domains or DNS** → Read `references/domains-and-dns.md`
+- **Projects or teams** → Read `references/projects-and-teams.md`
+- **Logs, debugging, or accessing preview deploys** → Read `references/monitoring-and-debugging.md`
+- **Blob storage** → Read `references/storage.md`
+- **Integrations (databases, storage, etc.)** → Read `references/integrations.md`
+- **Access a preview deployment** → Use `vercel curl` (see `references/monitoring-and-debugging.md`)
+- **CLI doesn't have a command for it** → Use `vercel api` as a fallback (see `references/advanced.md`)
+- **Node.js backends (Express, Hono, etc.)** → Read `references/node-backends.md`
+- **Monorepos (Turborepo, Nx, workspaces)** → Read `references/monorepos.md`
+- **Bun runtime** → Read `references/bun.md`
+- **Feature flags** → Read `references/flags.md`
+- **Advanced (API, webhooks)** → Read `references/advanced.md`
+- **Global flags** → Read `references/global-options.md`
+- **First-time setup** → Read `references/getting-started.md`
+
+**Quality gate:** before deploying to production, verify a preview deployment works first. Never skip preview → production because a failed production deploy affects real users.
+
+### 3. Verify the result
+
+After execution, confirm success based on the task type:
+
+| Task | Verification |
+|------|-------------|
+| Deploy (preview) | Confirm deployment URL is accessible, check build logs for warnings |
+| Deploy (production) | Verify production URL responds, confirm environment variables loaded |
+| Environment variables | Run `vercel env ls` to confirm the variable exists in the target environment |
+| Domain | Run `vercel domains ls` and confirm DNS status shows `Valid Configuration` |
+| Local dev | Confirm `vercel dev` serves the app at `localhost:3000` (or configured port) |
+| CI/CD | Confirm pipeline config includes `--yes` flag and uses `VERCEL_TOKEN` env var |
+
+**If something fails, check linking first** — inspect `.vercel/` contents and verify the team with `vercel whoami`. Linking issues cause most Vercel CLI failures.
+
+## Output format
+
+Report the result in this structure:
+
+```
+**Vercel: [task type]**
+
+- **Status:** [success / failed — reason]
+- **URL:** [deployment or domain URL, if applicable]
+- **Environment:** [preview / production]
+- **Team:** [team name from `vercel whoami`]
+- **Notes:** [warnings from build logs, DNS propagation time, etc.]
+```
+
+## Project linking
+
+Commands must run from the directory containing `.vercel/` (or a subdirectory). How `.vercel/` gets set up depends on the project structure:
+
+- **`.vercel/project.json`**: Created by `vercel link`. Links a single project. Fine for single-project repos.
+- **`.vercel/repo.json`**: Created by `vercel link --repo`. Links a repo with multiple projects. Always use this when any project has a non-root directory (e.g., `apps/web`).
 
 Running from a project subdirectory (e.g., `apps/web/`) skips the "which project?" prompt since it's unambiguous.
 
-**When something goes wrong, check how things are linked first** — look at what's in `.vercel/` and whether it's `project.json` or `repo.json`. Also verify you're on the right team with `vercel whoami` — linking while on the wrong team is a common mistake.
+## Anti-patterns
 
-## Quick Start
-
-```bash
-npm i -g vercel
-vercel login
-vercel link              # single project
-# OR
-vercel link --repo       # monorepo
-vercel pull
-vercel dev        # local development
-vercel deploy     # preview deployment
-vercel --prod     # production deployment
-```
-
-## Decision Tree
-
-Use this to route to the correct reference file:
-
-- **Deploy** → `references/deployment.md`
-- **Local development** → `references/local-development.md`
-- **Environment variables** → `references/environment-variables.md`
-- **CI/CD automation** → `references/ci-automation.md`
-- **Domains or DNS** → `references/domains-and-dns.md`
-- **Projects or teams** → `references/projects-and-teams.md`
-- **Logs, debugging, or accessing preview deploys** → `references/monitoring-and-debugging.md`
-- **Blob storage** → `references/storage.md`
-- **Integrations (databases, storage, etc.)** → `references/integrations.md`
-- **Access a preview deployment** → use `vercel curl` (see `references/monitoring-and-debugging.md`)
-- **CLI doesn't have a command for it** → use `vercel api` as a fallback (see `references/advanced.md`)
-- **Node.js backends (Express, Hono, etc.)** → `references/node-backends.md`
-- **Monorepos (Turborepo, Nx, workspaces)** → `references/monorepos.md`
-- **Bun runtime** → `references/bun.md`
-- **Feature flags** → `references/flags.md`
-- **Advanced (API, webhooks)** → `references/advanced.md`
-- **Global flags** → `references/global-options.md`
-- **First-time setup** → `references/getting-started.md`
-
-## Anti-Patterns
-
-- **Wrong link type in monorepos with multiple projects**: `vercel link` creates `project.json`, which only tracks one project. Use `vercel link --repo` instead. When things break, check `.vercel/` first.
+- **Wrong link type in monorepos with multiple projects**: `vercel link` creates `project.json`, which only tracks one project. Use `vercel link --repo` instead — `project.json` causes silent deployment failures when commands target the wrong project.
 - **Letting commands auto-link in monorepos**: Many commands implicitly run `vercel link` if `.vercel/` doesn't exist. This creates `project.json`, which may be wrong. Run `vercel link` (or `--repo`) explicitly first.
 - **Linking while on the wrong team**: Use `vercel whoami` to check, `vercel teams switch` to change.
-- **Forgetting `--yes` in CI**: Required to skip interactive prompts.
-- **Using `vercel deploy` after `vercel build` without `--prebuilt`**: The build output is ignored.
-- **Hardcoding tokens in flags**: Use `VERCEL_TOKEN` env var instead of `--token`.
-- **Disabling deployment protection**: Use `vercel curl` instead to access preview deploys.
+- **Forgetting `--yes` in CI**: Required to skip interactive prompts — without it the pipeline hangs.
+- **Using `vercel deploy` after `vercel build` without `--prebuilt`**: The build output is ignored because the CLI rebuilds from source.
+- **Hardcoding tokens in flags**: Use `VERCEL_TOKEN` env var instead of `--token` — tokens in flags leak into shell history and CI logs.
+- **Disabling deployment protection**: Use `vercel curl` instead to access preview deploys — disabling protection exposes previews to the public.
+- **Skipping preview before production**: Always verify a preview deployment works before promoting to production — production failures affect real users and rollback takes time.

@@ -13,22 +13,35 @@ Builds and maintains a persistent voice profile by extracting writing style patt
 > [!TIP]
 > Also activates via the PreCompact hook, or when you say "meu estilo", "como eu falo", "aprenda meu jeito", or ask to update/check your voice profile.
 
+## Input contract
+
+- **Conversation context** (required) — at least 3 substantive user messages
+- **Voice profile path** (optional) — defaults to `memory/voice-profile.md`
+
 ## How it works
 
-1. **Load profile** -- Reads the existing voice profile from `~/.brain/memory/voice-profile.md` (or creates one from the template)
-2. **Analyze conversation** -- Scans all user messages for writing style markers: vocabulary, sentence structure, tone, rhetorical devices, and punctuation habits
-3. **Deduplicate** -- Compares findings against the existing profile, skipping duplicates and one-off patterns (requires 2+ messages showing the same pattern)
-4. **Consolidate** -- Merges redundant entries to keep the profile lean
-5. **Write updates** -- Appends new observations in Portuguese with concrete examples and a timestamped changelog entry
+1. **Acquire lock** — Sets `locked: true` in the profile frontmatter to prevent concurrent writes
+2. **Validate input** — Checks for at least 3 substantive user messages; stops if insufficient
+3. **Analyze conversation** — Scans user messages for writing style markers: vocabulary, sentence structure, tone, rhetorical devices, and punctuation habits
+4. **Deduplicate** — Compares findings against the existing profile, skipping duplicates and one-off patterns (requires 2+ messages showing the same pattern)
+5. **Consolidate** — Merges redundant entries to keep the profile lean
+6. **Draft and validate** — Drafts proposed changes and validates each against the quality test before writing
+7. **Write and release lock** — Appends validated observations in Portuguese with concrete examples, adds a timestamped changelog entry, and releases the lock
 
 > [!IMPORTANT]
 > Captures **writing voice** only, not interaction patterns. CLI usage, tool preferences, and workflow habits are ignored -- only patterns relevant to published content are recorded.
+
+## Agent details
+
+- **Tools:** `Read`, `Write`, `Edit`, `Glob`, `Grep`
+- **Concurrency:** lock-based via frontmatter `locked: true/false` — concurrent runs are skipped
 
 ## Directory structure
 
 ```text
 capture-voice/
 ├── SKILL.md              # Core instructions
+├── README.md             # This file
 └── templates/
     └── voice-profile.md  # Template for new voice profiles
 ```

@@ -1,6 +1,13 @@
 ---
 name: create-excalidraw
 description: 'Generate Excalidraw diagrams from natural language descriptions. Use when asked to "create a diagram", "make a flowchart", "visualize a process", "draw a system architecture", "create a mind map", "generate an Excalidraw file", "draw this", "diagram this", or wants any kind of visual diagram — even if they don''t explicitly say "Excalidraw." Supports flowcharts, relationship diagrams, mind maps, architecture, data flow, swimlane, class, sequence, and ER diagrams. Outputs .excalidraw JSON files.'
+user-invocable: true
+argument-hint: '<diagram description>'
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - AskUserQuestion
 ---
 
 # Create Excalidraw
@@ -14,6 +21,8 @@ Before generating any diagram, read `references/design-aesthetics.md` for color 
 Never default to light-blue-on-white with a perfect grid — that's the hallmark of generic AI diagrams.
 
 ## 2. Understand the Request
+
+If `$ARGUMENTS` is provided, use it as the diagram description. If empty or too vague to determine diagram type and elements, use `AskUserQuestion` to clarify what diagram the user wants.
 
 Analyze the user's description to determine:
 1. **Diagram type** — match against the table below
@@ -65,7 +74,7 @@ Read `references/element-types.md` for detailed extraction guides per diagram ty
 - **Position**: `x`, `y` coordinates
 - **Size**: `width`, `height`
 - **Style**: `strokeColor`, `backgroundColor`, `fillStyle` — use palette from step 1
-- **Font**: `fontFamily: 5` (Excalifont) — required for ALL text elements
+- **Font**: `fontFamily: 1` (Virgil, hand-drawn) for most text. Use `2` (Helvetica) for clean labels, `3` (Cascadia) for code — Virgil keeps the sketch aesthetic that makes Excalidraw distinctive
 - **Connections**: `points` array for arrows
 
 ### File Structure
@@ -135,7 +144,20 @@ For architecture diagrams with professional icons (AWS/GCP/Azure), read `referen
 
 If no libraries are set up, use basic shapes with color coding — functional and clear, just less polished.
 
-## 7. Save and Deliver
+## 7. Validate
+
+Before delivering, verify:
+- All elements have unique IDs (use `Date.now().toString(36) + Math.random().toString(36).substr(2)`)
+- No overlapping coordinates
+- Text uses consistent `fontFamily` (1 for hand-drawn, 2 for clean, 3 for code)
+- Colors follow a consistent palette from `references/design-aesthetics.md`
+- Arrows connect logically
+- Valid JSON structure
+- Element count under 20 for clarity
+
+If any check fails, fix the issue before proceeding. For overlapping coordinates, recalculate positions using the spacing rules from step 5. For invalid JSON, re-parse and correct syntax errors. For palette drift, replace off-palette colors with the nearest palette match.
+
+## 8. Save, Deliver, and Refine
 
 1. Save as `<descriptive-name>.excalidraw`
 2. Provide a summary:
@@ -150,16 +172,8 @@ To view: visit https://excalidraw.com and drag-and-drop the file,
 or use the Excalidraw VS Code extension.
 ```
 
-## 8. Validation
-
-Before delivering, verify:
-- All elements have unique IDs (use `Date.now().toString(36) + Math.random().toString(36).substr(2)`)
-- No overlapping coordinates
-- All text uses `fontFamily: 5`
-- Colors follow a consistent palette from `references/design-aesthetics.md`
-- Arrows connect logically
-- Valid JSON structure
-- Element count under 20 for clarity
+3. Ask: "Want any adjustments — layout, colors, labels, or additional elements?"
+4. If the user requests changes, apply them and re-run the validation checklist (step 7) before re-delivering
 
 ## References
 

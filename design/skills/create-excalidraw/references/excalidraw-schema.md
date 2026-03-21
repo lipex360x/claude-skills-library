@@ -2,6 +2,23 @@
 
 This document describes the structure of Excalidraw `.excalidraw` files for diagram generation.
 
+## Table of Contents
+
+- [Top-Level Structure](#top-level-structure)
+- [AppState](#appstate)
+- [ExcalidrawElement Base Properties](#excalidrawelement-base-properties)
+- [Element Types](#element-types)
+- [Bindings](#bindings)
+- [Common Colors](#common-colors)
+- [ID Generation](#id-generation)
+- [Seed Generation](#seed-generation)
+- [Version and VersionNonce](#version-and-versionnonce)
+- [Coordinate System](#coordinate-system)
+- [Recommended Spacing](#recommended-spacing)
+- [Font Families](#font-families)
+- [Validation Rules](#validation-rules)
+- [Complete Minimal Example](#complete-minimal-example)
+
 ## Top-Level Structure
 
 ```typescript

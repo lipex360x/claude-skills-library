@@ -37,8 +37,7 @@ Comprehensive Postgres optimization guide maintained by Supabase, containing rul
 ```text
 review-postgres/
 ├── SKILL.md              # Core instructions (Agent Skills spec)
-├── AGENTS.md             # [GENERATED] Compiled references document
-├── CLAUDE.md             # Claude Code integration
+├── README.md             # This file
 └── references/           # Individual rule files
     ├── _template.md      # Reference template
     ├── _sections.md      # Section definitions

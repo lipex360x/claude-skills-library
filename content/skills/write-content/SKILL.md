@@ -1,6 +1,11 @@
 ---
 name: write-content
 description: Help the user create compelling written content and marketing copy — LinkedIn posts, articles, social media, memos, emails, landing pages, headlines, CTAs, value propositions — that sounds authentically like them and drives action. Use when the user says "write a post", "review this text", "polish this draft", "write copy for", "improve this copy", "rewrite this page", "marketing copy", "headline help", "CTA copy", "value proposition", "tagline", "hero section", "make this more compelling", or wants content that is clear, concise, and persuasive — even if they don't explicitly say "written" or "copywriting."
+allowed-tools:
+  - Read
+  - Write
+  - Glob
+  - AskUserQuestion
 ---
 
 # Written
@@ -13,22 +18,24 @@ Create compelling written content and persuasive copy that sounds like the user 
 
 Read the user's voice profile from `~/.brain/memory/voice-profile.md`. This is the foundation — every piece of content must sound like the user wrote it. The profile contains vocabulary, sentence rhythm, tone, rhetorical devices, and punctuation style.
 
+If the voice profile does not exist, ask the user to describe their writing style before proceeding — or suggest running `/capture-voice` to generate one. Do not write content without a voice foundation, because output without voice matching sounds generic and AI-generated.
+
 ### 2. Clarify intent
 
 Before writing, understand:
-- **Format** — post, article, email, memo, landing page, headline, tagline?
-- **Audience** — who is reading? (LinkedIn connections, technical community, customers, investors)
-- **Goal** — what should the reader feel, think, or do after reading?
-- **Tone register** — the user's default is casual/direct, but some contexts need adjustment
+- **Format** (required) — post, article, email, memo, landing page, headline, tagline?
+- **Audience** (required) — who is reading? (LinkedIn connections, technical community, customers, investors)
+- **Goal** (required) — what should the reader feel, think, or do after reading?
+- **Tone register** (optional, defaults to user's voice profile) — the user's default is casual/direct, but some contexts need adjustment
 
 For **marketing copy**, also gather:
-- What type of page? (homepage, landing page, pricing, feature, about)
-- What is the ONE primary action visitors should take?
-- What problem is the audience trying to solve?
-- What makes this different from alternatives?
-- Any proof points? (numbers, testimonials, case studies)
+- What type of page? (required) — homepage, landing page, pricing, feature, about
+- What is the ONE primary action visitors should take? (required)
+- What problem is the audience trying to solve? (required)
+- What makes this different from alternatives? (optional — strengthens copy but not blocking)
+- Any proof points? (optional — numbers, testimonials, case studies)
 
-If `.agents/product-marketing-context.md` exists, read it first and only ask for gaps.
+If a product-marketing-context file exists in the project, read it first and only ask for gaps.
 
 Use `AskUserQuestion` with concrete options when the user gives a vague brief.
 
@@ -64,7 +71,7 @@ LinkedIn truncates here. This is the only line that matters for "see more" click
 - **Contrarian hook**: challenge a belief ("Stop networking. It's ruining your career.")
 - **Confession hook**: vulnerability that creates trust ("I almost quit last week.")
 - **Curiosity gap**: open loop that demands resolution ("There's one thing nobody tells you about [X].")
-- Never use: "I'm excited to announce...", "In today's world...", "Have you ever wondered...?"
+- Never use: "I'm excited to announce...", "In today's world...", "Have you ever wondered...?" — because these are the most recognized AI writing tells and instantly erode credibility with readers who've seen them thousands of times.
 
 **Narrative arc:**
 - **Open loops** — start a thread without closing it. The brain treats unresolved information like an open browser tab (Zeigarnik effect).
@@ -107,7 +114,7 @@ Read `references/natural-transitions.md` for transition phrase libraries and AI 
 
 ### 5. CTA copy (for marketing pages)
 
-**Weak CTAs (avoid):** Submit, Sign Up, Learn More, Click Here, Get Started.
+**Weak CTAs (avoid):** Submit, Sign Up, Learn More, Click Here, Get Started — because they are generic, action-free labels that don't tell the reader what they'll get. Specific CTAs convert 2-3x better.
 
 **Strong CTAs:** Start Free Trial, Get [Specific Thing], See [Product] in Action, Create Your First [Thing].
 
@@ -164,6 +171,16 @@ When the user sends a message starting with `r:`, treat it as a refinement reque
 1. Re-run `wc -c` to verify platform limits.
 2. Flag if a requested change conflicts with a principle (e.g., "add this paragraph" would push over 3000 chars, or break the peak-end rule). Explain the conflict briefly and suggest an alternative — but if the user insists, apply it.
 3. Save the updated version to the same file (increment version in frontmatter).
+
+**Draft file convention:** Save drafts to the current working directory as `draft-{slug}.md` (e.g., `draft-linkedin-ai-tools.md`). Use this frontmatter:
+```yaml
+---
+type: draft
+format: linkedin-post | article | email | landing-page | tagline
+version: 1
+date: YYYY-MM-DD
+---
+```
 
 ## Platform-specific guidelines
 

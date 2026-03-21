@@ -90,6 +90,12 @@ If discrepancies are found, list them. Common issues:
 - **Missing symlinks** — new skill added but setup.sh didn't create the link
 - **Stale content** — symlink exists but points to wrong location
 
+If any discrepancies are found, use `AskUserQuestion` with options:
+- `"Re-run setup.sh"` — execute setup.sh again to fix missing/stale symlinks
+- `"Remove orphaned symlinks"` — delete symlinks whose targets no longer exist
+- `"Both"` — re-run setup.sh and remove orphans
+- `"Skip"` — leave discrepancies as-is, just report them
+
 ### 6. Report
 
 Present a concise summary:
@@ -111,6 +117,13 @@ Present a concise summary:
 ```
 
 If any repo was skipped or had errors, note it clearly.
+
+## Anti-patterns
+
+- **Force-pulling over diverged branches.** Running `git pull --force` or `git reset --hard origin/main` silently discards local commits. Always let the user choose how to resolve divergence.
+- **Resetting dirty trees.** Using `git checkout .`, `git reset --hard`, or `git clean -f` to get a clean tree destroys uncommitted work. Use `git stash` instead.
+- **Auto-fixing discrepancies.** Automatically deleting orphaned symlinks or recreating missing ones can break intentional local overrides. Report first, then offer options.
+- **Running setup.sh before pulling.** Rebuilding symlinks before pulling means they point to stale content. Always pull first, then rebuild.
 
 ## Guidelines
 

@@ -2,11 +2,25 @@
 name: create-hook
 description: Guide the user through creating or improving Claude Code hooks — from choosing the right event to writing the script and registering in settings.json. Use this skill when the user mentions "create a hook", "new hook", "add a hook", "improve a hook", "PostToolUse", "PreToolUse", "PreCompact", "SessionStart", or wants event-driven automation — even if they don't explicitly say "hook."
 user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - AskUserQuestion
 ---
 
 # Create Hook
 
 Step-by-step guide for building Claude Code hooks. Hooks are bash scripts (or prompts) triggered by events — deterministic, zero-fail-rate enforcement that runs outside the LLM.
+
+## Input contract
+
+- **Required:** intent — what the hook should do (the action and when it should fire)
+- **Optional:** event (must be one of: `PreToolUse`, `PostToolUse`, `PreCompact`, `Stop`, `SubagentStop`, `SessionStart`, `SessionEnd`, `UserPromptSubmit`, `Notification`), type (`command` or `prompt`), location (`local` or `global`)
+
+If the user provides only the intent, derive the remaining inputs through the process steps below.
 
 ## Process
 

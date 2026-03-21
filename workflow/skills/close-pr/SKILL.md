@@ -6,6 +6,8 @@ disable-model-invocation: false
 allowed-tools: Bash, Read
 ---
 
+**Input:** No arguments. Operates on the current branch's open PR.
+
 ## 1. Find the PR
 
 Find the open PR for the current branch:
@@ -29,6 +31,12 @@ Verify the PR's `baseRefName` matches the expected target. If it doesn't, warn t
 ## 3. Write implementation summary on the issue
 
 Extract the issue number from the PR body (`Closes #N` pattern) or from the branch name.
+
+If no issue is found, warn the user and skip to Step 4 — the PR can still be merged, but without a summary comment:
+
+```
+⚠️ No linked issue found. Skipping implementation summary. Continue with merge?
+```
 
 If an issue is found, generate a detailed implementation summary and post it as a **comment on the issue**. This comment serves as the single source of truth — anyone visiting the issue can understand what was built without navigating commits, branches, or PRs.
 
@@ -93,7 +101,14 @@ Check if `ARCHITECTURE.md` exists at the project root. If it does, analyze the d
 
 Read the current `ARCHITECTURE.md`, then update it with the relevant additions. Be surgical — only add what this branch introduced, don't rewrite existing content. Each addition should name the specific change (e.g., "add `/billing` route", "add `recharts` to dependencies").
 
-If `ARCHITECTURE.md` doesn't exist and the project has sufficient complexity (3+ routes, multiple layers, or a database), generate it from the current codebase state — this branch's merge is the trigger. Use the same structure as `start-new-project` (stack, layers, patterns, schema, auth, routes).
+If `ARCHITECTURE.md` doesn't exist and the project has sufficient complexity (3+ routes, multiple layers, or a database), generate it from the current codebase state — this branch's merge is the trigger. Use this structure:
+
+- **Stack & dependencies** — languages, frameworks, key libraries
+- **Layers** — directory structure and responsibility boundaries
+- **Patterns** — conventions used (naming, error handling, state management)
+- **Schema** — database tables/models summary
+- **Auth** — authentication/authorization model
+- **Routes** — URL routes or API endpoints
 
 **Commit the ARCHITECTURE.md update** as part of the merge preparation — it should be on the branch before merging so the base branch receives the updated file:
 
@@ -104,13 +119,36 @@ git commit -m "docs: update ARCHITECTURE.md with implementation changes"
 
 If no architectural changes were introduced (e.g., pure bugfix, config-only change), skip this step.
 
-## 5. Merge the PR
+## 5. Review gate
+
+Before merging, present the user with a summary of what will happen:
+
+```
+## Ready to merge
+
+- **PR:** #<number> — <title>
+- **Target:** <target-branch>
+- **Summary posted:** yes|no (issue #<number>)
+- **ARCHITECTURE.md:** updated|no changes|created
+```
+
+Wait for the user to confirm before proceeding. This prevents accidental merges and gives the user a chance to review the implementation summary and ARCHITECTURE.md changes.
+
+## 6. Merge the PR
 
 ```bash
 gh pr merge --merge --delete-branch
 ```
 
-## 6. Move card to "Done"
+If the merge fails due to **conflicts**, stop and tell the user:
+
+```
+❌ Merge failed — conflicts detected. Rebase onto <target-branch> and resolve conflicts before retrying.
+```
+
+If the merge fails for **any other reason**, show the error output and stop — do not retry automatically.
+
+## 7. Move card to "Done"
 
 If a project board exists for the repo (`gh project list --owner "@me"`), move the issue card from **"In review"** → **"Done"**:
 
@@ -121,17 +159,17 @@ If a project board exists for the repo (`gh project list --owner "@me"`), move t
 
 Read `references/project-board-operations.md` for the full command reference.
 
-If no project board exists, skip this step and Step 7.
+If no project board exists, inform the user ("No project board found — skipping card move and unblock notifications") and skip this step and Step 8.
 
-## 7. Notify unblocked issues
+## 8. Notify unblocked issues
 
 Detect all issues that were blocked by the closed issue, using two complementary scans:
 
-### 7a. Forward scan — closed issue declares what it blocks
+### 8a. Forward scan — closed issue declares what it blocks
 
 Scan the **closed issue's body** for `> **Blocks** #N` annotations. Collect all referenced issue numbers.
 
-### 7b. Reverse scan — other issues declare dependency on this one
+### 8b. Reverse scan — other issues declare dependency on this one
 
 Fetch all open issues and scan their bodies for patterns referencing the closed issue number:
 - `Depends on #N`
@@ -145,9 +183,9 @@ gh issue list --state open --json number,title,body --limit 100
 
 Filter issues whose body contains a dependency pattern matching the closed issue number. Collect these issue numbers.
 
-### 7c. Process unblocked issues
+### 8c. Process unblocked issues
 
-Merge results from 7a and 7b (deduplicate). For each referenced issue that is still open:
+Merge results from 8a and 8b (deduplicate). For each referenced issue that is still open:
 
 1. **Add a comment** on the unblocked issue:
    ```markdown
@@ -169,7 +207,7 @@ Merge results from 7a and 7b (deduplicate). For each referenced issue that is st
 
 If no blocked issues are found in either scan, skip this step.
 
-## 8. Switch to base branch
+## 9. Switch to base branch
 
 After merge, switch to the target branch and pull:
 
@@ -177,7 +215,7 @@ After merge, switch to the target branch and pull:
 git checkout <target-branch> && git pull
 ```
 
-## 9. Report
+## 10. Report
 
 Present concisely:
 - PR number and merge status
@@ -186,6 +224,14 @@ Present concisely:
 - Board status (card moved to Done)
 - Unblocked issues (if any — list issue numbers and their new status)
 - Current branch after switch
+
+## Anti-patterns
+
+- **Vague implementation summaries.** "Updated the auth module" tells nobody anything. Name the files, the functions, the routes. If the summary doesn't survive the test of "could I find the code from this description alone?", rewrite it.
+- **Merging without checking issue tasks.** If the linked issue has unchecked tasks, the work isn't done. Verify all checkboxes are complete before merging.
+- **Skipping ARCHITECTURE.md update.** Every merge that introduces routes, patterns, schema changes, or dependencies must update ARCHITECTURE.md. Skipping it silently degrades the project's context for future work.
+- **Force-merging with conflicts.** Never bypass merge conflicts. If `gh pr merge` fails, stop and ask the user to rebase — don't retry or force.
+- **Auto-committing without review.** The review gate (Step 5) exists because ARCHITECTURE.md changes and implementation summaries are significant artifacts. Never skip the confirmation step.
 
 ## Guidelines
 

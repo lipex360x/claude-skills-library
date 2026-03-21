@@ -34,7 +34,7 @@ Common flags: `--copy` (no symlinks), `-a claude-code` (Claude Code only), `-y` 
 
 ## Plugins
 
-Skills are organized into **8 plugin groups** by domain. Invoke any skill directly by name (e.g., `/push`, `/create-skill`). There are **34 skills** in total.
+Skills are organized into **8 plugin groups** by domain. Invoke any skill directly by name (e.g., `/push`, `/create-skill`). There are **36 skills** in total.
 
 ---
 
@@ -44,13 +44,13 @@ Skills are organized into **8 plugin groups** by domain. Invoke any skill direct
 
 | Skill | Description |
 |-------|-------------|
-| [add-backlog](./workflow/skills/add-backlog/) | Create a GitHub issue in the project's Backlog milestone. |
-| [open-pr](./workflow/skills/open-pr/) | Create a pull request from the current branch, linking it to the open issue. |
-| [list-backlog](./workflow/skills/list-backlog/) | List open backlog issues with numbered summary for selection. |
-| [list-issues](./workflow/skills/list-issues/) | List all open issues grouped by milestone with priority sorting and next-issue suggestion. |
-| [close-pr](./workflow/skills/close-pr/) | Merge the open pull request for the current branch and switch back to main. |
-| [push](./workflow/skills/push/) | Commit, push, and update GitHub issue checkboxes in one command. |
+| [add-backlog](./workflow/skills/add-backlog/) | Create a GitHub issue and add it to the project board's Backlog column. |
+| [close-pr](./workflow/skills/close-pr/) | Merge the current branch's PR, write implementation summary, notify unblocked issues, and move card to Done. |
 | [grill-me](./workflow/skills/grill-me/) | Deep structured interview about a plan, feature, or project — extracts decisions, constraints, and context. |
+| [list-backlog](./workflow/skills/list-backlog/) | List backlog issues with size, priority, and dependency status in a table. |
+| [list-issues](./workflow/skills/list-issues/) | List all open issues grouped by board column with priority sorting and next-issue suggestion. |
+| [open-pr](./workflow/skills/open-pr/) | Create a pull request from the current branch, linking it to the open issue. |
+| [push](./workflow/skills/push/) | Commit, push, and update GitHub issue checkboxes in one command. |
 | [start-issue](./workflow/skills/start-issue/) | Pull an issue and start implementation with an expanded step-by-step plan. |
 | [start-new-project](./workflow/skills/start-new-project/) | Plan and scaffold a new project from a prompt with structured GitHub issues. |
 | [tdd](./workflow/skills/tdd/) | Execute Test-Driven Development with strict red-green-refactor discipline. |
@@ -68,7 +68,7 @@ Skills are organized into **8 plugin groups** by domain. Invoke any skill direct
 | [approve-post](./content/skills/approve-post/) | Approve the current draft, generate English translation, and publish to local files and Google Drive. |
 | [capture-voice](./content/skills/capture-voice/) | Analyze conversations to capture the user's writing voice for authentic content generation. |
 | [inspire-me](./content/skills/inspire-me/) | Guided exploration session to unblock thinking on any topic — career, creativity, business, health. |
-| [write-content](./content/skills/write-content/) | Create compelling written content and marketing copy that sounds like the user wrote it. |
+| [write-content](./content/skills/write-content/) | Create compelling written content and marketing copy that sounds authentically like the user. |
 
 [Back to top](#claude-skills-library)
 
@@ -80,7 +80,7 @@ Skills are organized into **8 plugin groups** by domain. Invoke any skill direct
 
 | Skill | Description |
 |-------|-------------|
-| [create-diagram](./design/skills/create-diagram/) | Create professional diagrams using an HTML-first design workflow with Excalidraw export. |
+| [create-diagram](./design/skills/create-diagram/) | Create professional diagrams using a spec-driven workflow with HTML preview and Excalidraw export. |
 | [create-excalidraw](./design/skills/create-excalidraw/) | Generate Excalidraw diagrams from natural language with design-first aesthetics and icon library support. |
 | [create-webview](./design/skills/create-webview/) | Create data-driven HTML presentations from structured sources (Excel, PPTX, CSV → SQLite → JSON → HTML slides → PDF). |
 | [extract-design-system](./design/skills/extract-design-system/) | Analyze a design image and create a full design system project with separated artboards. |
@@ -131,15 +131,16 @@ Skills are organized into **8 plugin groups** by domain. Invoke any skill direct
 
 | Skill | Description |
 |-------|-------------|
+| [audit-skill](./meta/skills/audit-skill/) | Evaluate existing skills against the quality review checklist and produce structured audit reports. |
 | [capture-analysis](./meta/skills/capture-analysis/) | Capture skill gaps, workflow frictions, and pattern improvements as structured entries. |
 | [create-continuation](./meta/skills/create-continuation/) | Generate a continuation prompt for seamless session handoffs to a new conversation. |
 | [create-hook](./meta/skills/create-hook/) | Guide for creating or improving Claude Code hooks. |
 | [create-readme](./meta/skills/create-readme/) | Create or review a README.md for the project. |
 | [create-skill](./meta/skills/create-skill/) | Guide for creating, reviewing, and improving Claude Code skills. |
-| [plan-skill](./meta/skills/plan-skill/) | Plan and spec out a skill from raw input — produces a structured spec consumed by `/create-skill`. |
 | [find-skills](./meta/skills/find-skills/) | Discover and install agent skills from the open ecosystem. |
 | [improve-codebase-architecture](./meta/skills/improve-codebase-architecture/) | Explore a codebase for architectural friction and propose deep-module refactors as GitHub issue RFCs. |
-| [install-skill](./meta/skills/install-skill/) | Install a skill from an npx skills link — syncs skills-library, checks for duplicates, and supports local or global selection. |
+| [install-skill](./meta/skills/install-skill/) | Install a skill from an npx skills link with local or global selection. |
+| [plan-skill](./meta/skills/plan-skill/) | Plan and spec out a skill from raw input — produces a structured spec consumed by `/create-skill`. |
 | [sync-claude](./meta/skills/sync-claude/) | Synchronize the Claude Code environment (skills-library + .brain) across machines — pull, rebuild symlinks, verify. |
 | [uninstall-skill](./meta/skills/uninstall-skill/) | Uninstall a skill by name, local or global. |
 

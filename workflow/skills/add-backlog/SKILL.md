@@ -10,6 +10,26 @@ Create a GitHub issue and add it to the project board's **Backlog** column.
 
 Parse `$ARGUMENTS` as the issue description. If empty, ask the user what to add.
 
+## Anti-patterns
+
+Avoid these common failure modes:
+
+- **Creating issues without board tracking** — every issue must be added to the project board. An issue not on the board is invisible to workflow skills and will be forgotten.
+- **Vague acceptance criteria** — "improve the UI" is not verifiable. Each checkbox must describe a concrete, testable outcome.
+- **Skipping scope analysis** — multi-concern issues cause merge conflicts and unclear ownership. Always check before creating.
+- **Forcing skill matches** — referencing a skill that only loosely relates to the issue misleads whoever picks it up. Only match when the skill directly implements the core work.
+
+## Error handling
+
+If `gh` CLI commands fail (auth issues, network errors, rate limits):
+
+1. **Auth failure** — suggest the user run `gh auth login` and retry
+2. **Network error** — report the error and stop; do not retry silently
+3. **Rate limit** — report the limit and suggest waiting before retrying
+4. **Label creation failure** — proceed without labels and note it in the report
+
+Never swallow errors silently — always surface failures to the user with actionable next steps.
+
 ## 1. Analyze scope
 
 Before creating anything, reason about whether the request contains multiple independent concerns. If it does, propose splitting into separate issues using `AskUserQuestion` with options like `["One issue", "Split into N issues"]` — show the proposed titles for each.
@@ -25,7 +45,7 @@ Structure each issue body with:
 
 ## 2b. Detect relevant skills
 
-Before finalizing the issue body, scan the issue scope against available skills to determine if execution should use a specific skill. List available skills:
+Before finalizing the issue body, scan the issue scope against available skills to determine if execution should use a specific skill — because referencing the right skill in the issue ensures whoever picks it up follows the established quality process instead of implementing ad-hoc. List available skills:
 
 ```bash
 ls skills-library/*/skills/*/SKILL.md 2>/dev/null || Glob: */skills/*/SKILL.md
@@ -55,6 +75,8 @@ Use `/skill-name` to [action] — it enforces [quality checks, review process, s
 ```
 
 If no skill matches, skip this section. Do not force a match — only reference skills with clear relevance.
+
+**Quality check:** Before moving on, verify the skill match is genuine. A loose topical overlap is not a match — the skill must directly implement the issue's core work.
 
 ## 3. Labels and Size
 
@@ -110,13 +132,24 @@ options:
     description: "Skip blocker detection"
 ```
 
-If the user selects "None" or no blockers are found, proceed to Step 5 without modifications.
+If the user selects "None" or no blockers are found, proceed to Step 6 without modifications.
 
 ### 4d. Store approved blockers
 
-Keep the list of approved blocked issue numbers — they will be updated in Step 6 after the new issue is created (because we need the new issue number for the `Depends on #N` reference).
+Keep the list of approved blocked issue numbers — they will be updated in Step 7 after the new issue is created (because we need the new issue number for the `Depends on #N` reference).
 
-## 5. Create
+## 5. Review draft
+
+Before creating the issue, review the complete draft:
+
+- **Acceptance criteria are verifiable** — each checkbox describes a concrete, testable outcome (not vague goals like "improve performance")
+- **Scope is single-concern** — if the issue touches unrelated areas, go back to Step 1 and split
+- **Skill match is genuine** — if Step 2b added an implementation note, confirm the skill directly implements the core work
+- **Why section has real motivation** — not just restating the What
+
+This refinement step prevents low-quality issues that cause rework when picked up later.
+
+## 6. Create
 
 Create the issue:
 
@@ -124,7 +157,7 @@ Create the issue:
 gh issue create --title "<title>" --body "<body>"
 ```
 
-## 6. Update blocked issues
+## 7. Update blocked issues
 
 For each issue approved as blocked in Step 4c:
 
@@ -143,9 +176,9 @@ For each issue approved as blocked in Step 4c:
    #<new-number> (<new title>) was created and introduces changes that this issue depends on. Marking as blocked until #<new-number> is resolved.
    ```
 
-This follows the same dependency format used by `/close-pr` (Step 8) for unblocking — `Depends on #N` is the canonical pattern detected by `/list-backlog`, `/list-issues`, and `/close-pr`.
+This follows the canonical `Depends on #N` pattern — the same format used by the PR merge skill for unblocking and by the issue listing skills for detecting blocked items.
 
-## 7. Add to project board (mandatory)
+## 8. Add to project board (mandatory)
 
 Check if a project board exists for the repo:
 
@@ -163,7 +196,7 @@ gh project list --owner "@me" --format json | jq '.projects[] | {number, title}'
 
 Read `references/project-board-operations.md` for the full command reference.
 
-## 8. Report
+## 9. Report
 
 Present:
 - Issue URL

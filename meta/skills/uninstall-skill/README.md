@@ -2,7 +2,7 @@
 
 > Uninstall a skill by name, local or global.
 
-Removes an installed skill from either the current project or the global skills-library, cleaning up directories and updating `STRUCTURE.md` as needed.
+Safely removes an installed skill from either the current project or the global skills-library. Handles symlink cleanup, permission checks, `setup.sh` re-registration, and `STRUCTURE.md` updates.
 
 ## Usage
 
@@ -15,10 +15,12 @@ Removes an installed skill from either the current project or the global skills-
 
 ## How it works
 
-1. **Locate the skill** — Checks both local (`.claude/skills/`) and global (`skills-library/`) locations
+1. **Locate the skill** — Searches both local (`.claude/skills/`) and global (`skills-library/`) locations. Suggests similar names if not found.
 2. **Confirm scope** — If found in both locations, asks which to remove (local, global, or both)
-3. **Remove** — Deletes the skill directory and updates `STRUCTURE.md` if removing globally
-4. **Confirm** — Reports which skill was removed and from which location
+3. **Pre-removal safety checks** — Detects symlinks, verifies write permissions before any destructive operation
+4. **Remove** — Deletes the skill directory, removes symlinks, runs `setup.sh` for global removals, updates `STRUCTURE.md`
+5. **Post-removal verification** — Confirms directory, symlinks, and index are clean
+6. **Report** — Presents a structured removal summary with any warnings
 
 ## Directory structure
 

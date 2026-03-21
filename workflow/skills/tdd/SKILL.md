@@ -2,6 +2,14 @@
 name: tdd
 description: Execute Test-Driven Development with strict red-green-refactor discipline. Guides the agent through vertical slices — one test, one implementation, repeat. Use when the user says "tdd", "test first", "red green refactor", "write tests", "test driven", "let's TDD this", or wants to implement a feature with test discipline — even if they don't explicitly say "TDD."
 user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - Grep
+  - AskUserQuestion
 ---
 
 # Test-Driven Development

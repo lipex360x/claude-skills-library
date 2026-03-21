@@ -2,6 +2,16 @@
 name: create-skill
 description: Guide the user through creating, reviewing, or improving Claude Code skills — from structuring SKILL.md files to writing effective descriptions, designing progressive disclosure, and launching subagents. Use this skill whenever the user mentions "create a skill", "improve a skill", "update a skill", "skill quality", "skill best practices", "how to write a skill", or wants to build or update a /command — even if they don't explicitly say "skill."
 user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - Grep
+  - Agent
+  - AskUserQuestion
+  - Skill
 ---
 
 # Create Skill
@@ -106,6 +116,7 @@ Keep it under 500 lines. These principles produce measurably better results:
 - **Numbered steps.** Give the model a clear execution path. Headers for major phases, numbers for sequential steps within each phase.
 - **Explicit output formats.** When the skill produces structured output (a brief, a spec, a report), show the expected format with an example — the model follows concrete shapes better than abstract descriptions.
 - **Error handling.** Skills that call external tools, APIs, or check dependencies should handle failures explicitly. Read `references/error-handling-patterns.md` for patterns: dependency checks via AUQ, input validation with clear messages, and tool failure recovery.
+- **Anthropic patterns.** Apply proven patterns from Anthropic's skill design: `allowed-tools` restrictions, few-shot examples, dynamic context injection, and structured output with XML tags. Read `references/anthropic-patterns.md` for the full guide.
 
 If approaching 500 lines, move detailed content to `references/` with a pointer:
 

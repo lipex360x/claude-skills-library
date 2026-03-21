@@ -2,11 +2,25 @@
 name: improve-codebase-architecture
 description: Explore a codebase for architectural friction, surface shallow modules and coupling issues, and propose deep-module refactors as GitHub issue RFCs. Use when the user says "improve architecture", "refactor modules", "codebase review", "make code agent-friendly", "deep modules", "module boundaries", "architectural friction", "simplify codebase", or wants to restructure code for better testability and maintainability — even if they don't explicitly say "architecture."
 user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - Grep
+  - Agent
+  - AskUserQuestion
 ---
 
 # Improve Codebase Architecture
 
 Explore a codebase like an agent would, surface architectural friction, and propose module-deepening refactors as GitHub issue RFCs. Based on John Ousterhout's "A Philosophy of Software Design" — deep modules (small interface, large implementation) improve testability, navigability, and agent output quality.
+
+## Input
+
+- **Required:** A codebase with source files to analyze (the current working directory)
+- **Optional:** Specific area or module to focus on (if not provided, explore the entire codebase)
+- **Skip for tiny projects:** If the codebase has fewer than 5 source files, inform the user that architecture analysis isn't meaningful at this scale and suggest waiting until the project grows
 
 ## Steps
 
@@ -47,9 +61,9 @@ Present this to the user.
 
 ### 4. Design multiple interfaces
 
-Spawn 3 sub-agents in parallel using the Agent tool. Each produces a **radically different** interface for the deepened module.
+Spawn 3 sub-agents in parallel using the Agent tool. Each produces a **radically different** interface for the deepened module. Use `allowed_tools: ["Read", "Glob", "Grep"]` for each sub-agent — they need to read the actual code to produce grounded designs.
 
-Give each agent a separate technical brief (file paths, coupling details, dependency category, what's being hidden) plus a different design constraint:
+Give each agent a separate technical brief (file paths, coupling details, dependency category, what's being hidden) plus a different design constraint. Each agent works in two phases: first outline the approach (interface sketch + rationale), then produce the full design — this reduces wasted work if the agent misunderstands the brief.
 
 - **Agent 1: Minimalist** — "Minimize the interface — aim for 1-3 entry points max"
 - **Agent 2: Flexible** — "Maximize flexibility — support many use cases and extension"
@@ -100,6 +114,11 @@ Present the issue URL to the user.
 - **English for all issue content.** Issues are public and portable — always write in English. Communication with the user follows their language preference.
 
 - **No local paths in issues.** Use project-relative paths only. Never reference `~/.brain/`, `/Users/...`, or any absolute paths in issue content.
+
+- **Handle these edge cases:**
+  - No friction found — celebrate it. Tell the user the codebase is well-structured and suggest re-running after the next development surge
+  - Sub-agent failure — proceed with the remaining designs. Two designs are enough for a meaningful comparison; one is enough to draft an RFC
+  - `gh` CLI unavailable — write the RFC as a local markdown file instead of a GitHub issue, and inform the user they can create the issue manually later
 
 - **Avoid these anti-patterns:**
   - Proposing refactors without reading the code first — the friction signal comes from exploration, not assumptions

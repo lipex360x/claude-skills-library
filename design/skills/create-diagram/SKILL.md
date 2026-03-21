@@ -11,6 +11,12 @@ metadata:
     - visual
 argument-hint: "[diagram-description-or-reference-image]"
 user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Agent
+  - AskUserQuestion
 ---
 
 # Create Diagram

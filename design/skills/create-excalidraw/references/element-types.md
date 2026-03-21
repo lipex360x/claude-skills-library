@@ -2,6 +2,18 @@
 
 Detailed specifications for each Excalidraw element type with visual examples and use cases.
 
+## Table of Contents
+
+- [Element Type Overview](#element-type-overview)
+- [Rectangle](#rectangle)
+- [Ellipse](#ellipse)
+- [Diamond](#diamond)
+- [Arrow](#arrow)
+- [Line](#line)
+- [Text](#text)
+- [Combining Elements](#combining-elements)
+- [Summary](#summary)
+
 ## Element Type Overview
 
 | Type | Visual | Primary Use | Text Support |

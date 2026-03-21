@@ -2,6 +2,7 @@
 name: grill-me
 description: Deep structured interview about a plan, feature, or project — extracts decisions, constraints, and context to generate PRD input. Use when the user says "grill me", "me entrevista", "quero detalhar isso", "vamos aprofundar", "let's flesh this out", "stress-test this idea", or wants to think through a plan deeply — even if they don't explicitly say "grill."
 user-invocable: true
+allowed-tools: AskUserQuestion, Bash, Read, Glob, Grep
 ---
 
 # Grill Me
@@ -94,6 +95,10 @@ Present the file path to the user and suggest: "When you're ready to turn this i
 - **Adapt to detail level.** If the user is answering with short responses ("yes", "no"), the questions are good. If they're writing paragraphs, the options aren't capturing what they mean — adjust.
 
 - **Codebase as oracle.** In existing projects, the code is truth. If the user says "we don't have authentication" but there's an `auth/` in the project, gently confront: "I found an auth/ module — want to leverage it or replace it?"
+
+- **Handle interruptions gracefully.** If the user abandons the interview mid-way (stops responding, changes topic, or explicitly cancels), save whatever has been collected so far to `.claude/grill-output.md` with a `status: partial` marker in the header and a list of unresolved branches. This ensures no context is lost if the user returns later.
+
+- **Budget codebase exploration.** When exploring an existing codebase in Step 3/4, limit code reading to the top-level structure and directly relevant modules. Do not attempt to read the entire codebase — focus on files that answer the current question. If the project is too large to navigate efficiently, ask the user to point you to the relevant areas.
 
 - **Avoid these anti-patterns:**
   - Open-ended questions without options (violates the core rule)

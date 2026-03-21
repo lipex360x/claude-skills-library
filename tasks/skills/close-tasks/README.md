@@ -15,9 +15,12 @@ Shuts down the task board by deleting all tasks and disabling the always-open se
 
 ## How it works
 
-1. **Delete** — removes all tasks from the task list using `TaskUpdate` with status `deleted`
-2. **Disable** — sets `task-visibility.always-open` to `false` in `~/.brain/config/behavior.config.json`
-3. **Confirm** — reports that the board is closed
+1. **Pre-check** — reads config to verify the board isn't already closed
+2. **Safety check** — warns before closing if any tasks are still in-progress
+3. **Delete** — removes all tasks from the task list using `TaskUpdate` with status `deleted`
+4. **Disable** — sets `task-visibility.always-open` to `false` in config
+5. **Verify** — reads config again to confirm the change persisted
+6. **Confirm** — reports the board is closed and how many tasks were removed
 
 ## Directory structure
 
