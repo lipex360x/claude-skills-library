@@ -41,6 +41,7 @@ This format is compact, scannable, and lets the user see pass/fail at a glance. 
 | Constraints reasoned? | Uses "because X" rather than rigid "ALWAYS/NEVER" |
 | Numbered steps? | Clear headers for major phases, numbers for sequential steps |
 | Output formats? | Defined with concrete examples |
+| Input contract? | Required vs optional inputs defined, with validation rules and type expectations |
 
 ### Quality
 
@@ -49,6 +50,15 @@ This format is compact, scannable, and lets the user see pass/fail at a glance. 
 | Quality repeated? | Quality expectations repeated at multiple key points, not just stated once |
 | Anti-patterns named? | Specific failure modes listed, not just generic "make it good" |
 | Refinement step? | Explicit "polish, don't add" step included |
+| Error handling? | Dependency checks, input validation, and tool failure patterns applied where relevant (see `references/error-handling-patterns.md`) |
+
+### Testing
+
+| Item | What to check |
+|------|---------------|
+| Invoked with realistic input? | Skill was actually run with a real scenario, not just written and pushed |
+| Activation tested? | 3+ natural trigger phrases tested — exact command, natural description, indirect reference — all activated correctly |
+| Failure modes checked? | Verified: no undertriggering (fails to fire when it should), no overtriggering (fires when it shouldn't), no token bloat (loads excessive context), no silent failures (errors swallowed without user feedback) |
 
 ### Subagents (if applicable)
 
@@ -68,3 +78,9 @@ This format is compact, scannable, and lets the user see pass/fail at a glance. 
 | Large refs have TOC? | References >300 lines have a table of contents |
 | Self-contained? | No cross-skill dependencies |
 | README generated? | README.md with all placeholders filled |
+
+### Compliance
+
+| Item | What to check |
+|------|---------------|
+| CLAUDE.md compliance? | Frontmatter values don't violate global rules (e.g., `disable-model-invocation` default, naming conventions, plugin structure). Read the user's CLAUDE.md and verify no conflicts |
