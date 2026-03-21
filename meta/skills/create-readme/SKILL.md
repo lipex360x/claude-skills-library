@@ -35,8 +35,9 @@ Build a README from scratch by analyzing the project.
 
 1. Scan the project: package.json, source structure, config files, CI/CD, tests, docs.
 2. Read `references/readme-references.md` for the list of local reference READMEs. Read at least 2 that match the project type for structure and tone inspiration.
-3. Draft the README following the formatting rules below.
-4. Present the draft to the user before writing.
+3. Re-read the formatting rules and anti-patterns below before drafting — the draft must pass all of them. Every section must earn its place, structure must be scannable, and no anti-pattern should slip through.
+4. Draft the README.
+5. Present the draft to the user before writing.
 
 ### 3. Review mode
 
