@@ -32,7 +32,7 @@ skills-library/
 | **database** | Database optimization and best practices | review-postgres |
 | **deploy** | Deployment and infrastructure | deploy-vercel |
 | **gws** | Google Workspace: Gmail filters, inbox management | check-gmail |
-| **meta** | Claude Code skill/hook management and analysis | capture-analysis, create-continuation, create-hook, create-readme, create-skill, find-skills, improve-codebase-architecture, install-skill, uninstall-skill |
+| **meta** | Claude Code skill/hook management and analysis | audit-skill, capture-analysis, create-continuation, create-hook, create-readme, create-skill, find-skills, improve-codebase-architecture, install-skill, uninstall-skill |
 | **tasks** | Task visibility board management | clean-tasks, close-tasks, open-tasks |
 
 ## How to navigate
