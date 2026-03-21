@@ -23,6 +23,39 @@ Structure each issue body with:
 - **Why:** motivation or context (prevents rework when picking up later)
 - **Acceptance criteria:** 2-4 concrete, verifiable items as checkboxes
 
+## 2b. Detect relevant skills
+
+Before finalizing the issue body, scan the issue scope against available skills to determine if execution should use a specific skill. List available skills:
+
+```bash
+ls skills-library/*/skills/*/SKILL.md 2>/dev/null || Glob: */skills/*/SKILL.md
+```
+
+Match the issue scope against skill purposes:
+
+| Issue scope | Skill to reference |
+|-------------|-------------------|
+| Creating a new skill | `/create-skill` |
+| Auditing skill quality | `/audit-skill` |
+| Creating a diagram | `/create-diagram` |
+| Creating a presentation | `/create-webview` |
+| Scaffolding a new project | `/start-new-project` |
+| Writing content (posts, copy) | `/write-content` |
+| Designing a system from an image | `/extract-design-system` |
+| Database optimization | `/review-postgres` |
+| Deploying to Vercel | `/deploy-vercel` |
+| Any other work that maps to a `/command` | Reference it |
+
+If a matching skill is found, add an `## Implementation note` section to the issue body before the Size line:
+
+```markdown
+## Implementation note
+
+Use `/skill-name` to [action] — it enforces [quality checks, review process, standards]. Do not [manual alternative].
+```
+
+If no skill matches, skip this section. Do not force a match — only reference skills with clear relevance.
+
 ## 3. Labels and Size
 
 Use `AskUserQuestion` to ask which labels to apply (fetch available labels with `gh label list`). If no labels exist, skip labels.

@@ -136,6 +136,13 @@ Report:
 - Scope transfers performed (if any)
 - Board status (card moved to "In review", or skipped)
 
+## 7. Suggest merge
+
+After reporting, use `AskUserQuestion` with options `["Yes, merge now", "No, wait for review"]`.
+
+- **"Yes, merge now"** → invoke `/close-pr`
+- **"No, wait for review"** → end normally
+
 ## Guidelines
 
 - **All comments in English.** Scope transfer comments, PR body, and all issue content must be in English because they're public and portable. Communication with the user follows their language preference.
