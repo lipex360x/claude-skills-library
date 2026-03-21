@@ -79,6 +79,7 @@ Keep it under 500 lines. These principles produce measurably better results:
 - **Explain the why.** Reasoning beats rigid rules. Instead of "NEVER do X", write "Avoid X because Y — this causes Z". LLMs handle edge cases better when they understand the reasoning behind a constraint.
 - **Numbered steps.** Give the model a clear execution path. Headers for major phases, numbers for sequential steps within each phase.
 - **Explicit output formats.** When the skill produces structured output (a brief, a spec, a report), show the expected format with an example — the model follows concrete shapes better than abstract descriptions.
+- **Error handling.** Skills that call external tools, APIs, or check dependencies should handle failures explicitly. Read `references/error-handling-patterns.md` for patterns: dependency checks via AUQ, input validation with clear messages, and tool failure recovery.
 
 If approaching 500 lines, move detailed content to `references/` with a pointer:
 
@@ -115,6 +116,16 @@ bash ~/.brain/scripts/setup.sh
 ```
 
 Without this step, the skill won't appear in `/` autocomplete in new sessions.
+
+### 8b. Test the skill
+
+Invoke the skill with realistic input before moving on. A skill that passes review but fails on real input is worse than no skill — it erodes trust in the entire library.
+
+1. **Functional test** — Run the skill with a realistic scenario that exercises its main workflow. Verify it activates, follows the expected steps, and produces the expected output format.
+2. **Activation test** — Test with at least 3 natural phrases that should trigger the skill. Vary the wording: use the exact `/command` name, a natural description of the action, and a partial or indirect reference. All three must activate the skill. If any fails, revise the description (Step 3) and retest.
+3. **Edge case** — Try one input that's just outside the skill's intended scope. Verify it either handles it gracefully or doesn't activate (no silent failures, no crashes).
+
+If any test fails, fix the issue before proceeding. Do not defer fixes to a follow-up — the skill is not done until it works.
 
 ### 9. Update READMEs
 
@@ -171,5 +182,6 @@ These are hard-won lessons — each one caused real debugging time:
 
 - **`@` imports** — Only resolved in CLAUDE.md files, not in SKILL.md. Use Read tool instructions instead.
 - **Cross-skill dependencies** — Each skill must be fully self-contained. You can't call one skill from another.
+- **Shared state without contracts** — When a skill reads or writes shared state (filesystem paths, config files like `project-settings.json`, manifests like `STRUCTURE.md`), it must document the contract: what it reads, what it writes, and the expected format. Without this, one skill's update silently breaks another because neither declared the dependency. Add an `## External state` section to the SKILL.md listing each shared resource, its path, and whether the skill reads or writes it.
 - **Overly specific instructions** — Skills may be used across many inputs. Avoid rules tied to one test case. Generalize the principle, not the specific fix.
 - **Long SKILL.md without hierarchy** — Walls of text get lost in context. Use headers, numbered steps, and extract detail to references.
