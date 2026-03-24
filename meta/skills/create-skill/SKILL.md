@@ -195,7 +195,7 @@ Update `skills-library/STRUCTURE.md` if the skill was created, moved, renamed, o
 
 ### 11. Push to GitHub
 
-Push using `/push -y`. If `.brain/` files were modified, push that repo too.
+Push using `/push`. If `.brain/` files were modified, push that repo too.
 
 ### 12. Report
 
