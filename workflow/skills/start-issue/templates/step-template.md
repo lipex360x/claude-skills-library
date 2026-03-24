@@ -106,18 +106,18 @@ Example:
 - [ ] Verify
 ```
 
-### Verification Step (Agent Teams)
-When using Agent Teams, the final step must include a **verification matrix** — named checks × units:
-- Each checkbox names a specific check (not "verify everything")
-- The lead fills in a pass/fail matrix table when executing
-- Include a checkbox for documenting false positives with reasoning
+### Consolidation Step (Agent Teams)
+The final step consolidates progressive audit results — the actual auditing happens in background as teammates deliver (see Step 7 in SKILL.md):
+- Each checkbox names a specific consolidation action
+- The lead collects audit results and presents the verification matrix
+- Flag failures for remediation, document false positives
 
 Example:
 ```markdown
-## Step 4 — Cross-batch verification
+## Step 4 — Consolidate audit results and push
 
-- [ ] Verify [check A] for all [units] — present results as matrix
-- [ ] Verify [check B] for all [units]
+- [ ] Collect progressive audit results for all [units] — present consolidated verification matrix
+- [ ] Flag any audit failures for remediation
 - [ ] Document false positives with reasoning
 - [ ] Push all changes
 ```

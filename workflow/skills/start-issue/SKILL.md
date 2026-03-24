@@ -157,6 +157,8 @@ After completing Step N (last sequential dependency):
 
 **Teammate task pattern:** Create one task per sub-section in your assigned Step. Task names must match sub-section headers for lead monitoring.
 
+**Audit pattern:** Lead spawns a background audit agent per teammate on completion — do not wait for all teammates. Final step consolidates results into the verification matrix.
+
 _Remove this section entirely if Agent Teams is not enabled._
 ```
 
@@ -170,15 +172,15 @@ Also add an inline reminder in the first parallelizable step: `⚠️ This step 
 **Structured verification for the final Step.** When the plan uses Agent Teams, the verification step (typically the last Step, owned by the lead) must include a **verification matrix** — a predefined table of checks × units of work. Each checkbox in the verification step should name a specific check, not generic "verify everything works". Template for the issue body:
 
 ```markdown
-## Step N — Cross-batch verification
+## Step N — Consolidate audit results and push
 
-- [ ] Verify [specific check A] for all [units] — present results as matrix
-- [ ] Verify [specific check B] for all [units]
+- [ ] Collect progressive audit results for all [units] — present consolidated verification matrix
+- [ ] Flag any audit failures for remediation
 - [ ] Document false positives with reasoning (e.g., runtime paths in skill files are legitimate)
 - [ ] Push all changes
 ```
 
-The lead fills in a matrix table when executing this step:
+The actual auditing happens progressively as teammates deliver (see Step 7 — Progressive audit). This step only consolidates results. The lead fills in a matrix table:
 ```markdown
 | Check | unit-1 | unit-2 | unit-3 |
 |-------|--------|--------|--------|
@@ -303,6 +305,8 @@ Do NOT edit the issue body or mark checkboxes — the lead verifies your work an
 - **Lead** → monitors progress via `TaskList`, verifies each teammate's output, then marks issue checkboxes in the verification step
 
 This ensures checkboxes on the issue represent **verified** work, not self-declared completion.
+
+**Progressive audit.** When a teammate reports completion, immediately spawn a background audit agent (`Agent` with `run_in_background: true`) to verify that teammate's output against the verification matrix checks. Do not wait for all teammates — audit each delivery as it arrives. By the time the last teammate finishes, most verification is already complete. The final verification step only consolidates audit results and presents the matrix.
 
 If the issue has no Execution mode section (Agent Teams not enabled), skip this step.
 
