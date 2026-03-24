@@ -73,6 +73,7 @@ Surgical edits to existing skills — instant context via `skill-meta.json`, sco
 2. Target skill directory exists → if not: AUQ with skill list from STRUCTURE.md for selection.
 3. Target `SKILL.md` is readable → if not: "SKILL.md not found at expected path." — stop.
 4. Working tree is clean (no uncommitted changes in target skill) → if dirty: warn but continue — the user may have in-progress work.
+5. Skeleton compliance baseline → scan the target SKILL.md for the 13 canonical section headers (read `references/skeleton-template.md` for the expected names and order). If sections are missing or names are non-canonical → AUQ with options `["Migrate with /create-skill first", "Continue anyway"]`. If "Migrate": invoke `Skill("create-skill")` with the target skill name, wait for completion, then resume the update flow. If "Continue": proceed in best-effort mode — the post-edit compliance check (Step 5) will flag remaining gaps.
 
 </pre_flight>
 
@@ -222,6 +223,7 @@ Scoped to modified sections only — full skill audit is `/audit-skill`'s job.
 - **Re-auditing the entire skill.** Content audit is scoped to modified sections — because full content re-verification is `/audit-skill`'s job, not a side effect of every edit.
 - **Forgetting skill-meta.json.** Always update or generate `skill-meta.json` at the end of every session — because stale metadata defeats the purpose of instant context loading for future edits.
 - **Using /create-skill for edits.** `/create-skill` regenerates the full skeleton — because applying it to an existing skill risks overwriting carefully tuned content that took multiple iterations to get right.
+- **Editing a non-compliant skill without warning.** Always run the skeleton baseline check in pre-flight — because scoped edits on a non-compliant skill produce inconsistent results (you fix one section while 5 others are missing or misnamed).
 
 ## Guidelines
 
