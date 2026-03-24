@@ -8,6 +8,7 @@ Patterns from Anthropic's skill design that improve quality, token efficiency, a
 - [Few-shot examples](#few-shot-examples)
 - [Dynamic context injection](#dynamic-context-injection)
 - [Structured output with XML tags](#structured-output-with-xml-tags)
+- [Claude 4.6 responsiveness](#claude-46-responsiveness)
 
 ## Allowed tools
 
@@ -82,13 +83,7 @@ Read `references/quality-techniques.md` for the full set of techniques.
 - Reference data that changes independently of the main skill logic.
 - Detailed examples, templates, or lookup tables.
 
-**Three-tier architecture:**
-
-| Tier | File | Token cost | When loaded |
-|------|------|-----------|-------------|
-| 1 | SKILL.md | Always | Every invocation |
-| 2 | references/*.md | On demand | When a step requires it |
-| 3 | templates/*.md | On demand | When producing output |
+**Three-tier architecture:** See `references/progressive-disclosure.md` for the full tier breakdown, overflow thresholds, and token management strategy.
 
 **Guidelines:**
 - SKILL.md contains the workflow, decisions, and quality gates.
@@ -139,3 +134,33 @@ For each skill, evaluate against the checklist and produce a report.
 - Don't nest XML tags more than one level deep — it adds complexity without clarity.
 
 **Common mistake:** Using XML tags for everything. They add value for structured data boundaries — not for prose instructions. If the content reads naturally as markdown, use markdown.
+
+## Claude 4.6 responsiveness
+
+Claude 4.6 is significantly more responsive to system prompts than previous versions. This changes how skill instructions should be written.
+
+**Use normal language with reasoning instead of aggressive emphasis.**
+
+| Instead of | Write |
+|---|---|
+| `CRITICAL: You MUST use this tool when...` | `Use this tool when...` |
+| `ALWAYS check the branch before pushing` | `Check the branch before pushing because force-pushing to main can overwrite teammates' work` |
+| `NEVER skip the pre-flight checks` | `Run pre-flight checks before proceeding because skipping them has caused silent failures in production` |
+| `NEVER commit directly to main` | `Avoid committing directly to main because it bypasses CI checks and can break the deploy pipeline` |
+
+**Calibrate intensity to actual risk.** Reserve strong language (MUST, NEVER, CRITICAL) for genuinely dangerous operations:
+- Data deletion or corruption
+- Credential exposure
+- Force pushes to shared branches
+- Irreversible state changes
+
+For everything else, plain language with a brief reason is more effective.
+
+**Constraints work better with reasoning.** Instead of bare prohibitions, explain the consequence. The model internalizes constraints more reliably when it understands the failure mode. This also helps it make correct judgment calls in edge cases that the rule author did not anticipate.
+
+- Weak: "NEVER amend after hook failure"
+- Strong: "Avoid amending after hook failure because the failed commit never landed, so `--amend` modifies the previous commit — potentially destroying unrelated work"
+
+**Why this matters.** Claude 4.6 overtriggers on aggressive prompting. Excessive use of ALWAYS, NEVER, CRITICAL, and MUST causes the model to treat every instruction as maximum priority, which paradoxically reduces compliance on the instructions that actually matter. When everything is critical, nothing is.
+
+For the full XML vs markdown decision patterns, see `references/xml-tag-patterns.md`.
