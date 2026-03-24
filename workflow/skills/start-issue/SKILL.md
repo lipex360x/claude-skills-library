@@ -1,6 +1,11 @@
 ---
 name: start-issue
-description: Pull an issue and start implementation — reads the issue, expands acceptance criteria into a detailed step-by-step plan with checkboxes, rewrites the issue, creates branch and tasks. Use this skill when the user says "start issue", "work on issue #N", "pull from backlog", "start #N", or wants to begin implementing an issue — even if they don't explicitly say "issue."
+description: >-
+  Pull an issue and start implementation — reads the issue, expands acceptance
+  criteria into a detailed step-by-step plan with checkboxes, rewrites the issue,
+  creates branch and tasks. Use this skill when the user says "start issue",
+  "work on issue #N", "pull from backlog", "start #N", or wants to begin
+  implementing an issue — even if they don't explicitly say "issue."
 user-invocable: true
 allowed-tools:
   - Read
@@ -21,6 +26,58 @@ allowed-tools:
 # Start Issue
 
 Turn an issue with high-level acceptance criteria into a detailed implementation plan with Steps and checkboxes, then set up the branch and tasks. One approval gate: the proposed plan. Everything else is automated.
+
+## Input contract
+
+<input_contract>
+
+| Input | Source | Required | Validation | On invalid |
+|-------|--------|----------|------------|------------|
+| `issue-number` | $ARGUMENTS | no | Positive integer (accepts `#N` or `N`) | AUQ with Backlog/Todo issues from project board |
+
+</input_contract>
+
+## Output contract
+
+<output_contract>
+
+| Artifact | Path | Persists | Format |
+|----------|------|----------|--------|
+| Rewritten issue body | GitHub API | yes | Markdown with Steps + checkboxes |
+| Feature branch | git | yes | `feat/<number>-<slug>` |
+| Board card update | GitHub Projects | yes | Status → In Progress |
+| Task list | TaskCreate | no | One task per Step |
+
+</output_contract>
+
+## External state
+
+<external_state>
+
+| Resource | Path | Access | Format |
+|----------|------|--------|--------|
+| GitHub issue | `gh issue view` | R/W | Markdown body |
+| Project board | GitHub Projects API | R/W | GraphQL |
+| ARCHITECTURE.md | project root | R/W | Markdown |
+| Step template | `templates/step-template.md` | R | Markdown |
+| Board operations | `references/project-board-operations.md` | R | Markdown |
+| Board setup | `references/project-board-setup.md` | R | Markdown |
+| CDP practices | `references/cdp-best-practices.md` | R | Markdown |
+| Dev guidelines | `references/development-guidelines.md` | R | Markdown |
+| TDD methodology | `references/tdd-methodology.md` | R | Markdown |
+
+</external_state>
+
+## Pre-flight
+
+<pre_flight>
+
+1. `which gh` → if missing: "GitHub CLI required. Install: https://cli.github.com/" — stop.
+2. `gh auth status` → if not authenticated: "Run `gh auth login` first." — stop.
+3. Current directory is a git repo → if not: "Must run inside a git repo." — stop.
+4. Working tree is clean → if dirty: warn user about uncommitted changes, suggest stashing.
+
+</pre_flight>
 
 ## Steps
 
@@ -54,184 +111,77 @@ Fetch the issue body:
 gh issue view <number> --json body,title,labels -q '{title: .title, labels: [.labels[].name], body: .body}'
 ```
 
-Extract:
-- **Title** — will become the branch slug
-- **What/Why** — context for planning
-- **Acceptance criteria** — the high-level checkboxes to expand into detailed steps
+Extract: **Title** (branch slug), **What/Why** (context), **Acceptance criteria** (checkboxes to expand).
 
-**Read issue comments for context.** After fetching the issue body, fetch comments before analyzing the codebase:
+**Read issue comments for context.** Fetch comments before analyzing the codebase:
 
 ```bash
 gh issue view <number> --json comments --jq '.comments[] | {author: .author.login, body: .body}'
 ```
 
-If the issue has comments, scan them for actionable context:
-- **File paths** — explicit references to files or directories (e.g., `workflow/skills/push/SKILL.md`)
-- **Scope transfers** — notes from `/open-pr` or `/close-pr` indicating what was done or what remains
-- **Partial completion notes** — comments from previous branches describing completed work or abandoned approaches
-- **Blocker resolutions** — updates about resolved blockers that change the implementation approach
-- **Implementation hints** — suggestions, code snippets, or architecture decisions from collaborators
+Scan comments for: file paths, scope transfers from `/open-pr` or `/close-pr`, partial completion notes, blocker resolutions, implementation hints. Store as **comment insights** to narrow exploration scope.
 
-Store the extracted context as **comment insights** — a structured summary of what the comments reveal. These insights feed directly into the codebase analysis phase: if comments already point to specific files, patterns, or completed work, the exploration scope can be narrowed significantly.
+**Analyze the current codebase.** Start by checking for `ARCHITECTURE.md` at the project root. If it exists, read it first — it contains stack, layers, patterns, schema, auth model, and routes (~2k tokens vs ~53k for full exploration). Only spawn an exploration agent if ARCHITECTURE.md is missing, incomplete, or stale.
 
-If the issue has no comments, skip this step and proceed to codebase analysis with full exploration scope.
+Apply comment insights to narrow exploration — if comments point to specific files, target those instead of a full scan. If comments plus ARCHITECTURE.md provide sufficient context, skip exploration entirely.
 
-**Analyze the current codebase** to inform the plan, using comment insights to narrow exploration scope. **Start by checking for `ARCHITECTURE.md` at the project root.** If it exists, read it first — it contains stack, layers, patterns, schema, auth model, and routes, eliminating the need for expensive exploration (~2k tokens vs ~53k). Only spawn an exploration agent if ARCHITECTURE.md is missing, incomplete, or appears stale (e.g., routes in the file don't match `src/app/` directory).
+**If ARCHITECTURE.md doesn't exist, create it.** Explore the codebase and generate it at the project root. This file is the living context document — `/close-pr` updates it after each merge.
 
-**Apply comment insights to narrow exploration.** If comment insights identified specific file paths or directories, target those first instead of a full codebase scan. If comments provide sufficient context about the relevant code areas (e.g., "all changes are in `workflow/skills/push/`"), reduce the exploration agent scope to those areas or skip exploration entirely when the comments plus ARCHITECTURE.md already provide enough context for concrete checkboxes. When the issue has no comments or comments contain no actionable context, fall back to the current full-scan behavior unchanged.
+If ARCHITECTURE.md exists but is stale, update it with what you discover during exploration.
 
-**If ARCHITECTURE.md doesn't exist, create it.** This is the first issue being worked on — the codebase has no knowledge cache yet. Explore the codebase (read package.json, directory structure, key config files, existing routes/schema), then generate `ARCHITECTURE.md` at the project root using the same structure as `start-new-project` (stack, layers, patterns by canonical example, schema summary, auth model, routes). This file is the **living context document** — `/close-pr` will update it after each merge, and every subsequent `/start-backlog` will read it first. Creating it now pays for itself immediately: the plan you're about to write will be more concrete, and every future session starts with context instead of re-exploration.
-
-If ARCHITECTURE.md already exists but is stale, update it with what you discover during exploration — don't leave known-incorrect information in the file.
-
-This context is essential for writing concrete checkboxes with file paths.
-
-**CDP detection (for web projects).** Check two things:
-
-1. **CDP already configured?** Look for `.claude/project-settings.json`. If it exists and has a `chrome.cdp` field, CDP is ready — store the `pages` map for use in verification checkboxes.
-
-2. **Web project with frontend?** If CDP is not configured, determine if this is a web project with a frontend layer. Check for signals: `package.json` with frontend frameworks (react, vue, svelte, next, nuxt, remix, astro, angular, solid), HTML template files, a `pages/` or `app/` directory with UI components, or a dev server config (vite, webpack, next.config). Store the result — you **MUST** use it in Step 3 to decide whether to include CDP setup.
+**CDP detection (for web projects).** Check:
+1. **CDP already configured?** Look for `.claude/project-settings.json` with `chrome.cdp` field. Store the `pages` map for verification checkboxes.
+2. **Web project with frontend?** Check for frontend framework signals (react, vue, svelte, next, etc.). Store the result for Step 3.
 
 ### 2b. Check Agent Teams capability
 
-Run `echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to determine if Agent Teams is enabled (value `1`). Store the result — you **MUST** use it in Step 3 to decide whether to include the parallel execution plan. This check is not optional.
+Run `echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to determine if Agent Teams is enabled (value `1`). Store the result — you **MUST** use it in Step 3.
 
 ### 2c. Enforce development standards
 
-Before proposing any plan, verify that the issue and project setup enforce these non-negotiable standards. If any are missing or weak, the plan **must** compensate by making them explicit in every relevant Step:
+Before proposing any plan, verify non-negotiable standards. If any are missing, the plan must compensate:
 
-1. **TDD is mandatory.** Scan the issue body for TDD references (test-first checkboxes, red-green-refactor mentions, references to `tdd-methodology.md`). If TDD is not explicitly enforced — either because `/start-new-project` didn't make it clear or because this is a standalone backlog item — **you must enforce it yourself**. Every Step that introduces behavior gets test-first checkboxes. This is not a suggestion to consider; it's a structural requirement of the plan. Read `references/tdd-methodology.md` for the full methodology.
-
-2. **No workarounds.** The plan must solve problems at their root. If a Step would require a workaround (hardcoded values to bypass a bug, temporary flags, monkey-patches, `any` casts to silence type errors, skipped validations), it's a signal that the Step is wrong or incomplete. Rewrite it to address the underlying issue. Workarounds create invisible tech debt that compounds across issues — what starts as "just for now" becomes permanent the moment the next issue lands on top of it.
-
-3. **No unnecessary code comments.** Code comments are allowed only when the logic is genuinely non-obvious — complex algorithms, unintuitive business rules, or regulatory constraints that aren't self-evident from the code. Self-documenting code (clear names, small functions, explicit types) replaces comments. Never add comments that restate what the code does ("// increment counter"), explain obvious patterns ("// check if user exists"), or serve as section dividers. When proposing checkboxes, never include "add comments" or "document the code" — if the code needs a comment to be understood, the code needs to be rewritten.
-
-If any of these standards conflict with the original issue's approach, flag it to the user and propose the correction. Don't silently ignore a weak issue setup.
+1. **TDD is mandatory.** Scan for TDD references. If absent, enforce test-first checkboxes in every behavioral Step. Read `references/tdd-methodology.md`.
+2. **No workarounds.** The plan must solve problems at root. Hardcoded values, temporary flags, monkey-patches signal the Step is incomplete.
+3. **No unnecessary code comments.** Only allowed for genuinely non-obvious logic. Never include "add comments" checkboxes.
 
 ### 3. Propose the detailed plan
 
 Read `templates/step-template.md` for the expected format.
 
-Transform the high-level acceptance criteria into a detailed plan with **Steps** and checkboxes. Each acceptance criterion typically expands into 1-3 Steps, each with 2-6 concrete checkboxes.
+Transform acceptance criteria into Steps with checkboxes. Each criterion typically expands into 1-3 Steps with 2-6 concrete checkboxes.
 
 **Apply CDP detection result from Step 2:**
-
-- **CDP already configured** (`.claude/project-settings.json` exists): use the `pages` map to write verification checkboxes with the pattern "Navigate to [page] via CDP and take screenshot to verify [expected state]". No setup Step needed — but if this issue introduces new routes, include a checkbox to update the `pages` map in `project-settings.json`.
-- **Web project without CDP**: include a **Step 1 — Configure CDP for visual verification** before all other steps. Checkboxes:
-  - `Create .claude/start-chrome.sh` from the start-new-project skill template (cross-platform Chrome launcher with `--remote-debugging-port=9222`)
-  - `Create .claude/project-settings.json` with `baseUrl` pointing to the dev server, `testPort` for the dedicated test server port, `tabs` with the app URL, and `pages` mapping all known routes. This file is a living document — whenever a Step creates new routes or pages, include a checkbox to update the `pages` map
-  - `Verify CDP connection — run .claude/start-chrome.sh and confirm Playwright can connect via connectOverCDP`
-  - Subsequent Steps should use CDP verification checkboxes for any UI-facing changes.
+- **CDP already configured**: use `pages` map for verification checkboxes. If new routes, include checkbox to update `pages`.
+- **Web project without CDP**: include Step 1 — Configure CDP. Read `references/cdp-best-practices.md`.
 - **Not a web project**: skip CDP entirely.
 
-Present the full proposed issue body in a fenced code block. The structure:
+Present the full proposed issue body in a fenced code block with: **What**, **Why**, **Acceptance criteria** (original), **Steps** (new detailed breakdown).
 
-- **What** — keep the original description (or improve it slightly)
-- **Why** — keep the original motivation
-- **Acceptance criteria** — keep original checkboxes as-is (these are the success criteria)
-- **Steps** — the new detailed breakdown:
-  - Numbered Steps with concise titles
-  - Each Step has checkboxes with specific, verifiable actions
-  - Include file paths when the codebase structure is known
-  - Include verification checkboxes where steps have observable output
+Sizing: 2-8 Steps total, 2-6 checkboxes per Step. Each checkbox = one focused action.
 
-Sizing guidelines:
-- 2-8 Steps total (depending on issue complexity)
-- 2-6 checkboxes per Step (TDD steps naturally have more checkboxes — test + implementation pairs)
-- Each checkbox = one focused action completable in a single work session
+**Mandatory split rule.** If plan has **more than 8 steps**, split into multiple smaller issues — all added to Backlog. Each issue independently completable with 3-8 steps.
 
-**Mandatory split rule for backlog issues.** After drafting the plan, count the total steps. If the plan has **more than 8 steps**, it **MUST** be split into multiple smaller issues — all added to the project board in the "Backlog" column. Backlog issues don't use Phases (they're standalone items, not parts of a larger project plan). Instead, split by logical grouping: each resulting issue should be independently completable with 3-8 steps and its own verification. Title each issue descriptively (no "Phase N" prefix). Create them sequentially, referencing related issues in the body (e.g., "Related: #12, #13"). The original issue becomes the first chunk (rewritten with its subset of steps), and new issues are created for the rest.
+If Agent Teams is enabled, add an **Execution mode** section at the top of the issue body (before What/Why) with teammate assignments, prompt pattern, task pattern, and audit pattern. Also add inline reminders in parallelizable steps. Read `references/guidelines.md` § "Verification is part of the plan" and § "Checkbox ownership with Agent Teams" for the verification matrix and ownership rules.
 
-If `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` is enabled (value `1`), also analyze the Steps for parallelism and add an **Execution mode** section **at the top of the proposed issue body** (before What/Why). This section must be the first thing the agent reads — placing it at the bottom causes the agent to default to isolated worktree agents instead of using `TeamCreate`.
+**Include a task preview** after the fenced code block listing Step titles as bullet points.
 
-```markdown
-## Execution mode
+Present the plan and use `AskUserQuestion` with options `["Approved", "I want to adjust"]`. This is the **single and only** approval gate.
 
-> **MUST use Agent Teams (`TeamCreate`).** Do NOT fall back to isolated worktree agents.
+- **"Approved"** — proceed immediately to Step 4. No additional confirmation.
+- **"I want to adjust"** — apply changes, re-present, repeat until approved.
 
-After completing Step N (last sequential dependency):
-- `teammate-name`: Steps X-Y — description
-- `teammate-name`: Steps W-Z — description
+### 4. Update the issue
 
-**Teammate prompt pattern:** "Read issue #<number> Step X via `gh issue view`. Create one internal task per sub-section in your Step. Execute each unit, mark internal tasks as completed. Do NOT edit the issue body — lead verifies and marks checkboxes."
-
-**Teammate task pattern:** Create one task per sub-section in your assigned Step. Task names must match sub-section headers for lead monitoring.
-
-**Audit pattern:** Lead spawns a background audit agent per teammate on completion — do not wait for all teammates. Final step consolidates results into the verification matrix.
-
-_Remove this section entirely if Agent Teams is not enabled._
-```
-
-Also add an inline reminder in the first parallelizable step: `⚠️ This step runs in parallel via Agent Teams — see Execution mode above`.
-
-**Issue-as-contract rule for parallelizable Steps.** When Agent Teams is enabled, each parallelizable Step in the plan must be self-contained enough for a teammate to execute from the issue alone. This means:
-- A **"Before starting"** block listing references to read (with repo-relative paths)
-- **Sub-sections per unit of work** (e.g., `### component-name (path/)`) with individual checkboxes
-- Enough operational detail that the teammate prompt is just the standardized pattern above — no duplicated context
-
-**Structured verification for the final Step.** When the plan uses Agent Teams, the verification step (typically the last Step, owned by the lead) must include a **verification matrix** — a predefined table of checks × units of work. Each checkbox in the verification step should name a specific check, not generic "verify everything works". Template for the issue body:
-
-```markdown
-## Step N — Consolidate audit results and push
-
-- [ ] Collect progressive audit results for all [units] — present consolidated verification matrix
-- [ ] Flag any audit failures for remediation
-- [ ] Document false positives with reasoning (e.g., runtime paths in skill files are legitimate)
-- [ ] Push all changes
-```
-
-The actual auditing happens progressively as teammates deliver (see Step 7 — Progressive audit). This step only consolidates results. The lead fills in a matrix table:
-```markdown
-| Check | unit-1 | unit-2 | unit-3 |
-|-------|--------|--------|--------|
-| Check A | ✅ | ✅ | ✅ |
-| Check B | ✅ | ⚠️ note | ✅ |
-```
-
-If any check produces a false positive (e.g., runtime paths flagged as violations), document the reasoning — future sessions running similar plans will encounter the same edge case and need the precedent.
-
-Rules for the execution plan:
-- **Identify the sequential prefix** — Steps that must run first because everything depends on them (e.g., template definition, shared types). These stay with the lead.
-- **Group independent Steps by layer** — each group becomes a teammate.
-- **Mark blocked teammates** — if a teammate depends on another's output, note it explicitly.
-- **Keep it practical** — 2-4 teammates max.
-
-If Agent Teams is not enabled, skip the Execution mode section entirely — do not include it with a "not enabled" note.
-
-**Before presenting the plan, confirm:** if Agent Teams is enabled (Step 2b), does the plan include an "Execution mode" section at the top? If not, add it now — this is mandatory when Agent Teams is active.
-
-Before presenting, review the plan with a critical eye: tighten vague checkboxes, remove redundancy, ensure TDD order, verify file paths are concrete. The question is "how can I make this plan more precise?" — not "what else can I add?"
-
-**Include a task preview.** After the fenced code block with the plan, add a "Tasks that will be created" section listing the Step titles as bullet points. This lets the user see both the plan and the resulting tasks before approving — no separate task confirmation step.
-
-Present the plan and use `AskUserQuestion` with options `["Approved", "I want to adjust"]`. This is the **single and only** approval gate in the entire skill flow.
-
-- **"Approved"** — proceed immediately to Step 4. Do NOT ask for any additional confirmation, acknowledgment, or "aprovado" text. Execution starts now.
-- **"I want to adjust"** — ask the user what to change (free text follow-up), apply the requested changes to the plan, then present the updated plan and the same `AskUserQuestion` again. Repeat until the user selects "Approved".
-
-### 4. Update the issue (or create additional issues)
-
-After approval, rewrite the issue body with the detailed plan and assign it to the user:
+After approval, rewrite the issue body and assign:
 
 ```bash
 gh issue edit <number> --body "<approved body>" --add-assignee @me
 ```
 
-If the mandatory split rule triggered (8+ steps), create the additional issues:
-
-```bash
-gh issue create --title "<descriptive title>" --body "<body with steps subset>"
-```
-
-Add each new issue to the project board's **Backlog** column using the same board operations from Step 7 of `/add-backlog`.
-
-Add cross-references between related issues in each body (e.g., "Related: #12, #13"). Apply the same labels as the original issue.
-
-Preserve the original title and labels.
+If split rule triggered, create additional issues and add to Backlog. Add cross-references and preserve labels.
 
 ### 5. Create branch linked to issue
-
-Use `gh issue develop` to create the branch and automatically link it to the issue on GitHub. This makes the branch visible in the issue sidebar.
 
 ```bash
 git checkout main && git pull
@@ -239,130 +189,98 @@ gh issue develop <number> --name feat/<number>-<slug> --checkout
 git push -u origin feat/<number>-<slug>
 ```
 
-Derive `<slug>` from the issue title (kebab-case, max 40 chars). The `gh issue develop` command creates the branch and links it — the subsequent `git push -u` ensures the remote tracking is set up.
+Derive `<slug>` from issue title (kebab-case, max 40 chars).
 
 ### 5b. Board transitions and blocker check
 
 Read `references/project-board-operations.md` for the full command reference.
 
-Find the project board for the repo (`gh project list --owner "@me"`).
+Find the project board. If no board exists, offer to create one via `references/project-board-setup.md`.
 
-**If no board exists**, ask the user with `AskUserQuestion` offering `["Yes, create a board", "No, cancel"]`. If they choose to create one, read `references/project-board-setup.md` and set up the full board (7 status columns, Priority and Size fields). Add the current issue to the board after creation. If they cancel, stop — board tracking is required for all workflow skills.
+**Check for blockers.** Scan issue body for `> Blocked by #N`. If blocking issue is still open, flag with AUQ.
 
-**Check for blockers.** Before moving the card, scan the issue body for `> Blocked by #N` annotations. If any blocking issue is still open, flag it to the user:
+**Move card to "Ready"** → then after plan approval, **move to "In Progress"**.
 
-```
-⚠️ This issue is blocked by #N (<title>) which is still open. Continue anyway?
-```
-
-Use `AskUserQuestion` with options `["Yes, start anyway", "No, pick another issue"]`.
-
-**Move card to "Ready".** After the blocker check passes, move the issue card to **"Ready"** — this signals the issue is picked up and the plan is about to be proposed:
-
-1. Get the project node ID and the item ID for this issue
-2. Get the Status field ID and the "Ready" option ID
-3. Update the item status with `gh project item-edit`
-
-Also check if **Priority** and **Size** are set on the card. If either is missing, infer from the plan:
-- **Priority** — P0 for blocking/foundational, P1 for core features, P2 for nice-to-haves
-- **Size** — based on step count: 1-2 = S, 3-4 = M, 5-6 = L, 7+ = XL
-
-Set them with `gh project item-edit`. If unsure about priority, ask the user with `AskUserQuestion` offering `["P0 (Critical)", "P1 (High)", "P2 (Medium)"]`.
-
-**Move card to "In Progress".** After the plan is approved (Step 3 approval gate), move the card from **Ready → In Progress** before creating the branch. This signals active development has started.
+Check if Priority and Size are set. If missing, infer from plan (P0/P1/P2 and S/M/L/XL based on step count). Set with `gh project item-edit`.
 
 ### 6. Create tasks
 
-Tasks were already previewed to the user in Step 3. Create them silently — no user interaction needed.
-
-Parse the Steps from the approved plan. Create a `TaskCreate` for each **Step** (not each checkbox — Steps are the right granularity for tasks).
-
-Each task:
-- **subject** — the Step title (e.g., "Step 1: Define README template")
-- **description** — the checkboxes within that Step, so the agent knows what to accomplish
-- **activeForm** — present continuous form for the spinner
-
-Set up `addBlockedBy` dependencies between tasks when Steps have sequential dependencies.
+Parse Steps from the approved plan. Create a `TaskCreate` for each Step (not each checkbox). Set up `addBlockedBy` dependencies between sequential tasks.
 
 ### 7. Spawn teammates (automatic when Execution mode is present)
 
-If the approved issue body contains an "Execution mode" section, spawn teammates immediately — **no second approval**. The user already approved the full plan (including the Execution mode section) in Step 3. Asking again violates the single-gate principle.
+If the approved issue body contains an "Execution mode" section, spawn teammates immediately — no second approval.
 
-**Teammate prompt.** Use the standardized prompt pattern from the Execution mode section — the issue is the single source of truth, not the TeamCreate prompt. Each teammate receives:
+Each teammate receives the standardized prompt pattern pointing to the issue. Teammates must have explicit tool access: `Bash`, `Read`, `Write`, `Edit`, `Grep`, `Glob`, `Agent`, `TaskCreate`, `TaskUpdate` at minimum.
 
-```
-Read issue #<number> Step <X> via `gh issue view <number>`.
-Create one internal task per sub-section in your assigned Step (task names must match sub-section headers).
-Execute each unit of work following the checkboxes. Mark each internal task as completed when done.
-Do NOT edit the issue body or mark checkboxes — the lead verifies your work and updates the issue.
-```
+**Checkbox ownership.** Teammates track progress via internal tasks. The lead monitors via `TaskList`, verifies output, then marks issue checkboxes. This prevents race conditions.
 
-- Each teammate must have explicit tool access: `Bash`, `Read`, `Write`, `Edit`, `Grep`, `Glob`, `Agent`, `TaskCreate`, `TaskUpdate` at minimum — add `WebSearch` and `WebFetch` if the Step involves research or unfamiliar APIs. Teammates inherit the user's model by default — suggest Sonnet only if the user wants to optimize for speed or cost.
-- The lead completes the sequential prefix, then teammates work in parallel on their assigned Steps.
+**Progressive audit.** When a teammate reports completion, spawn a background audit agent to verify against the verification matrix. The final verification step consolidates results.
 
-**Checkbox ownership.** Teammates must NEVER edit the issue body directly. Multiple agents writing to the same issue body causes race conditions (last `gh issue edit --body` wins, earlier edits are silently lost). The ownership model:
-- **Teammates** → track progress via internal tasks (`TaskCreate`/`TaskUpdate`) — one task per sub-section in their assigned Step
-- **Lead** → monitors progress via `TaskList`, verifies each teammate's output, then marks issue checkboxes in the verification step
+If no Execution mode section, skip this step.
 
-This ensures checkboxes on the issue represent **verified** work, not self-declared completion.
+### 8. Report
 
-**Progressive audit.** When a teammate reports completion, immediately spawn a background audit agent (`Agent` with `run_in_background: true`) to verify that teammate's output against the verification matrix checks. Do not wait for all teammates — audit each delivery as it arrives. By the time the last teammate finishes, most verification is already complete. The final verification step only consolidates audit results and presents the matrix.
+Present concisely:
+- **What was done** — issue analyzed, plan approved, branch created, tasks set up
+- **Audit results** — self-audit summary (or "all checks passed")
+- **Errors** — issues encountered (or "none")
+- **Next step** — "Start working on Step 1" or teammate status if Agent Teams active
 
-If the issue has no Execution mode section (Agent Teams not enabled), skip this step.
+## Next action
+
+Begin working on Step 1 of the approved plan. If Agent Teams is active, teammates are already executing.
+
+## Self-audit
+
+<self_audit>
+
+Before presenting the Report, verify:
+
+1. **Pre-flight passed?** — gh authenticated, repo valid, working tree clean
+2. **Steps completed?** — issue rewritten, branch created, board updated, tasks created
+3. **Output exists?** — issue body updated on GitHub, branch pushed, card in "In Progress"
+4. **Anti-patterns clean?** — no generic checkboxes, TDD order enforced, no local paths in issue
+5. **Approval gate honored?** — user explicitly approved the plan before execution
+
+</self_audit>
+
+## Content audit
+
+<content_audit>
+
+Before finalizing output, verify:
+
+1. **Checkboxes concrete?** — every checkbox has file paths or specific actions, no vague "implement X"
+2. **TDD order correct?** — test checkbox before implementation in every behavioral Step
+3. **Plan structure matches template?** — What/Why/Acceptance criteria/Steps format
+4. **Split rule respected?** — if 8+ steps, plan was split into multiple issues
+
+</content_audit>
+
+## Error handling
+
+| Failure | Strategy |
+|---------|----------|
+| `gh` auth expired | AUQ: "Run `gh auth login`" → stop |
+| Issue not found | Report number and suggest `gh issue list` → stop |
+| No board exists | Offer to create one via AUQ → proceed or stop |
+| Board has no Backlog/Todo items | Inform user → stop |
+| Branch already exists | Offer to checkout existing or create new → AUQ |
+| Agent Teams check fails | Default to sequential execution (no Execution mode section) |
+
+## Anti-patterns
+
+Read `references/anti-patterns.md` for the full list (13 items). Key traps:
+
+- **Generic checkboxes without file paths.** "Add tests" instead of specifying the test file and expected behavior — because vague checkboxes produce vague implementations.
+- **Skipping Agent Teams check.** Proposing a plan without checking the env var first — because if enabled, the Execution mode section is mandatory.
+- **Multiple agents editing the same issue body.** Last write wins, earlier edits silently lost — because GitHub's issue API has no merge.
 
 ## Guidelines
 
-- **TDD is mandatory, not optional.** Every Step that introduces new behavior MUST include a test checkbox **before** the implementation checkbox — no exceptions. This is the single most important quality rule in this skill. The TDD-ordered checkboxes in the plan ARE the enforcement mechanism — when the agent executes the steps, the test-first order ensures red-green-refactor discipline naturally. No separate skill invocation is needed. Read `references/tdd-methodology.md` for the full methodology. Key principles: vertical slices (one test → one implementation → repeat, never write all tests first), test behavior through public interfaces (not implementation details), mock only at system boundaries (external APIs, not your own modules). When proposing the detailed plan, verify every step follows TDD order: test checkbox first, implementation checkbox second. If a step has no test checkbox before its implementation, it's wrong — fix it before presenting. This applies to all change types — new routes, new commands, new components, new utilities.
+Read `references/guidelines.md` for the full list (20 items). Key principles:
 
-- **Test isolation via docker-compose.** Tests must never touch production data. When the issue involves database changes or file I/O, include a checkbox to configure the test environment. Read `references/development-guidelines.md` § 1 for env file separation, runtime safety guards, high ports, and full teardown requirements.
-
-- **E2E state changes go through the UI.** When E2E tests need to change application state, always go through the UI (forms, buttons, navigation) — never manipulate the database directly and expect the app to see the change. Fullstack frameworks cache server-side data; direct DB writes don't trigger cache invalidation. Direct DB is valid only for setup/teardown (seed data) and assertions (verifying persistence after UI actions).
-
-- **"Full test" means unit + lint + E2E.** When generating verification checkboxes that say "run full test suite", expand to all three layers: unit tests + lint + E2E (with server and database). Unit tests with mocks can pass while the schema is broken. CDP screenshots catch UI issues but don't verify persistence. Only E2E with real DB writes confirms the full stack. List the actual commands in the checkbox, not just "run tests".
-
-- **Seed data quick-reference file.** When a Step creates or modifies seed data with test credentials (users, API keys, tokens), include a checkbox to create or update a gitignored `TEST_USERS.md` (or `TEST_CREDENTIALS.md`) at the project root. Format credentials as a readable table (email, password, role, relevant attributes). If the file already exists, check if the changes affect it and include an update checkbox. Without this, developers waste time digging through SQL files to find login credentials for manual testing. This file is especially important when the project has no signup flow — it's the only way to know how to log in.
-
-- **Domain-Driven Design by default.** Rich domain entities with behavior, value objects, and clear layer separation (domain → application → infrastructure). Place new business logic in the domain layer. Read `references/development-guidelines.md` § 3 for full DDD principles and when to skip.
-
-- **Codebase-aware plans.** The most valuable part of this skill is producing checkboxes with concrete file paths and references to existing patterns. Always read the codebase before planning — generic checkboxes like "implement the feature" are a failure mode.
-
-- **Acceptance criteria are success criteria, not the plan.** Keep the original acceptance criteria as top-level checkboxes. Steps are the implementation plan to achieve those criteria. Mark an acceptance criterion as done when all its related Steps are complete.
-
-- **English for all issue content.** Issues, checkboxes, and branch names are always in English because issue content is public, portable, and often read by collaborators or tools that expect English. Communication with the user follows their language preference.
-
-- **Don't over-plan.** Later Steps can be less detailed than early ones because over-specifying Step 5 when Step 1 hasn't started wastes planning effort on assumptions that will change once early work is done. The first Step should have precise checkboxes; the last can be higher-level — the user will refine as they go.
-
-- **Steps are work sessions.** Each Step should represent a focused work session — something you can complete, commit, and verify before moving on. Too large = lost focus. Too small = overhead.
-
-- **Backlog issues are standalone — no Phases.** Unlike project issues created by `start-new-project` (which use "Phase 1: Theme", "Phase 2: Theme"), backlog issues are self-contained items. They use Steps directly, never Phases. If a backlog item grows too large (8+ steps), split it into multiple independent backlog issues — each with a descriptive title, 3-8 steps, and its own verification. All split issues are added to the board's Backlog column and reference each other.
-
-- **No local environment paths in issues.** Issue content is public and portable. Never reference local paths like `~/.brain/`, `~/.claude/`, or absolute user paths. Use paths relative to the project root (e.g., `create-skill/SKILL.md`, not `~/.brain/skills/skill-creator/SKILL.md`). This applies to checkboxes, descriptions, and any text written to the issue body.
-
-- **Visual verification via CDP (mandatory for web projects).** When the issue touches UI, verification checkboxes must use CDP: "Navigate to [page] via CDP and take screenshot to verify [expected state]". Read `references/development-guidelines.md` § 2 for setup steps, key CDP rules, and persistent test script requirements. Also see `references/cdp-best-practices.md` for the full rule set.
-
-- **ARCHITECTURE.md maintenance.** Every Step that introduces a new pattern, route, table, or dependency must include a checkbox: "Update `ARCHITECTURE.md` with [specific addition]" — naming exactly what changed (e.g., "add billing query hook to Patterns section", "add `/billing` route to Routes section", "add `recharts` to Stack & dependencies"). This keeps the codebase knowledge cache current without a bulk "update everything" step at the end. If ARCHITECTURE.md doesn't exist and the project is a web app or has sufficient complexity, include a checkbox in Step 1 to generate it using the patterns discovered during codebase analysis.
-
-- **No workarounds.** Every step must solve problems at their root. If a step would require a workaround (hardcoded values to bypass a bug, temporary flags, monkey-patches, `any` casts to silence type errors, skipped validations), it's a signal that the step is wrong or incomplete. Rewrite it to address the underlying issue. Workarounds create invisible tech debt that compounds across issues — what starts as "just for now" becomes permanent the moment the next issue lands on top of it.
-
-- **No unnecessary code comments.** Code comments are allowed only when the logic is genuinely non-obvious — complex algorithms, unintuitive business rules, or regulatory constraints that aren't self-evident from the code. Self-documenting code (clear names, small functions, explicit types) replaces comments. Never include "add comments" or "document the code" as checkboxes — if the code needs a comment to be understood, the code needs to be rewritten.
-
-- **Web research is authorized.** When the agent is blocked on a problem — unfamiliar framework behavior, unclear best practices, or an error with no obvious solution — it is authorized to search the web for best practices and solutions. This is not a last resort; it's a standard tool. Better to spend 30 seconds searching than 10 minutes guessing.
-
-- **Verification is part of the plan, not an afterthought.** When the plan uses Agent Teams, the verification step checkboxes must name specific checks (not "verify everything works"). Each check maps to a row in the verification matrix the lead presents after teammates complete. This prevents improvised verification and ensures every parallel execution has consistent, comparable quality evidence. Document false positive precedents (e.g., "runtime paths in SKILL.md are legitimate, not a local-path violation") so future sessions don't re-analyze the same edge cases.
-
-- **Checkbox ownership with Agent Teams.** When teammates run in parallel, they must NEVER edit the issue body directly. Progress tracking uses internal tasks (`TaskCreate`/`TaskUpdate`) — one task per unit of work within their assigned Step, with task names matching the sub-section headers from the issue. The lead monitors progress via `TaskList` and marks issue checkboxes only after verifying each teammate's output in the verification step. This prevents race conditions (GitHub's issue API has no merge — last write wins) and ensures checkboxes reflect verified completion.
-
-- **Avoid these anti-patterns:**
-  - Checkboxes without TDD order — implementation before test, or tests missing entirely. Always: test checkbox first, then implementation checkbox
-  - Generic checkboxes without file paths ("Add tests" → "Add test for login in `src/__tests__/auth.test.ts` — expect 200 with valid credentials")
-  - Steps that mix concerns (backend + frontend in one Step)
-  - Missing verification checkboxes (how do you know the Step works?)
-  - Over-expanding simple issues into 10+ Steps when 3 would suffice
-  - Checkboxes that duplicate the acceptance criteria verbatim instead of expanding them
-  - Local/absolute paths in issue content (`~/.brain/`, `/Users/...`) — always use project-relative paths
-  - Workarounds or hacks instead of proper solutions — if it needs a TODO comment, the step is incomplete
-  - Comments that restate what the code does — self-documenting code replaces narration
-  - Proposing a plan without checking `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` first — if enabled, the Execution mode section at the top is **mandatory**, not optional. Skipping it means the user loses the ability to parallelize work
-  - Placing the Agent Teams section at the bottom of the issue — the agent reads top-down and will default to isolated worktree agents if it doesn't see the execution mode first
-  - Multiple agents editing the same issue body concurrently — use internal tasks for parallel progress tracking, lead marks checkboxes only after verification
-  - Passing full context in TeamCreate prompts instead of pointing to the issue — duplicates content, causes drift between approved plan and actual execution, wastes context window
+- **TDD is mandatory, not optional.** Every Step with new behavior MUST include test checkbox before implementation — because the TDD-ordered checkboxes ARE the enforcement mechanism.
+- **Codebase-aware plans.** Always read the codebase before planning — because generic checkboxes like "implement the feature" are a failure mode.
+- **Steps are work sessions.** Each Step = focused work session you can complete, commit, and verify — because too large loses focus, too small adds overhead.

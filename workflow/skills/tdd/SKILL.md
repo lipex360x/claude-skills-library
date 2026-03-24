@@ -1,6 +1,11 @@
 ---
 name: tdd
-description: Execute Test-Driven Development with strict red-green-refactor discipline. Guides the agent through vertical slices — one test, one implementation, repeat. Use when the user says "tdd", "test first", "red green refactor", "write tests", "test driven", "let's TDD this", or wants to implement a feature with test discipline — even if they don't explicitly say "TDD."
+description: >-
+  Execute Test-Driven Development with strict red-green-refactor discipline.
+  Guides the agent through vertical slices — one test, one implementation,
+  repeat. Use when the user says "tdd", "test first", "red green refactor",
+  "write tests", "test driven", "let's TDD this", or wants to implement a
+  feature with test discipline — even if they don't explicitly say "TDD."
 user-invocable: true
 allowed-tools:
   - Read
@@ -16,11 +21,55 @@ allowed-tools:
 
 Execute the red-green-refactor loop with strict vertical slice discipline. One test at a time, one implementation at a time — never write all tests first.
 
+## Input contract
+
+<input_contract>
+
+| Input | Source | Required | Validation | On invalid |
+|-------|--------|----------|------------|------------|
+| `feature` | $ARGUMENTS | yes | Non-empty description of behavior to implement | AUQ: "What feature or behavior do you want to build?" |
+
+</input_contract>
+
+## Output contract
+
+<output_contract>
+
+| Artifact | Path | Persists | Format |
+|----------|------|----------|--------|
+| Test files | Project test directory (follows existing conventions) | yes | Test framework format |
+| Implementation files | Project source directory | yes | Source code |
+| Report | stdout | no | Markdown |
+
+</output_contract>
+
+## External state
+
+<external_state>
+
+| Resource | Path | Access | Format |
+|----------|------|--------|--------|
+| Project source code | Project directory | R/W | Source files |
+| Test suite | Project test directory | R/W | Test files |
+| ARCHITECTURE.md | Project root (if exists) | R | Markdown |
+
+</external_state>
+
+## Pre-flight
+
+<pre_flight>
+
+1. Project has a test framework configured → if not: AUQ suggesting common frameworks for the detected language — stop.
+2. Test runner executes successfully (even with 0 tests) → if not: "Test runner is broken — fix before TDD." — stop.
+3. `$ARGUMENTS` contains a feature description → if not: AUQ: "What feature or behavior do you want to build?" — stop.
+
+</pre_flight>
+
 ## Steps
 
 ### 1. Understand what to build
 
-Parse `$ARGUMENTS` for the feature or behavior to implement. If no argument, ask the user what they want to build.
+Parse `$ARGUMENTS` for the feature or behavior to implement.
 
 Read the codebase to understand:
 - **Existing test patterns** — framework (Jest, Vitest, Pytest, Go test, etc.), file locations, naming conventions
@@ -107,34 +156,74 @@ After all cycles complete:
 npm test 2>&1
 ```
 
-Report:
-- Tests added (count and names)
-- Code added/modified (files and line counts)
-- Refactors performed
-- Any behaviors skipped and why
+If any existing tests broke, fix them — regressions from new code are implementation bugs, not test problems.
+
+### 6. Report
+
+Present concisely:
+- **What was done** — behaviors implemented, test count, files created/modified
+- **Tests added** — count and names
+- **Code added/modified** — files and line counts
+- **Refactors performed** — what was cleaned up during refactor phases
+- **Behaviors skipped** — any from the plan that were skipped and why
+- **Audit results** — self-audit summary (or "all checks passed")
+- **Errors** — issues encountered (or "none")
+
+## Next action
+
+Run the full test suite to confirm everything passes, then `/push` to commit the changes.
+
+## Self-audit
+
+<self_audit>
+
+Before presenting the Report, verify:
+
+1. **Pre-flight passed?** — test framework detected and working
+2. **Steps completed?** — all planned behaviors have RED → GREEN → REFACTOR cycles
+3. **Output exists?** — test files and implementation files created as declared
+4. **Anti-patterns clean?** — no horizontal slicing, no implementation-coupled tests, no mocking of internal collaborators
+5. **Approval gate honored?** — user confirmed behavior list before loop started
+
+</self_audit>
+
+## Content audit
+
+> _Skipped: "N/A — skill does not generate verifiable content (produces code and tests, not prose)."_
+
+## Error handling
+
+| Failure | Strategy |
+|---------|----------|
+| Test framework not found | AUQ suggesting frameworks for the detected language → stop |
+| Test runner broken | Report error details → stop (user must fix environment first) |
+| Test passes immediately (RED phase) | Investigate: either behavior exists or test is wrong — report finding, adjust |
+| Implementation breaks existing tests | Fix implementation, not tests — regressions are implementation bugs |
+| Partial completion (some behaviors done) | Report what succeeded, list remaining behaviors for next session |
+
+## Anti-patterns
+
+- **Horizontal slicing.** Writing all tests first, then all implementations — because each test must respond to what you learned from the previous cycle; batch-writing produces tests that verify imagined behavior.
+- **Testing private methods.** Accessing internal state or private functions directly — because tests coupled to internals break on harmless refactors and don't verify actual behavior.
+- **Mocking internal collaborators.** Mocking your own classes instead of only system boundaries — because this couples tests to implementation details and makes refactoring painful.
+- **Implementation-coupled assertions.** Verifying HOW instead of WHAT (e.g., "calls service.process" vs "order is confirmed") — because these tests break on any internal change.
+- **Skipping the RED step.** Not running the test before implementation — because if the test passes before implementation, it's testing nothing new.
+- **Refactoring while RED.** Cleaning up code when a test is failing — because you have no safety net to catch regressions; get to GREEN first.
+- **Speculative features during GREEN.** Adding more than the current test demands — because untested code is unverified code.
+- **Verifying through external means.** Querying the DB directly instead of through the interface — because this bypasses the contract and tests infrastructure, not behavior.
 
 ## Guidelines
 
-- **Vertical slices only.** One test → one implementation → repeat. Each test responds to what you learned from the previous cycle. Horizontal slicing (all tests first, then all code) produces tests that verify imagined behavior, not actual behavior — they become insensitive to real changes and break on harmless refactors.
+- **Vertical slices only.** One test → one implementation → repeat. Each test responds to what you learned from the previous cycle — because horizontal slicing produces tests that verify imagined behavior, not actual behavior.
 
 - **Test behavior, not implementation.** Tests verify what the system does through public interfaces. They should survive internal refactors — if you rename a private function and tests break, those tests were testing implementation. Read `references/tdd-methodology.md` for good vs bad test examples.
 
-- **Mock at system boundaries only.** Mock external APIs, databases (prefer test DB when possible), time/randomness. Never mock your own classes or internal collaborators — that couples tests to implementation. Use dependency injection to make boundary mocking easy.
+- **Mock at system boundaries only.** Mock external APIs, databases (prefer test DB when possible), time/randomness. Never mock your own classes or internal collaborators — because that couples tests to implementation.
 
-- **One logical assertion per test.** A test that checks 5 things is really 5 tests crammed together. When it fails, you don't know which behavior broke. Split into focused tests with descriptive names.
+- **One logical assertion per test.** A test that checks 5 things is really 5 tests crammed together — because when it fails, you don't know which behavior broke.
 
-- **Test names are specifications.** `"user can checkout with valid cart"` tells you what capability exists. `"test checkout"` tells you nothing. `"should call processPayment"` tests implementation, not behavior.
+- **Test names are specifications.** `"user can checkout with valid cart"` tells you what capability exists — because `"test checkout"` tells you nothing and `"should call processPayment"` tests implementation.
 
-- **Adapt to the project's test stack.** Use whatever framework and conventions the project already has. Don't introduce a new test runner because you prefer it — match the existing patterns. If no patterns exist, suggest one and confirm with the user.
+- **Adapt to the project's test stack.** Use whatever framework and conventions the project already has — because introducing a new test runner creates unnecessary churn.
 
-- **TDD applies to all layers.** Backend routes, CLI commands, library functions, UI components, database queries. The red-green-refactor loop is universal. Only skip for pure configuration files, static assets, and trivial boilerplate.
-
-- **Avoid these anti-patterns:**
-  - Writing all tests first (horizontal slicing) — each test must be written, run (RED), and satisfied (GREEN) before the next
-  - Testing private methods or internal state — always go through the public interface
-  - Mocking internal collaborators — mock only at system boundaries
-  - Tests that verify HOW instead of WHAT — "calls service.process" vs "order is confirmed"
-  - Verifying through external means (querying DB directly) instead of through the interface
-  - Skipping the RED step — if the test passes before implementation, it's not testing new behavior
-  - Refactoring while RED — get to GREEN first, then refactor with the safety net of passing tests
-  - Adding speculative features during GREEN — implement only what the current test demands
+- **TDD applies to all layers.** Backend routes, CLI commands, library functions, UI components, database queries — because the red-green-refactor loop is universal. Only skip for pure configuration files, static assets, and trivial boilerplate.
