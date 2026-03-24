@@ -56,7 +56,6 @@ Step-by-step factory for building structurally consistent Claude Code skills. Ev
 | Resource | Path | Access | Format |
 |----------|------|--------|--------|
 | Symlinks | `~/.claude/skills/` | Write | Symlink via `setup.sh` |
-| Skills config | `~/.brain/config/skills.conf` | Read/Write | Text, one skill name per line |
 | Library structure | `skills-library/STRUCTURE.md` | Write | Markdown |
 | Library README | `skills-library/README.md` | Write | Markdown |
 
@@ -171,18 +170,11 @@ Fix any failures before proceeding.
 
 **Review checklist** — Read `references/review-checklist.md` and validate every item. Present results as a markdown table.
 
-### 8. Register, generate metadata, and classify
+### 8. Register and generate metadata
 
 **Register:** Run `bash ~/.brain/scripts/setup.sh` to create the symlink.
 
 **Generate skill-meta.json:** Create alongside SKILL.md per `references/skill-meta-spec.md`. Fill all fields: skeleton section states, step count, approval gates, references, dependencies.
-
-**Core vs on-demand:** Ask via AUQ: `["Core (always in context)", "On-demand (explicit invocation only)"]`.
-
-- **Core:** Append skill name to `~/.brain/config/skills.conf`, re-run `setup.sh`.
-- **On-demand:** Skill stays in `skills-library/` without symlink. Works via `/skill-name` but the model won't suggest it unprompted.
-
-If `skills.conf` doesn't exist, skip classification (backward compatible — all skills are linked).
 
 ### 8b. Test the skill
 
@@ -203,13 +195,13 @@ Update `skills-library/STRUCTURE.md` if the skill was created, moved, renamed, o
 
 ### 11. Push to GitHub
 
-Push using `/push -y`. If `.brain/` files were modified (e.g., `skills.conf`), push that repo too.
+Push using `/push -y`. If `.brain/` files were modified, push that repo too.
 
 ### 12. Report
 
 <report>
 
-- **What was done** — skill created, files generated, registration status (core/on-demand)
+- **What was done** — skill created, files generated, registration status
 - **Audit results** — skeleton compliance + review checklist + content audit summary
 - **Errors** — issues encountered or "none"
 
@@ -231,7 +223,7 @@ Before presenting the Report, verify:
 4. **skill-meta.json generated?** — exists alongside SKILL.md with correct schema
 5. **Under 500 lines?** — SKILL.md line count checked, overflow applied if needed
 6. **Anti-patterns clean?** — no cross-skill deps, no duplicate content, no missing contracts
-7. **Approval gates honored?** — scope classification and core/on-demand questions asked
+7. **Approval gates honored?** — scope classification questions asked
 
 </self_audit>
 
@@ -258,7 +250,6 @@ Before finalizing, verify the generated skill:
 | SKILL.md exceeds 500 lines | Extract sections >15 lines to references |
 | `setup.sh` fails | Report error, suggest manual run |
 | Review checklist has FAILs | Fix before proceeding |
-| `skills.conf` missing | Skip core/on-demand classification (backward compatible) |
 
 ## Anti-patterns
 

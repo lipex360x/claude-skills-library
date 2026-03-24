@@ -38,7 +38,7 @@
   "scripts": [],
   "dependencies": {
     "tools": ["gh", "git"],
-    "configs": ["skills.conf", "STRUCTURE.md"],
+    "configs": ["STRUCTURE.md"],
     "skills": []
   },
   "audit": {
