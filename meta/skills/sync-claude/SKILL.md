@@ -79,22 +79,35 @@ Capture the output — it reports which links were created, updated, or already 
 
 ### 5. Verify sync
 
-Compare skills-library against the symlinked skills directory:
+Run three checks against `~/.claude/skills/`:
 
 ```bash
-diff -rq ~/www/claude/skills-library/ ~/.claude/skills/ 2>/dev/null | grep -v '.git' | head -20
+# 1. Broken symlinks (target no longer exists)
+find ~/.claude/skills/ -maxdepth 2 -type l ! -exec test -e {} \; -print 2>/dev/null
+
+# 2. Unmanaged items (non-symlink directories — not created by setup.sh)
+find ~/.claude/skills/ -maxdepth 1 -mindepth 1 -not -type l 2>/dev/null
+
+# 3. Symlinks pointing outside skills-library (stale or from old setup)
+for link in ~/.claude/skills/*/; do
+  [ -L "${link%/}" ] || continue
+  target="$(readlink "${link%/}")"
+  echo "$target" | grep -qv "skills-library" && echo "$(basename "${link%/}") -> $target"
+done
 ```
 
-If discrepancies are found, list them. Common issues:
-- **Orphaned symlinks** — skill removed from library but symlink persists
-- **Missing symlinks** — new skill added but setup.sh didn't create the link
-- **Stale content** — symlink exists but points to wrong location
+setup.sh already reports warnings for these during step 4, but this step verifies nothing was missed.
 
-If any discrepancies are found, use `AskUserQuestion` with options:
-- `"Re-run setup.sh"` — execute setup.sh again to fix missing/stale symlinks
-- `"Remove orphaned symlinks"` — delete symlinks whose targets no longer exist
-- `"Both"` — re-run setup.sh and remove orphans
-- `"Skip"` — leave discrepancies as-is, just report them
+Possible issues:
+- **Broken symlinks** — target removed or renamed
+- **Unmanaged directories** — leftover from manual installs or old setups
+- **Wrong targets** — symlinks pointing outside skills-library (e.g., old `claude-dotfiles` paths)
+
+If any issues are found, use `AskUserQuestion` with options:
+- `"Remove unmanaged items"` — delete non-symlink directories and broken symlinks
+- `"Re-run setup.sh"` — execute setup.sh again
+- `"Both"` — remove orphans and re-run setup.sh
+- `"Skip"` — leave as-is, just report them
 
 ### 6. Report
 
