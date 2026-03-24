@@ -79,6 +79,45 @@ This format is compact, scannable, and lets the user see pass/fail at a glance. 
 | Self-contained? | No cross-skill dependencies |
 | README generated? | README.md with all placeholders filled |
 
+### Skeleton compliance
+
+| Item | What to check |
+|------|---------------|
+| All 13 sections present? | Frontmatter, Title+Intro, Input contract, Output contract, External state, Pre-flight, Steps, Next action, Self-audit, Content audit, Error handling, Anti-patterns, Guidelines — all present in this exact order |
+| Section names canonical? | "Anti-patterns" (not "Avoid these"), "Steps" (not "Process" or "Workflow"), "Guidelines" (not inline in other sections) |
+| Skipped sections justified? | Every Skipped section has `> _Skipped: "reason"_` — not just omitted |
+| Never-skip sections populated? | Pre-flight, Self-audit, Anti-patterns, and Guidelines always have real content — never Skipped |
+| Report is last step? | The final numbered step in Steps is always "Report" with the standard structure (what was done, audit results, errors) |
+| XML tags on contracts/audits? | `<input_contract>`, `<output_contract>`, `<external_state>`, `<pre_flight>`, `<self_audit>`, `<content_audit>`, `<report>` used where applicable |
+
+### Metadata
+
+| Item | What to check |
+|------|---------------|
+| `allowed-tools` declared? | Frontmatter includes explicit `allowed-tools` list — omitting means all tools available, which is rarely intended |
+| `argument-hint` present? | If the skill accepts arguments, `argument-hint` shows in autocomplete |
+| `skill-meta.json` generated? | Auxiliary metadata file exists alongside SKILL.md with correct schema (see `references/skill-meta-spec.md`) |
+| `skill-meta.json` accurate? | `skeleton` object matches actual section states, `lineCount` matches, `references[]` lists all files in references/ |
+
+### Content audit
+
+| Item | What to check |
+|------|---------------|
+| Audit level classified? | Skill declares whether content audit applies or is N/A — never left ambiguous |
+| Criteria defined (if applicable)? | If skill generates verifiable content, the Content audit section defines what to verify and how (factual, quality, structural, completeness) |
+| Scoped appropriately? | For `/update-skill`: audit only modified sections. For `/create-skill`: audit the full skill. See `references/content-audit-patterns.md` |
+| N/A justified (if skipped)? | If Skipped, reason clearly states why (e.g., "read-only — displays existing data, generates nothing") |
+
+### Progressive disclosure
+
+| Item | What to check |
+|------|---------------|
+| SKILL.md under 500 lines? | Detail extracted to references/ if approaching limit |
+| No section exceeds ~15 lines? | Sections that exceed ~15 lines overflow to references with top 3-5 items inline and a Read pointer |
+| No duplication? | Information lives in ONE place — either SKILL.md or references, never both |
+| Large refs have TOC? | References >300 lines have a table of contents at the top |
+| Grep patterns for huge refs? | References >10k words include grep search patterns in SKILL.md pointers |
+
 ### Compliance
 
 | Item | What to check |
