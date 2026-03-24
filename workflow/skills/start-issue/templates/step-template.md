@@ -13,6 +13,10 @@ After completing Step [N] ([last sequential step]):
 - `[teammate-name]`: Steps [X-Y] — [what this teammate owns]
 - `[teammate-name]`: Steps [W-Z] — [what this teammate owns]
 
+**Teammate prompt pattern:** "Read issue #<number> Step X via `gh issue view`. Create one internal task per sub-section in your Step. Execute each unit, mark internal tasks as completed. Do NOT edit the issue body — lead verifies and marks checkboxes."
+
+**Teammate task pattern:** Create one task per sub-section in your assigned Step. Task names must match sub-section headers for lead monitoring.
+
 _Remove this section entirely if Agent Teams is not enabled._
 
 ## What
@@ -74,6 +78,33 @@ _Remove this section entirely if Agent Teams is not enabled._
   - `Add test for user creation in src/__tests__/user.test.ts — expect valid user object returned`
   - `Implement user creation in src/services/user.ts`
 - For config tasks: `Configure Y in config-file.ext`
+
+### Parallelizable Steps (Agent Teams)
+When a Step will be assigned to a teammate, make it self-contained:
+- Start with a **"Before starting"** block listing references to read (repo-relative paths)
+- Use **sub-sections** (`### unit-name (path/)`) for each unit of work with individual checkboxes
+- The teammate reads the issue step directly — no context duplication in the TeamCreate prompt
+
+Example:
+```markdown
+## Step 2 — Migrate batch A
+
+⚠️ This step runs in parallel via Agent Teams — see Execution mode above.
+
+**Before starting:** Read these references:
+- `path/to/reference-1.md` — what it provides
+- `path/to/reference-2.md` — what it provides
+
+### component-a (`src/components/a/`)
+- [ ] Task 1
+- [ ] Task 2
+- [ ] Verify
+
+### component-b (`src/components/b/`)
+- [ ] Task 1
+- [ ] Task 2
+- [ ] Verify
+```
 
 ### Sizing
 - 2-8 Steps per issue (simple issues: 2-3, complex: 5-8)

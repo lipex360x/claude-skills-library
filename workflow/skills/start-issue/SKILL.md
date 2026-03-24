@@ -153,10 +153,19 @@ After completing Step N (last sequential dependency):
 - `teammate-name`: Steps X-Y — description
 - `teammate-name`: Steps W-Z — description
 
+**Teammate prompt pattern:** "Read issue #<number> Step X via `gh issue view`. Create one internal task per sub-section in your Step. Execute each unit, mark internal tasks as completed. Do NOT edit the issue body — lead verifies and marks checkboxes."
+
+**Teammate task pattern:** Create one task per sub-section in your assigned Step. Task names must match sub-section headers for lead monitoring.
+
 _Remove this section entirely if Agent Teams is not enabled._
 ```
 
 Also add an inline reminder in the first parallelizable step: `⚠️ This step runs in parallel via Agent Teams — see Execution mode above`.
+
+**Issue-as-contract rule for parallelizable Steps.** When Agent Teams is enabled, each parallelizable Step in the plan must be self-contained enough for a teammate to execute from the issue alone. This means:
+- A **"Before starting"** block listing references to read (with repo-relative paths)
+- **Sub-sections per unit of work** (e.g., `### component-name (path/)`) with individual checkboxes
+- Enough operational detail that the teammate prompt is just the standardized pattern above — no duplicated context
 
 Rules for the execution plan:
 - **Identify the sequential prefix** — Steps that must run first because everything depends on them (e.g., template definition, shared types). These stay with the lead.
@@ -256,8 +265,23 @@ Set up `addBlockedBy` dependencies between tasks when Steps have sequential depe
 
 If the approved issue body contains an "Execution mode" section, spawn teammates immediately — **no second approval**. The user already approved the full plan (including the Execution mode section) in Step 3. Asking again violates the single-gate principle.
 
-- Spawn teammates using `TeamCreate` following the plan from the issue. Each teammate must have explicit tool access: `Bash`, `Read`, `Write`, `Edit`, `Grep`, `Glob`, `Agent`, `TaskUpdate` at minimum — add `WebSearch` and `WebFetch` if the Step involves research or unfamiliar APIs. Teammates inherit the user's model by default — suggest Sonnet only if the user wants to optimize for speed or cost.
+**Teammate prompt.** Use the standardized prompt pattern from the Execution mode section — the issue is the single source of truth, not the TeamCreate prompt. Each teammate receives:
+
+```
+Read issue #<number> Step <X> via `gh issue view <number>`.
+Create one internal task per sub-section in your assigned Step (task names must match sub-section headers).
+Execute each unit of work following the checkboxes. Mark each internal task as completed when done.
+Do NOT edit the issue body or mark checkboxes — the lead verifies your work and updates the issue.
+```
+
+- Each teammate must have explicit tool access: `Bash`, `Read`, `Write`, `Edit`, `Grep`, `Glob`, `Agent`, `TaskCreate`, `TaskUpdate` at minimum — add `WebSearch` and `WebFetch` if the Step involves research or unfamiliar APIs. Teammates inherit the user's model by default — suggest Sonnet only if the user wants to optimize for speed or cost.
 - The lead completes the sequential prefix, then teammates work in parallel on their assigned Steps.
+
+**Checkbox ownership.** Teammates must NEVER edit the issue body directly. Multiple agents writing to the same issue body causes race conditions (last `gh issue edit --body` wins, earlier edits are silently lost). The ownership model:
+- **Teammates** → track progress via internal tasks (`TaskCreate`/`TaskUpdate`) — one task per sub-section in their assigned Step
+- **Lead** → monitors progress via `TaskList`, verifies each teammate's output, then marks issue checkboxes in the verification step
+
+This ensures checkboxes on the issue represent **verified** work, not self-declared completion.
 
 If the issue has no Execution mode section (Agent Teams not enabled), skip this step.
 
@@ -299,6 +323,8 @@ If the issue has no Execution mode section (Agent Teams not enabled), skip this 
 
 - **Web research is authorized.** When the agent is blocked on a problem — unfamiliar framework behavior, unclear best practices, or an error with no obvious solution — it is authorized to search the web for best practices and solutions. This is not a last resort; it's a standard tool. Better to spend 30 seconds searching than 10 minutes guessing.
 
+- **Checkbox ownership with Agent Teams.** When teammates run in parallel, they must NEVER edit the issue body directly. Progress tracking uses internal tasks (`TaskCreate`/`TaskUpdate`) — one task per unit of work within their assigned Step, with task names matching the sub-section headers from the issue. The lead monitors progress via `TaskList` and marks issue checkboxes only after verifying each teammate's output in the verification step. This prevents race conditions (GitHub's issue API has no merge — last write wins) and ensures checkboxes reflect verified completion.
+
 - **Avoid these anti-patterns:**
   - Checkboxes without TDD order — implementation before test, or tests missing entirely. Always: test checkbox first, then implementation checkbox
   - Generic checkboxes without file paths ("Add tests" → "Add test for login in `src/__tests__/auth.test.ts` — expect 200 with valid credentials")
@@ -311,3 +337,5 @@ If the issue has no Execution mode section (Agent Teams not enabled), skip this 
   - Comments that restate what the code does — self-documenting code replaces narration
   - Proposing a plan without checking `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` first — if enabled, the Execution mode section at the top is **mandatory**, not optional. Skipping it means the user loses the ability to parallelize work
   - Placing the Agent Teams section at the bottom of the issue — the agent reads top-down and will default to isolated worktree agents if it doesn't see the execution mode first
+  - Multiple agents editing the same issue body concurrently — use internal tasks for parallel progress tracking, lead marks checkboxes only after verification
+  - Passing full context in TeamCreate prompts instead of pointing to the issue — duplicates content, causes drift between approved plan and actual execution, wastes context window
