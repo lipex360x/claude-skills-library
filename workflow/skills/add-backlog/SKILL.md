@@ -104,13 +104,18 @@ Match the issue scope against skill purposes:
 | Deploying to Vercel | `/deploy-vercel` |
 | Any other work that maps to a `/command` | Reference it |
 
-If a matching skill is found, add an `## Implementation note` section to the issue body before the Size line:
+If a matching skill is found, add an `## Implementation note` section to the issue body before the Size line. The note format depends on whether the work will likely be executed by the lead directly or by parallel agents:
 
 ```markdown
 ## Implementation note
 
 Use `/skill-name` to [action] — it enforces [quality checks, review process, standards]. Do not [manual alternative].
 ```
+
+**Agent-friendly issues.** When the issue involves repetitive, independent work across many targets (e.g., updating 38 READMEs, adding headers to all files), agents will likely execute it. Agents cannot invoke skills — they need the skill's quality criteria distilled into the issue body. In this case, add context that helps `/start-issue` build self-contained agent prompts:
+- Reference the skill as a **quality standard**, not an invocation instruction (e.g., "Use `/create-readme` review mode as the quality reference" instead of "Run `/create-readme` on each file")
+- Include audit data, golden examples, or format specifications that agents can consume directly
+- List which existing outputs are "EXCELLENT" quality and can serve as templates
 
 If no skill matches, skip this section. Do not force a match — only reference skills with clear relevance.
 
@@ -273,3 +278,5 @@ Before finalizing output, verify:
 - **Dependency annotations follow the canonical pattern.** `Depends on #N` / `> **Blocks** #N` — the same format used by merge and listing skills for consistency across the workflow.
 
 - **Batch API calls.** When operating on multiple board items, fetch the item list once and parse locally — never re-fetch per item.
+
+- **Skill references are for `/start-issue`, not for agents.** When referencing a skill in the Implementation note, write it as a quality standard that `/start-issue` can distill into agent prompts — not as an invocation command. Agents cannot call `Skill()`, so "Use `/create-readme`" in the issue body is only useful if the lead executes directly. For agent-friendly issues, include the skill's quality criteria, golden examples, and format specs so `/start-issue` can embed them in self-contained steps.
