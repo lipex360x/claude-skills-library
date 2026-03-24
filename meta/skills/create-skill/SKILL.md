@@ -39,13 +39,13 @@ Step-by-step factory for building structurally consistent Claude Code skills. Ev
 
 <output_contract>
 
-| Artifact | Path | Persists | Format |
-|----------|------|----------|--------|
-| SKILL.md | `<plugin>/skills/<name>/SKILL.md` | yes | Markdown with YAML frontmatter |
-| skill-meta.json | `<plugin>/skills/<name>/skill-meta.json` | yes | JSON per `references/skill-meta-spec.md` |
-| README.md | `<plugin>/skills/<name>/README.md` | yes | Markdown |
-| References | `<plugin>/skills/<name>/references/*.md` | yes | Markdown |
-| Templates | `<plugin>/skills/<name>/templates/*` | yes | Various |
+| Artifact | Path (global) | Path (local) | Persists | Format |
+|----------|---------------|--------------|----------|--------|
+| SKILL.md | `<plugin>/skills/<name>/SKILL.md` | `<project>/.claude/skills/<name>/SKILL.md` | yes | Markdown with YAML frontmatter |
+| skill-meta.json | `<plugin>/skills/<name>/skill-meta.json` | `<project>/.claude/skills/<name>/skill-meta.json` | yes | JSON per `references/skill-meta-spec.md` |
+| README.md | `<plugin>/skills/<name>/README.md` | `<project>/.claude/skills/<name>/README.md` | yes | Markdown |
+| References | `<plugin>/skills/<name>/references/*.md` | `<project>/.claude/skills/<name>/references/*.md` | yes | Markdown |
+| Templates | `<plugin>/skills/<name>/templates/*` | `<project>/.claude/skills/<name>/templates/*` | yes | Various |
 
 </output_contract>
 
@@ -53,11 +53,11 @@ Step-by-step factory for building structurally consistent Claude Code skills. Ev
 
 <external_state>
 
-| Resource | Path | Access | Format |
-|----------|------|--------|--------|
-| Symlinks | `~/.claude/skills/` | Write | Symlink via `setup.sh` |
-| Library structure | `skills-library/STRUCTURE.md` | Write | Markdown |
-| Library README | `skills-library/README.md` | Write | Markdown |
+| Resource | Path | Access | Mode | Format |
+|----------|------|--------|------|--------|
+| Symlinks | `~/.claude/skills/` | Write | global only | Symlink via `setup.sh` |
+| Library structure | `skills-library/STRUCTURE.md` | Write | global only | Markdown |
+| Library README | `skills-library/README.md` | Write | global only | Markdown |
 
 </external_state>
 
@@ -65,8 +65,10 @@ Step-by-step factory for building structurally consistent Claude Code skills. Ev
 
 <pre_flight>
 
-1. Current directory is `skills-library/` or a subdirectory → if not: "Run from the skills-library directory." — stop.
-2. Target plugin directory exists under `skills-library/` → if not: list available plugins via AUQ.
+1. **Detect mode:**
+   - If current directory is `skills-library/` or a subdirectory → **global mode** (skill will live in `skills-library/<plugin>/skills/<name>/`).
+   - Otherwise → **local mode** (skill will live in `<project>/.claude/skills/<name>/`). Confirm target project directory via AUQ.
+2. **Global mode only:** Target plugin directory exists under `skills-library/` → if not: list available plugins via AUQ.
 3. Skill name follows verb-subject pattern (e.g., `create-skill`, `review-postgres`) → if not: suggest correction.
 
 </pre_flight>
@@ -172,7 +174,7 @@ Fix any failures before proceeding.
 
 ### 8. Register and generate metadata
 
-**Register:** Run `bash ~/.brain/scripts/setup.sh` to create the symlink.
+**Register (global mode only):** Run `bash ~/.brain/scripts/setup.sh` to create the symlink. Local skills are discovered automatically by Claude Code — no registration needed.
 
 **Generate skill-meta.json:** Create alongside SKILL.md per `references/skill-meta-spec.md`. Fill all fields: skeleton section states, step count, approval gates, references, dependencies.
 
@@ -187,15 +189,15 @@ Fix any failures before proceeding.
 Run `/create-readme` targeting:
 
 1. The skill's directory
-2. The `skills-library/` root
+2. **Global mode only:** The `skills-library/` root
 
 ### 10. Update STRUCTURE.md
 
-Update `skills-library/STRUCTURE.md` if the skill was created, moved, renamed, or deleted. Skip for content-only edits.
+**Global mode only.** Update `skills-library/STRUCTURE.md` if the skill was created, moved, renamed, or deleted. Skip for local skills and content-only edits.
 
 ### 11. Push to GitHub
 
-Push using `/push`. If `.brain/` files were modified, push that repo too.
+Push using `/push`. **Global mode:** if `.brain/` files were modified, push that repo too. **Local mode:** push only the project repo.
 
 ### 12. Report
 
@@ -246,7 +248,8 @@ Before finalizing, verify the generated skill:
 | Failure | Strategy |
 |---------|----------|
 | Spec file not found | Fall back to interactive flow (Step 1.0a) |
-| Plugin directory missing | AUQ: list available plugins or create new |
+| Plugin directory missing (global) | AUQ: list available plugins or create new |
+| `.claude/skills/` missing (local) | Create the directory automatically |
 | SKILL.md exceeds 500 lines | Extract sections >15 lines to references |
 | `setup.sh` fails | Report error, suggest manual run |
 | Review checklist has FAILs | Fix before proceeding |
