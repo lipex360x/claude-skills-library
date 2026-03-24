@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "close-tasks",
+  "plugin": "tasks",
+  "created": "2026-03-10",
+  "lastModified": "2026-03-24",
+  "lineCount": 121,
+  "skeleton": {
+    "inputContract": "No input — operates on current board state",
+    "outputContract": "No persistent output beyond config file update",
+    "externalState": true,
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": "N/A — skill does not generate verifiable content",
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 5,
+  "approvalGates": 1,
+  "references": [],
+  "templates": [],
+  "scripts": [],
+  "dependencies": {
+    "tools": [],
+    "configs": ["~/.brain/config/behavior.config.json"],
+    "skills": []
+  },
+  "audit": {
+    "lastRun": null,
+    "score": null,
+    "gaps": []
+  }
+}

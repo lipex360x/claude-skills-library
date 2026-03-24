@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "clean-tasks",
+  "plugin": "tasks",
+  "created": "2026-03-10",
+  "lastModified": "2026-03-24",
+  "lineCount": 103,
+  "skeleton": {
+    "inputContract": "No input — operates on current task list state",
+    "outputContract": "No persistent output — task deletions are immediate",
+    "externalState": "N/A — operates only on the internal task system",
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": "N/A — skill does not generate verifiable content",
+    "errorHandling": "No external calls — no error surface",
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 3,
+  "approvalGates": 0,
+  "references": [],
+  "templates": [],
+  "scripts": [],
+  "dependencies": {
+    "tools": [],
+    "configs": [],
+    "skills": []
+  },
+  "audit": {
+    "lastRun": null,
+    "score": null,
+    "gaps": []
+  }
+}
