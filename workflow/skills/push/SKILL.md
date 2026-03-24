@@ -1,6 +1,13 @@
 ---
 name: push
-description: Commit, push, and update GitHub issue checkboxes in one command. Analyzes changes, drafts a conventional commit message, stages, commits (with husky management), pushes, then reviews and updates the open issue for the current branch. Supports --confirm flag to require commit message approval and -nh flag to skip husky. Use when the user says "push", "commit and push", "ship it", "/push", or wants to finalize work and sync issue tracking — even if they don't explicitly mention the issue.
+description: >-
+  Commit, push, and update GitHub issue checkboxes in one command. Analyzes
+  changes, drafts a conventional commit message, stages, commits (with husky
+  management), pushes, then reviews and updates the open issue for the current
+  branch. Supports --confirm flag to require commit message approval and -nh
+  flag to skip husky. Use when the user says "push", "commit and push",
+  "ship it", "/push", or wants to finalize work and sync issue tracking —
+  even if they don't explicitly mention the issue.
 user-invocable: true
 allowed-tools:
   - Read
@@ -15,12 +22,57 @@ allowed-tools:
 
 Stage, commit, push, and update the related GitHub issue — all in one command. Default behavior: draft the commit message and proceed immediately. Only stop and ask when something goes wrong.
 
-## Flags
+## Input contract
 
-- **`--confirm`** — require explicit approval of the commit message before committing. Use when you want to review the message before it goes in.
-- **`-nh`** — skip husky entirely (uses `--no-verify` on every commit). Without this flag, the default behavior is: husky runs on the first commit of each `/push` invocation, `--no-verify` on subsequent commits within the same push (if multiple commits are grouped by concern).
+<input_contract>
+
+| Input | Source | Required | Validation | On invalid |
+|-------|--------|----------|------------|------------|
+| `--confirm` | $ARGUMENTS | no | Flag presence | — |
+| `-nh` | $ARGUMENTS | no | Flag presence | — |
+
+**`--confirm`** — require explicit approval of the commit message before committing. Use when you want to review the message before it goes in.
+
+**`-nh`** — skip husky entirely (uses `--no-verify` on every commit). Without this flag, the default behavior is: husky runs on the first commit of each `/push` invocation, `--no-verify` on subsequent commits within the same push (if multiple commits are grouped by concern).
 
 Flags can be combined: `/push --confirm -nh`
+
+</input_contract>
+
+## Output contract
+
+<output_contract>
+
+| Artifact | Path | Persists | Format |
+|----------|------|----------|--------|
+| Git commits | local `.git/` + remote | yes | Conventional Commits |
+| Issue checkbox updates | GitHub Issues API | yes | Markdown body edit |
+| Report | stdout | no | Markdown |
+
+</output_contract>
+
+## External state
+
+<external_state>
+
+| Resource | Path | Access | Format |
+|----------|------|--------|--------|
+| Git repository | local `.git/` | R/W | Git |
+| Remote branch | `origin/<branch>` | W | Git push |
+| GitHub Issues | `gh issue view/edit` | R/W | Markdown |
+| ARCHITECTURE.md | project root (if exists) | R | Markdown |
+| Issue update guide | `references/issue-update-guide.md` | R | Markdown |
+
+</external_state>
+
+## Pre-flight
+
+<pre_flight>
+
+1. Current directory is a git repo → if not: "Must run inside a git repo." — stop.
+2. Working tree has changes (staged, unstaged, or untracked) → if clean: "Nothing to push." — stop.
+
+</pre_flight>
 
 ## Steps
 
@@ -104,15 +156,7 @@ If found, read `references/issue-update-guide.md` for the matching and update pr
 6. Update: `gh issue edit <N> --body "<updated body>"`
 7. Report what was checked off
 
-### 6. Summary
-
-Present concisely:
-- Commit hash and message
-- Push status (branch, remote)
-- Checkboxes updated (if any)
-- Remaining open checkboxes count
-
-### 7. Suggest PR (if all checkboxes done)
+### 6. Suggest PR (if all checkboxes done)
 
 If an issue was found in Step 5 and **all checkboxes are now checked** (0 remaining), suggest opening a PR:
 
@@ -123,25 +167,62 @@ Use `AskUserQuestion` with options `["Yes, open PR", "No, not yet"]`.
 
 If there are still open checkboxes, skip this step entirely.
 
-## Avoid these
+### 7. Report
 
-- **Force-pushing** — rewrites shared history; others pulling the branch will get conflicts or lose work.
-- **Amending after hook failure** — the failed commit never landed, so `--amend` modifies the *previous* commit, potentially destroying unrelated work.
-- **Staging secrets** (`.env`, `*.key`, `*.pem`, `credentials.json`, files with `API_KEY=`/`SECRET=`/`PASSWORD=`) — the scan in step 3 catches common patterns; pre-commit hooks are the second line of defense.
-- **Committing unrelated files in one commit** — defeats `git bisect` and makes reverts dangerous. Group by concern (step 2).
-- **Skipping issue update when the branch has an issue** — the issue is the source of truth for progress. If `gh` is available and an issue exists, always attempt the update.
-- **Auto-editing ARCHITECTURE.md** — only add a note to the commit message body (step 6 of Guidelines). The file owner decides what to change.
+Present concisely:
+- **Commits** — hash and message for each commit
+- **Push status** — branch, remote
+- **Checkboxes updated** — list of items checked off (if any)
+- **Remaining** — open checkboxes count
+- **Audit results** — self-audit summary (or "all checks passed")
+- **Errors** — issues encountered (or "none")
+
+## Next action
+
+Run `/open-pr` when all issue checkboxes are complete.
+
+## Self-audit
+
+<self_audit>
+
+Before presenting the Report, verify:
+
+1. **Pre-flight passed?** — repo exists, working tree had changes
+2. **Steps completed?** — commits created, pushed, issue updated (if applicable)
+3. **Output exists?** — commits on remote, issue body updated (if applicable)
+4. **Anti-patterns clean?** — no force-push, no amend after hook failure, no secrets staged, no unrelated files in single commit
+5. **Approval gates honored?** — `--confirm` flag respected (if set), ambiguous checkboxes asked
+
+</self_audit>
+
+## Content audit
+
+> _Skipped: "N/A — does not generate verifiable content (commits and pushes code, does not produce prose)."_
+
+## Error handling
+
+| Failure | Strategy |
+|---------|----------|
+| `gh` not available | Skip issue update step, complete commit + push |
+| `gh` auth expired | AUQ: "Run `gh auth login`" → skip issue update |
+| Push rejected (behind remote) | Explain, suggest `git pull --rebase`, ask user → stop |
+| Hook failure | Fix issue, re-stage, create new commit (never amend) |
+| Issue body unparseable | Skip checkbox update, note in report |
+| Secrets detected in staged files | Warn, exclude from staging, ask user |
+
+## Anti-patterns
+
+- **Force-pushing.** Rewrites shared history — because others pulling the branch will get conflicts or lose work.
+- **Amending after hook failure.** The failed commit never landed, so `--amend` modifies the *previous* commit — because this potentially destroys unrelated work.
+- **Staging secrets.** `.env`, `*.key`, `*.pem`, `credentials.json`, files with `API_KEY=`/`SECRET=`/`PASSWORD=` — because the scan in step 3 catches common patterns; pre-commit hooks are the second line of defense.
+- **Committing unrelated files in one commit.** Defeats `git bisect` and makes reverts dangerous — because grouping by concern (step 2) keeps the history navigable.
+- **Skipping issue update when the branch has an issue.** The issue is the source of truth for progress — because if `gh` is available and an issue exists, always attempt the update.
+- **Auto-editing ARCHITECTURE.md.** Only add a note to the commit message body — because the file owner decides what to change.
 
 ## Guidelines
 
-- **No gates by default.** The default flow is fully automated — draft message, stage, commit, push, update issue. Only stop and ask via `AskUserQuestion` when something unexpected happens (secrets detected, push rejected, ambiguous checkbox matches). The `--confirm` flag adds an explicit approval step for the commit message when the user wants it.
+- **No gates by default.** The default flow is fully automated — draft message, stage, commit, push, update issue. Only stop and ask via `AskUserQuestion` when something unexpected happens (secrets detected, push rejected, ambiguous checkbox matches) — because unnecessary confirmation steps break flow and train users to click "approve" reflexively. The `--confirm` flag adds an explicit approval step when the user wants it.
 
-- **Graceful degradation.** If `gh` is not available, skip the issue update step. If the branch has no issue, skip it. If the issue body can't be parsed, skip it. The core job (commit + push) always completes.
+- **Graceful degradation.** If `gh` is not available, skip the issue update step. If the branch has no issue, skip it. If the issue body can't be parsed, skip it — because the core job (commit + push) should always complete even when optional steps fail.
 
-- **ARCHITECTURE.md drift detection.** Before committing, check if staged changes introduce patterns that should be reflected in `ARCHITECTURE.md` (if the file exists):
-  - New route (`page.tsx`/`route.ts` in a new directory)
-  - New dependency in `package.json`/`Cargo.toml`/`go.mod`
-  - New migration file (schema change)
-  - New file in a location that doesn't match any documented pattern
-
-  If ARCHITECTURE.md doesn't exist, skip this check entirely. If drift is detected, append a note to the **commit message body** (not the title): `Note: ARCHITECTURE.md may need updating (new route: /payments, new dep: recharts)`. Do NOT auto-edit ARCHITECTURE.md or block the commit — this is informational only.
+- **ARCHITECTURE.md drift detection.** Before committing, check if staged changes introduce patterns that should be reflected in `ARCHITECTURE.md` (if the file exists): new route (`page.tsx`/`route.ts` in a new directory), new dependency in `package.json`/`Cargo.toml`/`go.mod`, new migration file, new file in undocumented location. If drift is detected, append a note to the **commit message body** (not the title) — because this is informational only, never auto-edit or block.

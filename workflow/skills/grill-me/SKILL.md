@@ -1,19 +1,66 @@
 ---
 name: grill-me
-description: Deep structured interview about a plan, feature, or project — extracts decisions, constraints, and context to generate PRD input. Use when the user says "grill me", "me entrevista", "quero detalhar isso", "vamos aprofundar", "let's flesh this out", "stress-test this idea", or wants to think through a plan deeply — even if they don't explicitly say "grill."
+description: >-
+  Deep structured interview about a plan, feature, or project — extracts
+  decisions, constraints, and context to generate PRD input. Use when the user
+  says "grill me", "me entrevista", "quero detalhar isso", "vamos aprofundar",
+  "let's flesh this out", "stress-test this idea", or wants to think through
+  a plan deeply — even if they don't explicitly say "grill."
 user-invocable: true
-allowed-tools: AskUserQuestion, Bash, Read, Glob, Grep
+allowed-tools:
+  - AskUserQuestion
+  - Bash
+  - Read
+  - Glob
+  - Grep
 ---
 
 # Grill Me
 
 Relentless, structured interview that extracts every decision, constraint, and context needed to generate a complete PRD. Works for both greenfield projects (no codebase) and features in existing codebases.
 
-## Usage
+## Input contract
 
-`/grill-me` or `/grill-me <brief description of the idea>`
+<input_contract>
 
-If invoked without an argument, ask for the initial description. If invoked with an argument, use it as the starting point.
+| Input | Source | Required | Validation | On invalid |
+|-------|--------|----------|------------|------------|
+| `description` | $ARGUMENTS | no | Free text — brief description of the idea | AUQ prompting for initial description |
+
+</input_contract>
+
+## Output contract
+
+<output_contract>
+
+| Artifact | Path | Persists | Format |
+|----------|------|----------|--------|
+| Grill output document | `.claude/grill-output.md` | yes | Markdown (structured PRD input) |
+| Report | stdout | no | Markdown |
+
+</output_contract>
+
+## External state
+
+<external_state>
+
+| Resource | Path | Access | Format |
+|----------|------|--------|--------|
+| Project files | Working directory | R | Various (package.json, go.mod, etc.) |
+| Output template | `templates/grill-output.md` | R | Markdown |
+| Interview branches | `references/interview-branches.md` | R | Markdown |
+
+</external_state>
+
+## Pre-flight
+
+<pre_flight>
+
+1. `AskUserQuestion` tool is available → if not: "AskUserQuestion is required for the interview flow." — stop.
+2. Working directory is accessible → if not: "Cannot access working directory." — stop.
+3. Output template exists at `templates/grill-output.md` → if not: warn and use inline structure.
+
+</pre_flight>
 
 ## Steps
 
@@ -82,27 +129,78 @@ Generate the document at `.claude/grill-output.md` (in the project directory, or
 
 Present the file path to the user and suggest: "When you're ready to turn this into a PRD, use `/write-a-prd`."
 
+### 7. Report
+
+Present concisely:
+- **What was done** — interview completed, branches covered, decisions extracted
+- **Output** — path to `.claude/grill-output.md` with document status (complete or partial)
+- **Audit results** — self-audit summary (or "all checks passed")
+- **Errors** — issues encountered and how they were handled (or "none")
+
+## Next action
+
+Run `/write-a-prd` to turn the grill output into a full PRD.
+
+## Self-audit
+
+<self_audit>
+
+Before presenting the Report, verify:
+
+1. **Pre-flight passed?** — all validations green
+2. **Steps completed?** — all interview branches covered, checkpoint done, document generated
+3. **Output exists?** — `.claude/grill-output.md` exists and contains structured decisions
+4. **Anti-patterns clean?** — no open-ended questions without options, no generic options, no skipped branches
+5. **Approval gates honored?** — alignment checkpoint (Step 5) completed before document generation
+
+</self_audit>
+
+## Content audit
+
+<content_audit>
+
+Before finalizing output, verify:
+
+1. **Decisions captured?** — every branch resolution maps to a section in the output document
+2. **No invented decisions?** — all content traces back to user answers, not assumptions
+3. **Format matches template?** — output follows `templates/grill-output.md` structure
+4. **Context reflected in options?** — review that options throughout the interview were contextual, not generic
+
+Audit is scoped to content generated in THIS session.
+
+</content_audit>
+
+## Error handling
+
+| Failure | Strategy |
+|---------|----------|
+| User abandons mid-interview | Save partial output to `.claude/grill-output.md` with `status: partial` header and list of unresolved branches |
+| Codebase too large to navigate | Ask user to point to relevant areas — do not attempt full scan |
+| Template file missing | Generate output inline using expected structure, warn about missing template |
+| AskUserQuestion unavailable | Report error — cannot conduct interview without interactive questioning |
+
+## Anti-patterns
+
+- **Open-ended questions without options.** Every question must use `AskUserQuestion` with concrete options — because optionless questions slow the interview and produce vague answers.
+- **Generic options that don't reflect context.** "Option A", "Option B" or placeholders unrelated to the discussion — because they signal incompetence and force the user to type "Other" every time.
+- **Skipping branches because the user seems decided.** They might be wrong or have blind spots — because the interview's value comes from systematic coverage, not speed.
+- **Generating output without the alignment checkpoint.** Step 5 exists to catch misunderstandings before they're baked into the document — because fixing a PRD downstream is far more expensive than fixing a summary.
+- **Mixing interview with solutioning.** The skill extracts the problem, it doesn't propose the technical solution — because premature solutioning narrows the design space before constraints are fully understood.
+
 ## Guidelines
 
-- **Respect the chosen language.** Every user-facing interaction — questions, options, summaries, branch signals, checkpoint, output document — must use the language selected in Step 1. Skill instructions are in English for portability, but execution adapts to the user's choice.
+- **Respect the chosen language.** Every user-facing interaction — questions, options, summaries, branch signals, checkpoint, output document — must use the language selected in Step 1 — because skill instructions are in English for portability, but execution adapts to the user's choice.
 
-- **Smart options, not generic ones.** `AskUserQuestion` options must demonstrate you understood the context. If the user is talking about a B2B SaaS, don't offer "social media users" as an audience option. Derive options from what's already been said — this shows competence and speeds up the interview.
+- **Smart options, not generic ones.** `AskUserQuestion` options must demonstrate you understood the context — because if the user is talking about a B2B SaaS, offering "social media users" as an audience option wastes their time and trust.
 
-- **Depth > breadth.** 3 deeply explored branches are better than 7 superficial ones. When the user answers something unexpected, pursue that thread before returning to the script.
+- **Depth > breadth.** 3 deeply explored branches are better than 7 superficial ones — because unexpected answers often contain the most valuable constraints when pursued.
 
-- **Don't invent decisions.** If the user didn't mention something, ask — don't assume. The skill extracts information, it doesn't generate plans.
+- **Don't invent decisions.** If the user didn't mention something, ask — don't assume — because the skill extracts information, it doesn't generate plans.
 
 - **Adapt to detail level.** If the user is answering with short responses ("yes", "no"), the questions are good. If they're writing paragraphs, the options aren't capturing what they mean — adjust.
 
-- **Codebase as oracle.** In existing projects, the code is truth. If the user says "we don't have authentication" but there's an `auth/` in the project, gently confront: "I found an auth/ module — want to leverage it or replace it?"
+- **Codebase as oracle.** In existing projects, the code is truth — because if the user says "we don't have authentication" but there's an `auth/` module, gently confronting with evidence produces better decisions.
 
-- **Handle interruptions gracefully.** If the user abandons the interview mid-way (stops responding, changes topic, or explicitly cancels), save whatever has been collected so far to `.claude/grill-output.md` with a `status: partial` marker in the header and a list of unresolved branches. This ensures no context is lost if the user returns later.
+- **Handle interruptions gracefully.** If the user abandons the interview, save whatever has been collected to `.claude/grill-output.md` with a `status: partial` marker — because no context should be lost if the user returns later.
 
-- **Budget codebase exploration.** When exploring an existing codebase in Step 3/4, limit code reading to the top-level structure and directly relevant modules. Do not attempt to read the entire codebase — focus on files that answer the current question. If the project is too large to navigate efficiently, ask the user to point you to the relevant areas.
-
-- **Avoid these anti-patterns:**
-  - Open-ended questions without options (violates the core rule)
-  - Generic options that don't reflect context ("Option A", "Option B")
-  - Skipping branches because the user seems decided (they might be wrong)
-  - Generating output without the alignment checkpoint (Step 5)
-  - Mixing interview with solutioning — the skill extracts the problem, it doesn't propose the technical solution
+- **Budget codebase exploration.** Limit code reading to top-level structure and directly relevant modules — because attempting to read the entire codebase wastes context and slows the interview. Ask the user to point to relevant areas if the project is too large.

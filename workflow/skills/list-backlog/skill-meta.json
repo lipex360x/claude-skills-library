@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "list-backlog",
+  "plugin": "workflow",
+  "created": "2025-12-15",
+  "lastModified": "2026-03-24",
+  "lineCount": 197,
+  "skeleton": {
+    "inputContract": true,
+    "outputContract": true,
+    "externalState": true,
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": "N/A — skill does not generate verifiable content (read-only display)",
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 6,
+  "approvalGates": 0,
+  "references": [
+    "project-board-operations.md"
+  ],
+  "templates": [],
+  "scripts": [],
+  "dependencies": {
+    "tools": ["gh", "jq"],
+    "configs": [],
+    "skills": []
+  },
+  "audit": {
+    "lastRun": null,
+    "score": null,
+    "gaps": []
+  }
+}
