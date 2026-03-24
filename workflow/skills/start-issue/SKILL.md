@@ -237,7 +237,16 @@ If the approved issue body contains an "Execution strategy" section, spawn worke
 
 **Sequential strategy:** Skip this step — lead executes directly.
 
-**Progressive audit (both strategies).** When a worker reports completion, spawn a background audit agent to verify against the verification matrix. The final verification step consolidates results.
+**Progressive audit (both strategies).** Do NOT wait for all workers to finish before auditing. As each worker reports completion, immediately spawn a background audit agent to verify that worker's output against the verification matrix. This overlaps audit work with remaining agent execution, significantly reducing total wall-clock time. The consolidation step (final Step) collects all audit results — by then, most or all audits are already done.
+
+Example timeline with 4 agents:
+1. Agent 3 finishes → spawn audit-agent-3 in background
+2. Agent 1 finishes → spawn audit-agent-1 in background (audit-3 still running)
+3. Audit-agent-3 completes → results stored
+4. Agent 2 finishes → spawn audit-agent-2 in background
+5. Audit-agent-1 completes → results stored
+6. Agent 4 finishes → spawn audit-agent-4 in background
+7. ... consolidation step: most audits already done, minimal wait
 
 ### 8. Report
 

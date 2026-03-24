@@ -2,7 +2,7 @@
 
 > Guide the user through creating high-quality Claude Code skills — from structuring SKILL.md files to writing effective descriptions, designing progressive disclosure, and launching subagents.
 
-Step-by-step factory for building structurally consistent Claude Code skills. Every output follows the 13-section canonical skeleton, with quality enforced via review checklist and skeleton compliance gate.
+Step-by-step factory for building structurally consistent Claude Code skills. Every output follows the 13-section canonical skeleton, with quality enforced via a review checklist and skeleton compliance gate. Ships with 12 reference documents covering prompt engineering patterns, trigger descriptions, progressive disclosure, subagent coordination, and more.
 
 ## Usage
 
@@ -12,6 +12,13 @@ Step-by-step factory for building structurally consistent Claude Code skills. Ev
 
 > [!TIP]
 > Also activates when you say "create a skill", "new skill", "skill quality", "skill best practices", "how to write a skill", or want to build a /command.
+
+### Examples
+
+```text
+/create-skill                              # interactive — asks what the skill does
+/create-skill downloads/deploy-spec.md     # reads a /plan-skill spec file directly
+```
 
 ## How it works
 
@@ -29,6 +36,8 @@ Step-by-step factory for building structurally consistent Claude Code skills. Ev
 12. **Push to GitHub** — Commits and pushes via `/push`
 13. **Report** — Shows creation status, audit results, and any errors
 
+[↑ Back to top](#create-skill)
+
 ## Directory structure
 
 ```text
@@ -37,8 +46,8 @@ create-skill/
 ├── README.md             # This file
 ├── skill-meta.json       # Skill metadata
 ├── references/
-│   ├── anthropic-patterns.md       # Prompt engineering patterns
-│   ├── content-audit-patterns.md   # Content audit criteria guidance
+│   ├── anthropic-patterns.md       # Prompt engineering patterns from Anthropic research
+│   ├── content-audit-patterns.md   # Content audit criteria and verification guidance
 │   ├── description-patterns.md     # Trigger description examples and "pushy" technique
 │   ├── error-handling-patterns.md  # Error handling patterns for skills
 │   ├── progressive-disclosure.md   # Three-tier architecture for token efficiency
@@ -50,8 +59,10 @@ create-skill/
 │   ├── subagent-patterns.md        # Blank-context coordination and two-phase builds
 │   └── xml-tag-patterns.md         # XML tag usage patterns for contracts/audits
 └── templates/
-    └── skill-template.md           # Starter SKILL.md with frontmatter
+    └── skill-template.md           # Starter SKILL.md with frontmatter and section stubs
 ```
+
+[↑ Back to top](#create-skill)
 
 ## Installation
 

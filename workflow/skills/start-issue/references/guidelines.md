@@ -87,3 +87,7 @@ The choice between Agent, Teammate, and Sequential is not cosmetic — it determ
 ## Agent strategy: issue checkboxes are the sole tracker
 
 When using Agent strategy, do NOT create internal tasks (`TaskCreate`) to mirror issue checkboxes. Agents run in background, return results, and die. The lead validates each agent's output and marks issue checkboxes directly. This avoids the dual-tracking problem where internal tasks and issue checkboxes diverge. The GitHub issue is the single source of truth.
+
+## Progressive audit: don't wait, stream
+
+When workers run in parallel (Agent or Teammate), audit each worker's output as soon as it completes — do NOT wait for all workers to finish before starting audits. Spawn a background audit agent immediately when a completion notification arrives, even while other workers are still running. This overlaps audit I/O with remaining worker execution, reducing total wall-clock time by the duration of the audits that run in parallel. The consolidation step at the end collects results — by then, most audits are already done and the step becomes a quick summary rather than a bottleneck.
