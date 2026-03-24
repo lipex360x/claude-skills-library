@@ -2,19 +2,9 @@
 
 > Production-ready skills for Claude Code — organized as plugins.
 
-## Contents
+A collection of **37 skills** across **8 plugins**, each following a canonical 13-section skeleton that ensures consistency, quality, and self-auditing. Every skill is a `/command` — invoke it by name and it handles the rest.
 
-- [Installation](#installation)
-- [Plugins](#plugins)
-  - [workflow](#workflow) — GitHub workflow automation
-  - [content](#content) — Content creation and publishing
-  - [design](#design) — Visual design and diagrams
-  - [database](#database) — Database optimization
-  - [deploy](#deploy) — Deployment and infrastructure
-  - [gws](#gws) — Google Workspace automation
-  - [meta](#meta) — Skill and hook management
-  - [tasks](#tasks) — Task visibility board
-- [Adding new skills](#adding-new-skills)
+[Installation](#installation) • [Skill anatomy](#skill-anatomy) • [Plugins](#plugins) • [Adding new skills](#adding-new-skills)
 
 ## Installation
 
@@ -32,9 +22,74 @@ npx skills add lipex360x/claude-skills-library --skill {skill-name}
 
 Common flags: `--copy` (no symlinks), `-a claude-code` (Claude Code only), `-y` (skip prompts).
 
+> [!NOTE]
+> Requires [Claude Code](https://claude.ai/code) installed.
+
+## Skill anatomy
+
+Every skill follows a **13-section canonical skeleton** in its `SKILL.md`. Sections marked **never skip** must always contain real content — the rest use `> _Skipped: "reason"_` when not applicable.
+
+| # | Section | XML tag | Skippable | Purpose |
+|---|---------|---------|-----------|---------|
+| 1 | Frontmatter | — | no | Name, description, tools, triggers |
+| 2 | Title + Intro | — | no | One-line summary of what and why |
+| 3 | Input contract | `<input_contract>` | yes | Expected inputs, validation, fallbacks |
+| 4 | Output contract | `<output_contract>` | yes | Artifacts created, paths, format |
+| 5 | External state | `<external_state>` | yes | Resources read/written outside skill dir |
+| 6 | Pre-flight | `<pre_flight>` | **never** | Environment checks before work begins |
+| 7 | Steps | — | no | Numbered workflow (`### 1.`, `### 2.`, ..., `### N. Report`) |
+| 8 | Next action | — | yes | What to do after skill completes |
+| 9 | Self-audit | `<self_audit>` | **never** | Verification checklist before Report |
+| 10 | Content audit | `<content_audit>` | yes | Output quality checks |
+| 11 | Error handling | — | yes | Failure modes + recovery strategies |
+| 12 | Anti-patterns | — | **never** | Named failure modes with reasoning |
+| 13 | Guidelines | — | **never** | Principles with "because" context |
+
+### Frontmatter
+
+```yaml
+---
+name: skill-name                    # Lowercase, verb-subject (e.g., push, create-skill)
+description: >-                     # Pushy description — triggers + "even if" clause
+  Action summary. Use when... even if they don't explicitly say "X."
+user-invocable: true                # true for /commands, false for auto-triggered
+allowed-tools:                      # Only tools the skill actually uses
+  - Read
+  - Bash
+  - AskUserQuestion
+argument-hint: "[optional-arg]"     # Optional — shows in autocomplete
+---
+```
+
+### Skill directory
+
+```text
+<skill-name>/
+├── SKILL.md              # Required — 13-section skeleton (<500 lines)
+├── README.md             # Required — public docs (usage, triggers, install)
+├── skill-meta.json       # Required — metadata for auditing and registry
+├── references/           # Optional — detailed guides loaded on demand
+├── templates/            # Optional — output formats, starter structures
+└── scripts/              # Optional — executable code (rare)
+```
+
+Sections longer than ~15 lines are extracted to `references/` with a `Read references/...` pointer in the SKILL.md — keeping the main file under 500 lines.
+
+### Plugin directory
+
+```text
+<plugin>/
+├── .claude-plugin/
+│   └── plugin.json       # Plugin manifest (name, description, version)
+└── skills/
+    └── <skill-name>/     # Each skill follows the anatomy above
+```
+
+[Back to top](#claude-skills-library)
+
 ## Plugins
 
-Skills are organized into **8 plugin groups** by domain. Invoke any skill directly by name (e.g., `/push`, `/create-skill`). There are **37 skills** in total.
+Skills are organized into **8 plugin groups** by domain. Each plugin is a directory containing related skills. Invoke any skill directly by name (e.g., `/push`, `/create-skill`).
 
 ---
 
@@ -144,6 +199,7 @@ Skills are organized into **8 plugin groups** by domain. Invoke any skill direct
 | [plan-skill](./meta/skills/plan-skill/) | Plan and spec out a skill from raw input — produces a structured spec consumed by `/create-skill`. |
 | [sync-claude](./meta/skills/sync-claude/) | Synchronize the Claude Code environment (skills-library + .brain) across machines — pull, rebuild symlinks, verify. |
 | [uninstall-skill](./meta/skills/uninstall-skill/) | Uninstall a skill by name, local or global. |
+| [update-skill](./meta/skills/update-skill/) | Scoped edits to existing skills — reads skill-meta.json, modifies affected sections, verifies skeleton compliance. |
 
 [Back to top](#claude-skills-library)
 
@@ -163,7 +219,14 @@ Skills are organized into **8 plugin groups** by domain. Invoke any skill direct
 
 ## Adding new skills
 
-Use `/create-skill` to scaffold a new skill with the standard template. It walks you through intent, triggers, structure, and generates the `SKILL.md` with correct frontmatter.
+Use `/create-skill` to scaffold a new skill. It walks you through intent, triggers, and structure, then generates a `SKILL.md` with correct frontmatter and all 13 skeleton sections.
+
+Key rules:
+
+- **Under 500 lines** — extract detail to `references/` with Read pointers
+- **Never-skip sections** — Pre-flight, Self-audit, Anti-patterns, and Guidelines always have real content
+- **Self-contained** — no cross-skill dependencies; each skill includes everything it needs
+- **Progressive disclosure** — inline summary + `Read references/...` pointer for sections > ~15 lines
 
 > [!TIP]
-> Each skill directory contains a `SKILL.md` with full instructions, trigger phrases, and workflow details. Click any skill link above to explore.
+> Run `/audit-skill` after editing to verify skeleton compliance and catch quality gaps.
