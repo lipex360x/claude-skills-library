@@ -1,6 +1,11 @@
 ---
 name: deploy-vercel
-description: Deploy, manage, and develop projects on Vercel from the command line. Use when deploying to Vercel, configuring domains, setting up environment variables, managing CI/CD pipelines, running local dev with `vercel dev`, or troubleshooting deployment issues — even if they don't explicitly say "Vercel."
+description: >-
+  Deploy, manage, and develop projects on Vercel from the command line. Use when
+  deploying to Vercel, configuring domains, setting up environment variables,
+  managing CI/CD pipelines, running local dev with `vercel dev`, or
+  troubleshooting deployment issues — even if they don't explicitly say "Vercel."
+user-invocable: true
 allowed-tools:
   - Read
   - Bash
@@ -13,13 +18,50 @@ Deploy, manage, and develop projects on the Vercel platform using the `vercel` (
 
 ## Input contract
 
-| Input | Required | Description |
-|-------|----------|-------------|
-| Task type | Yes | What to do: deploy, configure env vars, set up domain, debug, local dev, CI/CD |
-| Project directory | Yes | Directory containing the project (must have `.vercel/` or be linkable) |
-| Environment | No | `preview` (default) or `production` — only for deploy tasks |
-| Team/scope | No | Vercel team — defaults to current (`vercel whoami`) |
-| Flags | No | Additional CLI flags (e.g., `--yes`, `--prebuilt`, `--env`) |
+<input_contract>
+
+| Input | Source | Required | Validation | On invalid |
+|-------|--------|----------|------------|------------|
+| Task type | Conversation | yes | One of: deploy, env vars, domain, local dev, CI/CD, debug | AUQ: "What Vercel task do you need?" |
+| Project directory | Filesystem | yes | Directory exists and contains `.vercel/` or is linkable | Run `vercel link` to set up |
+| Environment | Conversation | no | `preview` or `production` | Default to `preview` |
+| Team/scope | Conversation | no | Valid Vercel team | Default to current (`vercel whoami`) |
+
+</input_contract>
+
+## Output contract
+
+<output_contract>
+
+| Artifact | Path | Persists | Format |
+|----------|------|----------|--------|
+| Deployment | Vercel platform | yes | URL |
+| CLI output | stdout | no | Text with status, URL, environment |
+| Report | stdout | no | Markdown summary |
+
+</output_contract>
+
+## External state
+
+<external_state>
+
+| Resource | Path | Access | Format |
+|----------|------|--------|--------|
+| Vercel project link | `.vercel/project.json` or `.vercel/repo.json` | R/W | JSON |
+| Vercel CLI | `vercel` binary | R | CLI |
+| Reference files | `references/*.md` | R | Markdown |
+
+</external_state>
+
+## Pre-flight
+
+<pre_flight>
+
+1. `which vercel` → if missing: "Vercel CLI required. Install: `npm i -g vercel`" — stop.
+2. `.vercel/` exists in project directory → if missing: run `vercel link` (single project) or `vercel link --repo` (monorepo).
+3. Correct team confirmed via `vercel whoami` → if wrong team: run `vercel teams switch`.
+
+</pre_flight>
 
 ## Steps
 
@@ -30,7 +72,7 @@ Determine the task type from the user's request and verify the project is linked
 1. Check `.vercel/` exists in the project directory
 2. If missing, run `vercel link` (single project) or `vercel link --repo` (monorepo)
 3. Confirm the correct team with `vercel whoami`
-4. Route to the correct reference file using the Decision Tree below
+4. Route to the correct reference file using the decision tree below
 
 **Before proceeding, verify the link type matches the project structure** — `project.json` for single projects, `repo.json` for monorepos with multiple projects. A mismatch causes silent deployment failures because commands target the wrong project.
 
@@ -44,20 +86,18 @@ Read the reference file for the identified task type, then execute the commands:
 - **CI/CD automation** → Read `references/ci-automation.md`
 - **Domains or DNS** → Read `references/domains-and-dns.md`
 - **Projects or teams** → Read `references/projects-and-teams.md`
-- **Logs, debugging, or accessing preview deploys** → Read `references/monitoring-and-debugging.md`
+- **Logs, debugging, or preview deploys** → Read `references/monitoring-and-debugging.md`
 - **Blob storage** → Read `references/storage.md`
-- **Integrations (databases, storage, etc.)** → Read `references/integrations.md`
-- **Access a preview deployment** → Use `vercel curl` (see `references/monitoring-and-debugging.md`)
-- **CLI doesn't have a command for it** → Use `vercel api` as a fallback (see `references/advanced.md`)
-- **Node.js backends (Express, Hono, etc.)** → Read `references/node-backends.md`
-- **Monorepos (Turborepo, Nx, workspaces)** → Read `references/monorepos.md`
+- **Integrations** → Read `references/integrations.md`
+- **Node.js backends** → Read `references/node-backends.md`
+- **Monorepos** → Read `references/monorepos.md`
 - **Bun runtime** → Read `references/bun.md`
 - **Feature flags** → Read `references/flags.md`
 - **Advanced (API, webhooks)** → Read `references/advanced.md`
 - **Global flags** → Read `references/global-options.md`
 - **First-time setup** → Read `references/getting-started.md`
 
-**Quality gate:** before deploying to production, verify a preview deployment works first. Never skip preview → production because a failed production deploy affects real users.
+**Quality gate:** before deploying to production, verify a preview deployment works first — a failed production deploy affects real users.
 
 ### 3. Verify the result
 
@@ -65,45 +105,81 @@ After execution, confirm success based on the task type:
 
 | Task | Verification |
 |------|-------------|
-| Deploy (preview) | Confirm deployment URL is accessible, check build logs for warnings |
-| Deploy (production) | Verify production URL responds, confirm environment variables loaded |
-| Environment variables | Run `vercel env ls` to confirm the variable exists in the target environment |
-| Domain | Run `vercel domains ls` and confirm DNS status shows `Valid Configuration` |
-| Local dev | Confirm `vercel dev` serves the app at `localhost:3000` (or configured port) |
-| CI/CD | Confirm pipeline config includes `--yes` flag and uses `VERCEL_TOKEN` env var |
+| Deploy (preview) | Deployment URL is accessible, build logs have no warnings |
+| Deploy (production) | Production URL responds, env vars loaded |
+| Environment variables | `vercel env ls` confirms variable exists |
+| Domain | `vercel domains ls` shows `Valid Configuration` |
+| Local dev | `vercel dev` serves the app at `localhost:3000` |
+| CI/CD | Pipeline config includes `--yes` and uses `VERCEL_TOKEN` |
 
 **If something fails, check linking first** — inspect `.vercel/` contents and verify the team with `vercel whoami`. Linking issues cause most Vercel CLI failures.
 
-## Output format
+### 4. Report
 
-Report the result in this structure:
+<report>
 
-```
-**Vercel: [task type]**
+Present concisely:
+- **Task:** what was executed (deploy, env var, domain, etc.)
+- **Status:** success or failed with reason
+- **URL:** deployment or domain URL, if applicable
+- **Environment:** preview or production
+- **Team:** team name from `vercel whoami`
+- **Audit results** — self-audit summary (or "all checks passed")
+- **Errors** — issues encountered and how they were handled (or "none")
 
-- **Status:** [success / failed — reason]
-- **URL:** [deployment or domain URL, if applicable]
-- **Environment:** [preview / production]
-- **Team:** [team name from `vercel whoami`]
-- **Notes:** [warnings from build logs, DNS propagation time, etc.]
-```
+</report>
 
-## Project linking
+## Next action
 
-Commands must run from the directory containing `.vercel/` (or a subdirectory). How `.vercel/` gets set up depends on the project structure:
+> _Skipped: "Task-dependent — user decides next steps based on deployment result."_
 
-- **`.vercel/project.json`**: Created by `vercel link`. Links a single project. Fine for single-project repos.
-- **`.vercel/repo.json`**: Created by `vercel link --repo`. Links a repo with multiple projects. Always use this when any project has a non-root directory (e.g., `apps/web`).
+## Self-audit
 
-Running from a project subdirectory (e.g., `apps/web/`) skips the "which project?" prompt since it's unambiguous.
+<self_audit>
+
+Before presenting the Report, verify:
+
+1. **Pre-flight passed?** — Vercel CLI installed, project linked, correct team
+2. **Link type correct?** — `project.json` for single projects, `repo.json` for monorepos
+3. **Preview before production?** — if deploying to production, preview was verified first
+4. **Result verified?** — verification step from Step 3 was executed for the task type
+5. **Anti-patterns clean?** — no force-deployed to production, no hardcoded tokens
+
+</self_audit>
+
+## Content audit
+
+<content_audit>
+
+> _Skipped: "N/A — skill executes CLI commands, does not generate verifiable content."_
+
+</content_audit>
+
+## Error handling
+
+| Failure | Strategy |
+|---------|----------|
+| `vercel` not installed | Report install command → stop |
+| Auth expired | AUQ: "Run `vercel login`" → stop |
+| Project not linked | Run `vercel link` or `vercel link --repo` → retry |
+| Wrong team | Run `vercel teams switch` → retry |
+| Build failure | Show build logs, suggest fix → stop |
+| DNS not propagated | Report status, note propagation may take up to 48h |
 
 ## Anti-patterns
 
-- **Wrong link type in monorepos with multiple projects**: `vercel link` creates `project.json`, which only tracks one project. Use `vercel link --repo` instead — `project.json` causes silent deployment failures when commands target the wrong project.
-- **Letting commands auto-link in monorepos**: Many commands implicitly run `vercel link` if `.vercel/` doesn't exist. This creates `project.json`, which may be wrong. Run `vercel link` (or `--repo`) explicitly first.
-- **Linking while on the wrong team**: Use `vercel whoami` to check, `vercel teams switch` to change.
-- **Forgetting `--yes` in CI**: Required to skip interactive prompts — without it the pipeline hangs.
-- **Using `vercel deploy` after `vercel build` without `--prebuilt`**: The build output is ignored because the CLI rebuilds from source.
-- **Hardcoding tokens in flags**: Use `VERCEL_TOKEN` env var instead of `--token` — tokens in flags leak into shell history and CI logs.
-- **Disabling deployment protection**: Use `vercel curl` instead to access preview deploys — disabling protection exposes previews to the public.
-- **Skipping preview before production**: Always verify a preview deployment works before promoting to production — production failures affect real users and rollback takes time.
+- **Wrong link type in monorepos.** `vercel link` creates `project.json`, which only tracks one project — because `project.json` causes silent deployment failures when commands target the wrong project in multi-project repos. Use `vercel link --repo` instead.
+- **Letting commands auto-link in monorepos.** Many commands implicitly run `vercel link` if `.vercel/` doesn't exist — because this creates `project.json`, which may link to the wrong project.
+- **Linking while on the wrong team.** Verify with `vercel whoami` before linking — because the link is scoped to the team and changing teams later doesn't update existing links.
+- **Forgetting `--yes` in CI.** Required to skip interactive prompts — because without it the pipeline hangs waiting for input.
+- **Using `vercel deploy` after `vercel build` without `--prebuilt`.** The build output is ignored — because the CLI rebuilds from source, wasting the prior build step.
+- **Hardcoding tokens in flags.** Use `VERCEL_TOKEN` env var instead of `--token` — because tokens in flags leak into shell history and CI logs.
+- **Disabling deployment protection.** Use `vercel curl` to access preview deploys — because disabling protection exposes previews to the public.
+- **Skipping preview before production.** Always verify a preview deployment works first — because production failures affect real users and rollback takes time.
+
+## Guidelines
+
+- **Check linking first.** When something fails, inspect `.vercel/` contents and verify the team — because linking issues cause most Vercel CLI failures and are the cheapest thing to check.
+- **Preview before production.** Never deploy directly to production without a verified preview — because a failed production deploy affects real users and the rollback window is not instant.
+- **Reference-driven execution.** Route to the correct reference file for each task type rather than working from memory — because reference files contain the exact flags, options, and edge cases for each operation.
+- **Monorepo awareness.** Always check if the project is part of a monorepo before linking — because the wrong link type is the single most common source of silent Vercel CLI failures.

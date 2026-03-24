@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "deploy-vercel",
+  "plugin": "deploy",
+  "created": "2026-01-01",
+  "lastModified": "2026-03-24",
+  "lineCount": 185,
+  "skeleton": {
+    "inputContract": true,
+    "outputContract": true,
+    "externalState": true,
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": "N/A — skill executes CLI commands, does not generate verifiable content",
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 4,
+  "approvalGates": 0,
+  "references": [
+    "advanced.md",
+    "bun.md",
+    "ci-automation.md",
+    "deployment.md",
+    "domains-and-dns.md",
+    "environment-variables.md",
+    "flags.md",
+    "getting-started.md",
+    "global-options.md",
+    "integrations.md",
+    "local-development.md",
+    "monitoring-and-debugging.md",
+    "monorepos.md",
+    "node-backends.md",
+    "projects-and-teams.md",
+    "storage.md"
+  ],
+  "templates": [],
+  "scripts": [],
+  "dependencies": {
+    "tools": ["vercel"],
+    "configs": [],
+    "skills": []
+  },
+  "audit": {
+    "lastRun": null,
+    "score": null,
+    "gaps": []
+  }
+}

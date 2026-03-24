@@ -1,13 +1,12 @@
 ---
 name: review-postgres
-description: "Postgres performance optimization and best practices from Supabase. Use this skill when writing, reviewing, or optimizing Postgres queries, schema designs, or database configurations — even if they don't explicitly mention Postgres, even if they're just writing a migration, or even if the question is about 'my query is slow'."
-license: MIT
-metadata:
-  author: supabase
-  version: "2.0.0"
-  organization: Supabase
-  date: January 2026
-  abstract: Comprehensive Postgres performance optimization guide for developers using Supabase and Postgres. Contains performance rules across 8 categories, prioritized by impact from critical (query performance, connection management) to incremental (advanced features). Each rule includes detailed explanations, incorrect vs. correct SQL examples, query plan analysis, and specific performance metrics to guide automated optimization and code generation.
+description: >-
+  Postgres performance optimization and best practices from Supabase. Use this
+  skill when writing, reviewing, or optimizing Postgres queries, schema designs,
+  or database configurations — even if they don't explicitly mention Postgres,
+  even if they're just writing a migration, or even if the question is about
+  "my query is slow."
+user-invocable: true
 allowed-tools:
   - Read
   - Glob
@@ -19,14 +18,45 @@ Review and optimize Postgres queries, schemas, and configurations using Supabase
 
 ## Input contract
 
-Accepted inputs (one or more):
-- **SQL queries** — `SELECT`, `INSERT`, `UPDATE`, `DELETE`, CTEs, subqueries
-- **Schema definitions** — `CREATE TABLE`, `ALTER TABLE`, indexes, constraints
-- **Migration files** — any `.sql` file or migration runner output
-- **General request** — "review my database", "optimize this query", "check my schema"
-- **Error/performance complaint** — "this query is slow", "connection timeout", "deadlocks"
+<input_contract>
 
-If the input is ambiguous, ask the user to share the relevant SQL or schema before proceeding.
+| Input | Source | Required | Validation | On invalid |
+|-------|--------|----------|------------|------------|
+| SQL/schema/migration | Conversation or file | yes | Contains SQL or schema-related content | Ask the user to share the relevant SQL or schema |
+| Review scope | Conversation | no | One of: query, schema, migration, general | Default to full review across all categories |
+
+</input_contract>
+
+## Output contract
+
+<output_contract>
+
+| Artifact | Path | Persists | Format |
+|----------|------|----------|--------|
+| Review report | stdout | no | Markdown table with findings grouped by severity |
+| Corrected SQL | stdout | no | SQL code block |
+
+</output_contract>
+
+## External state
+
+<external_state>
+
+| Resource | Path | Access | Format |
+|----------|------|--------|--------|
+| Rule reference files | `references/*.md` | R | Markdown with SQL examples |
+| Sections index | `references/_sections.md` | R | Markdown index |
+
+</external_state>
+
+## Pre-flight
+
+<pre_flight>
+
+1. Input contains SQL, schema definition, migration file, or database-related question → if not: "Please share the SQL, schema, or migration you'd like reviewed." — stop.
+2. Rule reference files are accessible → if not: "Reference files missing at `references/`." — stop.
+
+</pre_flight>
 
 ## Steps
 
@@ -61,15 +91,7 @@ Compare the user's code against each loaded rule. For every violation or improve
 
 ### 4. Present the review
 
-Deliver findings in the output format below. Group by severity, highest first.
-
-### 5. Refine if needed
-
-If the user questions a finding or provides additional context, re-evaluate that specific rule application. Adjust the severity or recommendation accordingly. Repeat until the user is satisfied with the review.
-
-## Output format
-
-Present the review as a structured report:
+Deliver findings grouped by severity, highest first:
 
 ```markdown
 ## Postgres Review — [brief scope description]
@@ -78,8 +100,7 @@ Present the review as a structured report:
 
 | # | Severity | Rule | Finding | Recommendation |
 |---|----------|------|---------|----------------|
-| 1 | CRITICAL | query-missing-indexes | Full table scan on `users` — no index on `email` column used in WHERE clause | `CREATE INDEX idx_users_email ON users (email);` |
-| 2 | HIGH | schema-partial-indexes | Index on `orders.status` includes all rows but only 5% are `active` | `CREATE INDEX idx_orders_active ON orders (status) WHERE status = 'active';` |
+| 1 | CRITICAL | query-missing-indexes | Full table scan on `users` | `CREATE INDEX ...` |
 
 ### Summary
 
@@ -91,35 +112,74 @@ Present the review as a structured report:
 
 ### Corrected SQL
 
-[Full corrected version of the reviewed SQL, if applicable]
+[Full corrected version, if applicable]
 ```
+
+### 5. Refine if needed
+
+If the user questions a finding or provides additional context, re-evaluate that specific rule application. Adjust the severity or recommendation accordingly. Repeat until the user is satisfied with the review.
+
+### 6. Report
+
+Present concisely:
+- **What was done** — categories reviewed, number of findings by severity
+- **Audit results** — self-audit summary (or "all checks passed")
+- **Errors** — issues encountered and how they were handled (or "none")
+
+## Next action
+
+> _Skipped: "Review complete — user decides next steps based on findings."_
+
+## Self-audit
+
+<self_audit>
+
+Before presenting the Report, verify:
+
+1. **Pre-flight passed?** — input contained reviewable SQL/schema content
+2. **CRITICAL categories checked?** — query performance, connection management, and security were always reviewed
+3. **Every finding has a fix?** — no finding is just a description without a concrete recommendation
+4. **Corrected SQL compiles?** — no syntax errors in recommendations
+5. **Anti-patterns scanned?** — common traps were checked even if outside the explicit request scope
+
+</self_audit>
+
+## Content audit
+
+<content_audit>
+
+Before finalizing output, verify:
+
+1. **SQL correctness?** — recommended fixes are valid Postgres syntax
+2. **Rule application accurate?** — each finding correctly matches the rule it cites
+3. **Severity appropriate?** — CRITICAL is reserved for performance/security issues with measurable impact
+4. **References valid?** — rule file prefixes cited in findings exist in `references/`
+
+</content_audit>
+
+## Error handling
+
+| Failure | Strategy |
+|---------|----------|
+| Input is not SQL/schema-related | Ask user to provide the generated SQL or relevant schema |
+| Rule reference files missing | Report which files are missing, proceed with available rules |
+| Ambiguous input scope | Ask user to clarify what they want reviewed |
 
 ## Anti-patterns
 
-Watch for these common mistakes — flag them even if the user didn't ask:
+- **Missing indexes on FK columns.** Foreign key columns without indexes cause slow JOINs and cascading deletes — because the planner falls back to sequential scans on the referenced table.
+- **Sequential scans on large tables.** Any `Seq Scan` on tables with >10k rows deserves an index review — because full table scans grow linearly with data size.
+- **SELECT \*.** Fetching all columns when only a subset is needed — because it wastes I/O, memory, and prevents index-only scans.
+- **N+1 queries.** Looping queries inside application code instead of using JOINs or batch fetches — because each round-trip adds network latency and connection overhead.
+- **Long-running transactions.** Holding locks for extended periods — because it causes contention, deadlocks, and blocks autovacuum.
+- **Missing connection pooling.** Direct connections without a pooler — because connection limits are exhausted under load.
+- **Overly permissive RLS.** Policies that default to `true` or skip auth checks — because they expose data to unauthorized users.
+- **No EXPLAIN ANALYZE.** Optimizing queries without checking the actual execution plan — because assumptions about query behavior are often wrong.
+- **Implicit type casts in WHERE.** Comparing mismatched types (e.g., `varchar` to `int`) — because it prevents index usage and forces sequential scans.
 
-- **Missing indexes on FK columns** — foreign key columns without indexes cause slow JOINs and cascading deletes
-- **Sequential scans on large tables** — any `Seq Scan` on tables with >10k rows deserves an index review
-- **SELECT \*** — fetching all columns when only a subset is needed wastes I/O and memory
-- **N+1 queries** — looping queries inside application code instead of using JOINs or batch fetches
-- **Long-running transactions** — holding locks for extended periods causes contention and deadlocks
-- **Missing connection pooling** — direct connections without a pooler exhaust connection limits under load
-- **Overly permissive RLS** — policies that default to `true` or skip auth checks entirely
-- **No EXPLAIN ANALYZE** — optimizing queries without checking the actual execution plan is guessing
-- **Implicit type casts in WHERE** — comparing mismatched types (e.g., `varchar` to `int`) prevents index usage
+## Guidelines
 
-## Quality checkpoint
-
-After completing the review, verify:
-- [ ] All CRITICAL-priority categories were checked (query, conn, security)
-- [ ] Every finding includes a concrete fix, not just a description of the problem
-- [ ] The corrected SQL compiles (no syntax errors in recommendations)
-- [ ] Anti-patterns were scanned even if outside the explicit request scope
-
-## References
-
-- https://www.postgresql.org/docs/current/
-- https://supabase.com/docs
-- https://wiki.postgresql.org/wiki/Performance_Optimization
-- https://supabase.com/docs/guides/database/overview
-- https://supabase.com/docs/guides/auth/row-level-security
+- **Priority-ordered review.** Always start with CRITICAL categories (query, conn, security) before moving to lower-priority ones — because the highest-impact issues should be surfaced first regardless of what the user asked about.
+- **Concrete fixes over descriptions.** Every finding must include corrected SQL, not just an explanation of the problem — because actionable recommendations save the user from having to research the fix themselves.
+- **Scan anti-patterns proactively.** Check for common anti-patterns even if they fall outside the explicit request scope — because users often don't know what they don't know about database performance.
+- **Respect Supabase context.** When applicable, include Supabase-specific notes (RLS, connection pooling via Supavisor, edge functions) — because many users of this skill are on the Supabase platform.
