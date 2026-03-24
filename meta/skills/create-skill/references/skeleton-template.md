@@ -2,6 +2,8 @@
 
 Every skill follows this 13-section structure. Sections are never omitted — when a section does not apply, mark it as Skipped with a reason. An absent section is ambiguous; a Skipped section is explicit.
 
+**Skeleton version: 1** — Increment this number when the skeleton structure changes (new sections, renamed sections, new required fields). Skills built against older versions can be found via `grep -r '"skeletonVersion"' */skill-meta.json`.
+
 ## Table of contents
 
 - [Section order](#section-order)

@@ -1,5 +1,6 @@
 {
   "schema": 1,
+  "skeletonVersion": 1,
   "name": "create-skill",
   "plugin": "meta",
   "created": "2025-12-01",
