@@ -167,6 +167,27 @@ Also add an inline reminder in the first parallelizable step: `⚠️ This step 
 - **Sub-sections per unit of work** (e.g., `### component-name (path/)`) with individual checkboxes
 - Enough operational detail that the teammate prompt is just the standardized pattern above — no duplicated context
 
+**Structured verification for the final Step.** When the plan uses Agent Teams, the verification step (typically the last Step, owned by the lead) must include a **verification matrix** — a predefined table of checks × units of work. Each checkbox in the verification step should name a specific check, not generic "verify everything works". Template for the issue body:
+
+```markdown
+## Step N — Cross-batch verification
+
+- [ ] Verify [specific check A] for all [units] — present results as matrix
+- [ ] Verify [specific check B] for all [units]
+- [ ] Document false positives with reasoning (e.g., runtime paths in skill files are legitimate)
+- [ ] Push all changes
+```
+
+The lead fills in a matrix table when executing this step:
+```markdown
+| Check | unit-1 | unit-2 | unit-3 |
+|-------|--------|--------|--------|
+| Check A | ✅ | ✅ | ✅ |
+| Check B | ✅ | ⚠️ note | ✅ |
+```
+
+If any check produces a false positive (e.g., runtime paths flagged as violations), document the reasoning — future sessions running similar plans will encounter the same edge case and need the precedent.
+
 Rules for the execution plan:
 - **Identify the sequential prefix** — Steps that must run first because everything depends on them (e.g., template definition, shared types). These stay with the lead.
 - **Group independent Steps by layer** — each group becomes a teammate.
@@ -322,6 +343,8 @@ If the issue has no Execution mode section (Agent Teams not enabled), skip this 
 - **No unnecessary code comments.** Code comments are allowed only when the logic is genuinely non-obvious — complex algorithms, unintuitive business rules, or regulatory constraints that aren't self-evident from the code. Self-documenting code (clear names, small functions, explicit types) replaces comments. Never include "add comments" or "document the code" as checkboxes — if the code needs a comment to be understood, the code needs to be rewritten.
 
 - **Web research is authorized.** When the agent is blocked on a problem — unfamiliar framework behavior, unclear best practices, or an error with no obvious solution — it is authorized to search the web for best practices and solutions. This is not a last resort; it's a standard tool. Better to spend 30 seconds searching than 10 minutes guessing.
+
+- **Verification is part of the plan, not an afterthought.** When the plan uses Agent Teams, the verification step checkboxes must name specific checks (not "verify everything works"). Each check maps to a row in the verification matrix the lead presents after teammates complete. This prevents improvised verification and ensures every parallel execution has consistent, comparable quality evidence. Document false positive precedents (e.g., "runtime paths in SKILL.md are legitimate, not a local-path violation") so future sessions don't re-analyze the same edge cases.
 
 - **Checkbox ownership with Agent Teams.** When teammates run in parallel, they must NEVER edit the issue body directly. Progress tracking uses internal tasks (`TaskCreate`/`TaskUpdate`) — one task per unit of work within their assigned Step, with task names matching the sub-section headers from the issue. The lead monitors progress via `TaskList` and marks issue checkboxes only after verifying each teammate's output in the verification step. This prevents race conditions (GitHub's issue API has no merge — last write wins) and ensures checkboxes reflect verified completion.
 

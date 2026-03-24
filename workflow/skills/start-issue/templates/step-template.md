@@ -106,6 +106,22 @@ Example:
 - [ ] Verify
 ```
 
+### Verification Step (Agent Teams)
+When using Agent Teams, the final step must include a **verification matrix** — named checks × units:
+- Each checkbox names a specific check (not "verify everything")
+- The lead fills in a pass/fail matrix table when executing
+- Include a checkbox for documenting false positives with reasoning
+
+Example:
+```markdown
+## Step 4 — Cross-batch verification
+
+- [ ] Verify [check A] for all [units] — present results as matrix
+- [ ] Verify [check B] for all [units]
+- [ ] Document false positives with reasoning
+- [ ] Push all changes
+```
+
 ### Sizing
 - 2-8 Steps per issue (simple issues: 2-3, complex: 5-8)
 - 2-6 checkboxes per Step
