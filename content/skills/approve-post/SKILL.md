@@ -1,44 +1,90 @@
 ---
 name: approve-post
-description: Approve the current draft, generate English translation, and publish to local files and Google Drive. Use this skill when the user says "approve post", "publish post", "post approve", "ship the post", or wants to finalize and publish a draft — even if they don't explicitly say "approve."
+description: >-
+  Approve the current draft, generate English translation, and publish to local
+  files and Google Drive. Use this skill when the user says "approve post",
+  "publish post", "post approve", "ship the post", or wants to finalize and
+  publish a draft — even if they don't explicitly say "approve."
 user-invocable: true
-disable-model-invocation: false
-allowed-tools: Bash, Read, Write, Edit, Glob
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - AskUserQuestion
 ---
+
+# Approve Post
+
+Finalize a LinkedIn draft — review both language versions, publish to local files, and optionally sync to Google Drive.
 
 ## Input contract
 
-**Required:** A draft file must exist in `drafts/linkedin/` within the posts directory.
+<input_contract>
 
-**Optional argument:** A specific draft filename to approve (e.g., `/approve-post 042-my-post.md`). If omitted, the most recent draft is selected automatically.
+| Input | Source | Required | Validation | On invalid |
+|-------|--------|----------|------------|------------|
+| `draft-filename` | $ARGUMENTS | no | File exists in `drafts/linkedin/` | List available drafts, AUQ to pick one |
 
-**Draft format:** Each draft must contain YAML frontmatter (between `---` delimiters) with at minimum `title` and `date` fields, followed by the post body in PT-BR.
+If no argument is provided, the most recent draft is selected automatically (highest number prefix).
 
-## 1. Find the latest draft
+</input_contract>
 
-Glob `drafts/linkedin/*.md` inside the posts directory. Pick the most recent file by name (highest number prefix) because drafts are numbered sequentially — the highest number is the latest.
+## Output contract
 
-**If no drafts are found:** inform the user "No drafts found in drafts/linkedin/. Create a draft first with /write-content." and stop.
+<output_contract>
 
-**If a specific filename was passed as argument:** use that file instead of auto-selecting. If the file doesn't exist, list available drafts and ask the user to pick one.
+| Artifact | Path | Persists | Format |
+|----------|------|----------|--------|
+| Metadata file | `published/linkedin/<number>/meta.md` | yes | YAML frontmatter |
+| PT-BR content | `published/linkedin/<number>/pt-br.txt` | yes | Plain text |
+| EN translation | `published/linkedin/<number>/en.txt` | yes | Plain text |
+| Google Drive copy | Google Drive folder | yes | Plain text files |
+| Report | stdout | no | Markdown summary |
 
-## 2. Extract and prepare content
+Read `references/output-formats.md` for the exact format of each published file.
 
-Read the draft. Validate that it contains YAML frontmatter between `---` delimiters.
+</output_contract>
 
-**If frontmatter is missing or malformed:** inform the user with the specific parsing error and stop. Do not attempt to guess the metadata.
+## External state
 
-Extract:
+<external_state>
+
+| Resource | Path | Access | Format |
+|----------|------|--------|--------|
+| Draft files | `drafts/linkedin/*.md` | R | Markdown with YAML frontmatter |
+| Published directory | `published/linkedin/` | W | Directory with numbered subdirs |
+| Google Drive | via `gws` CLI | W | Plain text upload |
+
+</external_state>
+
+## Pre-flight
+
+<pre_flight>
+
+1. Posts directory exists and contains `drafts/linkedin/` → if not: "No drafts directory found. Create a draft first with /write-content." — stop.
+2. At least one `.md` file exists in `drafts/linkedin/` → if none: "No drafts found in drafts/linkedin/." — stop.
+3. If argument provided, that file exists → if not: list available drafts, AUQ to pick one.
+4. Draft file contains valid YAML frontmatter between `---` delimiters with at minimum `title` and `date` fields → if malformed: report the specific parsing error — stop.
+
+</pre_flight>
+
+## Steps
+
+### 1. Find and read the draft
+
+Glob `drafts/linkedin/*.md` inside the posts directory. If a specific filename was passed as argument, use that file. Otherwise pick the file with the highest number prefix because drafts are numbered sequentially.
+
+Read the draft. Extract:
 - **Frontmatter** — all YAML fields (title, date, tags, etc.)
 - **Post body** — everything after the closing `---` of frontmatter
 
-Save the PT-BR body to a temporary file.
+### 2. Translate to English
 
-Translate the PT-BR body to English. Preserve tone, line breaks, and hashtags because the translated version must feel like it was written natively — not machine-translated. Pay special attention to idiomatic expressions: translate the intent, not the literal words.
+Translate the PT-BR body to English. Preserve tone, line breaks, hashtags, mentions, and emoji placement because the translated version must feel like it was written natively — not machine-translated. Pay special attention to idiomatic expressions: translate the intent, not the literal words.
 
-Save the EN translation to a temporary file.
-
-## 3. Review before publishing
+### 3. Review before publishing
 
 Present both versions side-by-side to the user:
 - The original PT-BR body
@@ -46,38 +92,98 @@ Present both versions side-by-side to the user:
 
 Ask for approval before proceeding. This checkpoint exists because translation errors or tone mismatches are much cheaper to fix before publishing than after.
 
-If the user requests changes, apply them and present again. Only proceed to Step 4 when the user confirms both versions are ready.
+If the user requests changes, apply them and present again. Only proceed when the user confirms both versions are ready.
 
-## 4. Publish to local directory
+### 4. Publish to local directory
 
-Create a new directory under `published/linkedin/` using the draft's number prefix. Inside it, create three files following the templates in `references/output-formats.md`:
+Create a new directory under `published/linkedin/` using the draft's number prefix. Inside it, create three files following `references/output-formats.md`:
 
-- `meta.md` — structured frontmatter metadata
+- `meta.md` — structured frontmatter metadata (status set to `published`, `published_at` added)
 - `pt-br.txt` — the PT-BR content (plain text, no frontmatter)
 - `en.txt` — the EN translation (plain text, no frontmatter)
 
-Read `references/output-formats.md` for the exact format of each file.
-
-## 5. Upload to Google Drive
+### 5. Upload to Google Drive
 
 Check if the `gws` CLI is available by running `which gws`.
 
-**If `gws` is not found:** warn the user that Google Drive upload will be skipped. Inform them that files were saved locally and they can upload manually or install the `gws` plugin. Continue to Step 6 — do not fail the entire flow because of a missing optional dependency.
+**If `gws` is not found:** warn the user that Google Drive upload will be skipped. Continue to Step 6 — do not fail the entire flow because of a missing optional dependency.
 
-**If `gws` is available:** upload both `pt-br.txt` and `en.txt` to the appropriate Google Drive folder. If the upload fails (network error, auth expired, folder not found), report the specific error and continue to Step 6 — local files are already saved.
+**If `gws` is available:** upload both `pt-br.txt` and `en.txt` to the appropriate Google Drive folder. If the upload fails (network error, auth expired, folder not found), report the specific error and continue — local files are already saved.
 
-## 6. Clean up
+### 6. Clean up
 
 Remove the draft file from `drafts/linkedin/` only after confirming that local published files were written successfully. Never delete the draft before publish is verified because the draft is the only source of truth until published files exist.
 
-Report:
-- Published directory path
-- Google Drive link (if upload succeeded) or "Drive upload skipped" with reason
+### 7. Report
+
+<report>
+
+Present concisely:
+- **Published:** directory path and files created
+- **Translation:** approval status (approved / revised N times)
+- **Google Drive:** link if upload succeeded, or "skipped" with reason
+- **Content audit:** summary of verification results
+- **Errors:** issues encountered and how they were handled (or "none")
+
+</report>
+
+## Next action
+
+Share the published post on LinkedIn. Copy from `pt-br.txt` for the Portuguese audience or `en.txt` for the English audience.
+
+## Self-audit
+
+<self_audit>
+
+Before presenting the Report, verify:
+
+1. **Pre-flight passed?** — draft existed, frontmatter was valid
+2. **User approved both versions?** — review step was not skipped
+3. **All three files created?** — `meta.md`, `pt-br.txt`, `en.txt` exist in published directory
+4. **Draft removed?** — only after confirming published files exist on disk
+5. **Anti-patterns clean?** — no literal translations, no skipped review, no premature draft deletion
+
+</self_audit>
+
+## Content audit
+
+<content_audit>
+
+Before finalizing output, verify:
+
+1. **Translation accuracy?** — EN version preserves the original meaning, tone, and intent of the PT-BR body. Idiomatic expressions are translated to equivalent English idioms, not literal translations.
+2. **Formatting preserved?** — line breaks, paragraph spacing, hashtags, mentions, and emoji placement match between PT-BR and EN versions.
+3. **Metadata correct?** — `meta.md` contains all original frontmatter fields, `status` is `published`, `published_at` timestamp is current.
+4. **No content loss?** — published `pt-br.txt` matches the approved PT-BR body exactly (no truncation, no extra whitespace).
+5. **Output format matches spec?** — all three files follow the templates in `references/output-formats.md`.
+
+</content_audit>
+
+## Error handling
+
+| Failure | Strategy |
+|---------|----------|
+| No drafts found | Report and suggest `/write-content` — stop |
+| Malformed frontmatter | Report specific parsing error — stop |
+| `gws` CLI not found | Warn, skip Drive upload, continue with local publish |
+| Drive upload fails | Report error with details, continue — local files are primary |
+| Write to published directory fails | Report error — do NOT delete draft |
+| Draft deletion fails | Warn — published files already exist, manual cleanup needed |
 
 ## Anti-patterns
 
-- **Never publish without showing the user both versions first.** Skipping the review step leads to tone mismatches going live.
-- **Never translate idioms literally.** "Matar dois coelhos com uma cajadada" is not "kill two rabbits with one stick" — find the equivalent English idiom.
-- **Never delete the draft before confirming the published files exist on disk.** If the write fails silently, the content is lost.
-- **Never fail the entire flow because Drive upload failed.** Local publish is the primary output; Drive is a convenience copy.
-- **Never assume frontmatter fields exist.** Validate before accessing — a missing `title` field should produce a clear error, not a crash.
+- **Publishing without user review.** Skipping the side-by-side review step leads to tone mismatches going live — because translation errors are much cheaper to fix before publishing than after.
+- **Translating idioms literally.** "Matar dois coelhos com uma cajadada" is not "kill two rabbits with one stick" — because the goal is native-sounding English, not word-for-word conversion. Find the equivalent English idiom.
+- **Deleting draft before confirming publish.** If the write fails silently, the content is lost — because the draft is the only source of truth until published files exist on disk.
+- **Failing the entire flow on Drive error.** Local publish is the primary output; Drive is a convenience copy — because a network hiccup should not block the user from having their content saved locally.
+- **Assuming frontmatter fields exist.** Validate before accessing — because a missing `title` field should produce a clear error, not a crash.
+
+## Guidelines
+
+- **Local-first publishing.** The local filesystem is the source of truth. Google Drive is a sync target, not the primary store — always ensure local files are written before attempting any remote upload.
+
+- **Translation is creative work.** Treat translation as content creation, not mechanical conversion. The EN version should read as if originally written in English — preserving the author's voice, humor, and rhetorical style.
+
+- **Graceful degradation.** If `gws` is not available, skip the Drive step silently. If Drive upload fails, report and continue. The core job (review + local publish) should always complete even when optional steps fail.
+
+- **User approval is mandatory.** The review step (Step 3) is a hard gate, not a suggestion. Never bypass it — even if the translation looks perfect. The user's judgment on tone and accuracy is final.

@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "approve-post",
+  "plugin": "content",
+  "created": "2026-01-15",
+  "lastModified": "2026-03-24",
+  "lineCount": 189,
+  "skeleton": {
+    "inputContract": true,
+    "outputContract": true,
+    "externalState": true,
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": true,
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 7,
+  "approvalGates": 1,
+  "references": ["output-formats.md"],
+  "templates": [],
+  "scripts": [],
+  "dependencies": {
+    "tools": ["gws"],
+    "configs": [],
+    "skills": []
+  },
+  "audit": {
+    "lastRun": null,
+    "score": null,
+    "gaps": []
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "create-webview",
+  "plugin": "design",
+  "created": "2025-12-15",
+  "lastModified": "2026-03-24",
+  "lineCount": 229,
+  "skeleton": {
+    "inputContract": true,
+    "outputContract": true,
+    "externalState": true,
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": true,
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 6,
+  "approvalGates": 2,
+  "references": [
+    "data-extraction.md",
+    "html-renderer.md",
+    "json-contract.md",
+    "known-pitfalls.md",
+    "pdf-export.md"
+  ],
+  "templates": [
+    "base-styles.css",
+    "renderer-base.js",
+    "shell.html"
+  ],
+  "scripts": [
+    "check-deps.py",
+    "export-pdf.py"
+  ],
+  "dependencies": {
+    "tools": ["python3", "open"],
+    "configs": [],
+    "skills": []
+  },
+  "audit": {
+    "lastRun": null,
+    "score": null,
+    "gaps": []
+  }
+}
