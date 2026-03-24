@@ -14,6 +14,7 @@ Auxiliary metadata file generated alongside every skill's SKILL.md. Provides ins
 ```json
 {
   "schema": 1,
+  "skeletonVersion": 1,
   "name": "<string>",
   "plugin": "<string>",
   "created": "<YYYY-MM-DD>",
@@ -55,6 +56,7 @@ Auxiliary metadata file generated alongside every skill's SKILL.md. Provides ins
 | Field | Type | Description | Validation |
 |---|---|---|---|
 | `schema` | number | Schema version. Always `1` for this spec | Must be `1` |
+| `skeletonVersion` | number | Version of the canonical skeleton this skill was built against. Incremented in `skeleton-template.md` when the skeleton structure changes (new sections, renamed sections, new required fields). Used by `/audit-skill` to detect drift and by `/update-skill` to find outdated skills | Must match the current version in `skeleton-template.md` |
 | `name` | string | Skill invocation name (without `/` or plugin prefix) | Must match the skill directory name |
 | `plugin` | string | Plugin namespace the skill belongs to | Must match a registered plugin in `skills-library/` |
 | `created` | string | Date the skill was first generated (ISO 8601 date) | Format `YYYY-MM-DD`, immutable after creation |
@@ -136,6 +138,7 @@ Maps each canonical skeleton section to its presence status. Values:
 ```json
 {
   "schema": 1,
+  "skeletonVersion": 1,
   "name": "push",
   "plugin": "workflow",
   "created": "2025-12-15",
@@ -177,6 +180,7 @@ A straightforward workflow skill. Content audit is skipped with justification be
 ```json
 {
   "schema": 1,
+  "skeletonVersion": 1,
   "name": "add-lesson",
   "plugin": "content",
   "created": "2026-01-20",

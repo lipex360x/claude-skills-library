@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "create-skill",
+  "plugin": "meta",
+  "created": "2025-12-01",
+  "lastModified": "2026-03-24",
+  "lineCount": 278,
+  "skeleton": {
+    "inputContract": true,
+    "outputContract": true,
+    "externalState": true,
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": true,
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 12,
+  "approvalGates": 1,
+  "references": [
+    "anthropic-patterns.md",
+    "content-audit-patterns.md",
+    "description-patterns.md",
+    "error-handling-patterns.md",
+    "progressive-disclosure.md",
+    "quality-techniques.md",
+    "review-checklist.md",
+    "skeleton-template.md",
+    "skill-meta-spec.md",
+    "spec-contract.md",
+    "subagent-patterns.md",
+    "xml-tag-patterns.md"
+  ],
+  "templates": [
+    "skill-template.md"
+  ],
+  "scripts": [],
+  "dependencies": {
+    "tools": ["gh", "git"],
+    "configs": ["STRUCTURE.md"],
+    "skills": []
+  },
+  "audit": {
+    "lastRun": null,
+    "score": null,
+    "gaps": []
+  }
+}
