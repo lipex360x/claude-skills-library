@@ -1,6 +1,14 @@
 ---
 name: capture-voice
-description: Analyzes the current conversation to capture the user's writing voice for content generation — posts, articles, social media that sound like them, not AI-generated. Use this skill when the user runs /capture-voice, when triggered by the PreCompact hook, or whenever voice profile analysis is needed. Also use it when the user asks to update or check their voice profile, says "meu estilo", "como eu falo", "aprenda meu jeito", or wants content that sounds like them — even if they don't explicitly say "voice" or "myvoice."
+description: >-
+  Analyzes the current conversation to capture the user's writing voice for
+  content generation — posts, articles, social media that sound like them, not
+  AI-generated. Use this skill when the user runs /capture-voice, when triggered
+  by the PreCompact hook, or whenever voice profile analysis is needed. Also use
+  it when the user asks to update or check their voice profile, says "meu estilo",
+  "como eu falo", "aprenda meu jeito", or wants content that sounds like them —
+  even if they don't explicitly say "voice" or "myvoice."
+user-invocable: true
 allowed-tools:
   - Read
   - Write
@@ -16,14 +24,51 @@ Capture the user's **writing voice** from conversations and persist it to a voic
 
 ## Input contract
 
-- **Conversation context** (required) — at least 3 user messages with substantive text (not just commands or one-word approvals). If fewer than 3 analyzable messages exist, inform the user and stop — there is not enough signal to extract patterns.
-- **Voice profile path** (optional) — path to the existing profile file. Default: the user's memory directory (e.g., `memory/voice-profile.md`). If the file doesn't exist, create it from `templates/voice-profile.md`.
+<input_contract>
 
-## Instructions
+| Input | Source | Required | Validation | On invalid |
+|-------|--------|----------|------------|------------|
+| Conversation context | Current session | yes | At least 3 user messages with substantive text (not commands or one-word approvals) | Inform user there isn't enough signal to extract patterns — stop |
+| Voice profile path | Implicit or $ARGUMENTS | no | File exists or template available at `templates/voice-profile.md` | Create from template |
+
+</input_contract>
+
+## Output contract
+
+<output_contract>
+
+| Artifact | Path | Persists | Format |
+|----------|------|----------|--------|
+| Voice profile | User's memory directory (e.g., `memory/voice-profile.md`) | yes | Markdown with YAML frontmatter |
+| Changelog entry | Appended to voice profile | yes | `### YYYY-MM-DD HH:MM` section |
+| Report | stdout | no | Markdown summary |
+
+</output_contract>
+
+## External state
+
+<external_state>
+
+| Resource | Path | Access | Format |
+|----------|------|--------|--------|
+| Voice profile | `memory/voice-profile.md` (user's memory dir) | R/W | Markdown with YAML frontmatter |
+| Profile template | `templates/voice-profile.md` | R | Markdown |
+
+</external_state>
+
+## Pre-flight
+
+<pre_flight>
+
+1. Count user messages with substantive text (exclude single-word responses, tool commands, approvals like "sim", "ok", "approved") → if fewer than 3: "Not enough conversation to analyze — need at least 3 substantive messages." — stop.
+2. Check if another capture-voice agent is running by reading profile frontmatter for `locked: true` → if locked: "Another capture-voice run is in progress." — skip this run.
+3. Voice profile path is resolvable → if file doesn't exist and template `templates/voice-profile.md` is missing: "No profile or template found." — stop.
+
+</pre_flight>
+
+## Steps
 
 Run this as a **background agent** with tools: `Read`, `Write`, `Edit`, `Glob`, `Grep`. Do NOT block the main conversation.
-
-Before starting, check if another capture-voice agent is already running by looking for a lock indicator in the profile's frontmatter (`locked: true`). If locked, skip this run — concurrent writes corrupt the profile.
 
 ### 1. Acquire lock and load profile
 
@@ -41,13 +86,13 @@ Scan all user messages in this conversation. Focus on **writing style markers th
 
 Extract:
 
-- **Vocabulário e expressões**: gírias, expressões recorrentes, palavras-chave que definem o tom (ex: "esse cara", "bora", "rsrsrs")
-- **Estrutura de frases**: frases curtas vs. longas, uso de vírgulas, fragmentos, ritmo da escrita
-- **Tom e energia**: quando é direto, quando elabora, humor, ironia, nível de formalidade
-- **Recursos retóricos**: como constrói argumentos, usa analogias, faz transições, cria engajamento
-- **Pontuação e estilo**: uso de reticências, exclamações, emojis, "kkk"/"rsrs", capitalização
+- **Vocabulario e expressoes**: girias, expressoes recorrentes, palavras-chave que definem o tom (ex: "esse cara", "bora", "rsrsrs")
+- **Estrutura de frases**: frases curtas vs. longas, uso de virgulas, fragmentos, ritmo da escrita
+- **Tom e energia**: quando e direto, quando elabora, humor, ironia, nivel de formalidade
+- **Recursos retoricos**: como constroi argumentos, usa analogias, faz transicoes, cria engajamento
+- **Pontuacao e estilo**: uso de reticencias, exclamacoes, emojis, "kkk"/"rsrs", capitalizacao
 
-Each observation must be specific enough that another AI could write a post in the user's voice using only the profile. "Escreve de forma informal" is useless. "Usa frases curtas e imperativas, intercala pt-BR com termos técnicos em inglês sem traduzir" is actionable.
+Each observation must be specific enough that another AI could write a post in the user's voice using only the profile. "Escreve de forma informal" is useless. "Usa frases curtas e imperativas, intercala pt-BR com termos tecnicos em ingles sem traduzir" is actionable.
 
 **Ignore these** — they are interaction patterns, not writing voice:
 - How they use CLI flags or commands
@@ -70,7 +115,7 @@ Before adding new observations, scan each section for entries that overlap or co
 
 ### 6. Draft and validate updates
 
-Draft the proposed changes without writing them yet. For each new or modified entry, validate against the quality test: "Se eu usar só esse perfil para escrever um post, vai soar como o usuário escreveu?" Discard entries that fail this test — they are too vague or too generic.
+Draft the proposed changes without writing them yet. For each new or modified entry, validate against the quality test: "Se eu usar so esse perfil para escrever um post, vai soar como o usuario escreveu?" Discard entries that fail this test — they are too vague or too generic.
 
 Review the draft as a whole: does it introduce contradictions with existing entries? Does it duplicate existing observations in different words? Trim until every entry earns its place.
 
@@ -89,20 +134,78 @@ Then:
 
 If the write fails for any reason (file permission, disk full), log the error to the user and ensure `locked: false` is set — never leave a stale lock.
 
+### 8. Report
+
+<report>
+
+Present concisely:
+- **Patterns found:** count of new observations extracted from conversation
+- **Patterns added:** count after deduplication and validation (with brief list)
+- **Consolidated:** entries merged to reduce redundancy (if any)
+- **Audit results:** content audit summary (voice profile quality checks)
+- **Errors:** issues encountered and how they were handled (or "none")
+
+</report>
+
+## Next action
+
+Run `/write-content` to generate content using the updated voice profile.
+
+## Self-audit
+
+<self_audit>
+
+Before presenting the Report, verify:
+
+1. **Pre-flight passed?** — at least 3 substantive messages analyzed, no lock conflict
+2. **Steps completed?** — all steps executed or explicitly skipped with reason
+3. **Profile updated?** — voice profile file has new entries and changelog, `locked: false`
+4. **Anti-patterns clean?** — no generic observations, no single-message patterns, no duplicates, no typos captured as style
+5. **Lock released?** — `locked: false` in frontmatter, even if an error occurred
+
+If any check fails, note it in the Report.
+
+</self_audit>
+
+## Content audit
+
+<content_audit>
+
+Before finalizing the voice profile update, verify:
+
+1. **Observations are actionable?** — each entry is specific enough that another AI could reproduce the user's voice from it alone. Test: "Usa frases curtas e imperativas" is actionable; "Escreve de forma casual" is not.
+2. **Pattern frequency validated?** — every recorded pattern appeared in at least 2 separate user messages. One-off phrasing was filtered out.
+3. **No interaction patterns leaked?** — entries describe writing voice for published content, not CLI usage, tool preferences, or Claude interaction habits.
+4. **No contradictions introduced?** — new entries are consistent with existing profile entries. Evolutions are noted, not overwritten.
+5. **Examples are real?** — quoted examples in entries come from actual user messages in this session, not fabricated.
+6. **Profile stays lean?** — redundant entries were consolidated before appending. Profile is not bloated with overlapping observations.
+
+</content_audit>
+
+## Error handling
+
+| Failure | Strategy |
+|---------|----------|
+| Fewer than 3 substantive messages | Inform user, release lock, stop — no partial analysis |
+| Profile locked by another run | Skip this run silently — no queuing or waiting |
+| Write failure (permissions, disk) | Log error to user, force `locked: false` — never leave stale lock |
+| Template missing | Report path and suggest creating `templates/voice-profile.md` — stop |
+| No new patterns found | Release lock, report "no new patterns" — do not create empty changelog |
+
 ## Anti-patterns
 
-Avoid these specific traps:
-
-- **Observações genéricas** — "escreve de forma casual" não diz nada. "Mistura pt-BR com termos técnicos em inglês sem traduzir, como 'skill', 'push', 'commit'" é acionável.
-- **Over-reading single messages** — Uma piada isolada não significa "usa humor constantemente." Wait for patterns.
-- **Duplicar com palavras diferentes** — "Usa português informal" e "Prefere tom casual em pt-BR" são a mesma observação. Pick the more specific one.
-- **Capturar conteúdo, não estilo** — "Trabalha com CLI tools" é contexto de projeto, não voz. Capture *como* escreve, não *sobre o que* escreve.
-- **Capturar interação com Claude** — "Usa /push -y para commitar" é workflow, não voz de escrita. Ignore padrões de uso de ferramentas.
-- **Capturar typos como estilo** — Erros de digitação ("pdoe" por "pode", "faze" por "fazer") são artefatos de velocidade no chat, não padrões de escrita para conteúdo publicado. Nunca registrar typos como voz.
-- **Changelog sem substância** — "Atualizado voice profile" é inútil. Name what was added: "Adicionados 3 marcadores de vocabulário (gírias pt-BR)."
+- **Generic observations.** "Escreve de forma casual" says nothing useful — because another AI cannot reproduce the user's voice from vague descriptors. Every entry must be specific and actionable.
+- **Over-reading single messages.** One joke does not mean "usa humor constantemente" — because single-message patterns are noise, not signal. Require at least 2 messages showing the same pattern.
+- **Duplicating with different words.** "Usa portugues informal" and "Prefere tom casual em pt-BR" are the same observation — because profile bloat makes it harder for content generators to prioritize patterns.
+- **Capturing content, not style.** "Trabalha com CLI tools" is project context, not voice — because the profile must describe *how* the user writes, not *what* they write about.
+- **Capturing Claude interaction patterns.** "Usa /push para commitar" is workflow, not writing voice — because tool usage habits are irrelevant to content generation.
+- **Capturing typos as style.** "pdoe" for "pode" is a typing artifact, not a voice pattern — because including typos in the profile would produce content with intentional errors.
+- **Empty changelog entries.** "Atualizado voice profile" is useless — because changelogs must name what was added (e.g., "Adicionados 3 marcadores de vocabulario").
 
 ## Guidelines
 
-- The profile is append-only for observations — never delete previous entries, because a run with limited context might discard patterns that were accurately captured from richer conversations. Consolidation (merging redundant entries) is the only form of "editing."
-- When in doubt about whether something is a pattern, skip it. False negatives are cheap (you'll catch it next run). False positives pollute the profile permanently.
-- The profile is the foundation for content generation. Every entry should help produce text that sounds authentically like the user — not like a polished AI summary.
+- **Append-only for observations.** Never delete previous entries — because a run with limited context might discard patterns accurately captured from richer conversations. Consolidation (merging redundant entries) is the only form of editing.
+
+- **False negatives over false positives.** When in doubt about whether something is a pattern, skip it — because false negatives are cheap (next run catches it) while false positives pollute the profile permanently.
+
+- **Profile serves content generation.** Every entry should help produce text that sounds authentically like the user — because the profile is the foundation for `/write-content` and similar skills, not a personality assessment.

@@ -1,22 +1,12 @@
 ---
 name: create-webview
-description: >
+description: >-
   Create beautiful data-driven HTML presentations from structured data sources.
   Full pipeline: data extraction → SQLite → JSON → dynamic HTML slides → PDF export.
   Use when the user says "create a presentation", "make slides from this data",
   "build a webview", "data to slides", "generate a report", wants to turn
   spreadsheets or databases into visual presentations, or needs a dynamic
   HTML slide deck — even if they don't explicitly say "webview."
-metadata:
-  category: visual-design
-  tags:
-    - presentation
-    - slides
-    - data-visualization
-    - html
-    - pdf
-    - webview
-argument-hint: "[data-sources-or-description]"
 user-invocable: true
 allowed-tools:
   - Read
@@ -24,155 +14,216 @@ allowed-tools:
   - Bash
   - Agent
   - AskUserQuestion
+argument-hint: "[data-sources-or-description]"
 ---
 
 # Create Webview
 
-Transform structured data from any source (Excel, PowerPoint, CSV, JSON, SQLite, images) into polished HTML slide presentations with optional PDF export. Each presentation follows a four-phase pipeline: extract data → generate JSON → render HTML slides → export PDF. The pipeline produces self-contained HTML that works offline with dynamic JavaScript rendering.
+Transform structured data from any source (Excel, PowerPoint, CSV, JSON, SQLite, images) into polished HTML slide presentations with optional PDF export.
 
-## Phase 0 — Discovery & Setup
+## Input contract
 
-1. **Understand the project.** Parse `$ARGUMENTS` for the presentation description. If insufficient, ask with `AskUserQuestion`:
-   - Data sources (xlsx, pptx, csv, json, sqlite, images)
-   - Presentation topic, audience, purpose
-   - Brand identity: primary color, font preference, logo
-   - Slide dimensions (default: 1440×810 / 16:9)
+<input_contract>
 
-   **No data files found?** If there are no source files (xlsx, pptx, csv, etc.) in the working directory and the user didn't point to any, suggest: "Não encontrei arquivos de dados aqui. Quer rodar `/inspire-me` pra gente explorar o que você precisa antes?" via `AskUserQuestion` with options `["Sim, rodar /inspire-me", "Não, vou te passar as infos agora"]`. Regardless of the answer, proceed with whatever the user provides — a text description, pasted data, or even just a topic is enough to build a presentation from scratch. The pipeline adapts: skip Phase 1 (no extraction needed), build the JSON manually in Phase 2, and continue normally from Phase 3.
+| Input | Source | Required | Validation | On invalid |
+|-------|--------|----------|------------|------------|
+| `data-sources-or-description` | $ARGUMENTS | no | Non-empty string or data files in working directory | AUQ: ask for data sources, topic, audience, purpose |
+| Brand identity | Conversation | no | Primary color, font preference, logo | Use defaults: dark theme, DM Sans |
+| Slide dimensions | Conversation | no | Width × Height in pixels | Default: 1440×810 (16:9) |
 
-2. **Check dependencies.** Run `scripts/check-deps.py` to detect file types and install required Python libraries. The script inspects source files and ensures `openpyxl`, `python-pptx`, `Pillow`, or other parsers are available before extraction begins.
+</input_contract>
 
-3. **Create the project structure.** Set up the working directories:
-   ```
-   <project>/
-   ├── data/           # extraction scripts, SQLite DB, validation JSON
-   ├── output/         # final deliverables
-   │   ├── css/        # stylesheets
-   │   ├── js/         # renderer and helpers
-   │   └── img/        # extracted and processed images
-   ```
+## Output contract
 
-4. **Extract image assets immediately.** If source files contain images (logos, photos, charts), extract them to `output/img/` during setup — not later. CSS `filter` properties (`brightness()`, `grayscale()`, etc.) fail silently in Chrome print mode. If you need a dark version of an image, create it with Python (Pillow) during extraction. Never rely on CSS filters to process images at render time.
+<output_contract>
 
-## Phase 1 — Data Extraction
+| Artifact | Path | Persists | Format |
+|----------|------|----------|--------|
+| HTML presentation | `<project>/output/index.html` | yes | Self-contained HTML with JS/CSS |
+| Stylesheets | `<project>/output/css/styles.css` | yes | CSS with custom properties |
+| Renderer | `<project>/output/js/renderer.js` | yes | JavaScript function array pipeline |
+| Data JSON | `<project>/output/data.json` | yes | JSON with fixed schema |
+| SQLite database | `<project>/data/*.db` | yes | SQLite |
+| Extraction script | `<project>/data/extract.py` | yes | Python |
+| Generator script | `<project>/data/generate.py` | yes | Python |
+| Validation dataset | `<project>/data/validation.json` | yes | JSON cross-reference |
+| PDF export | `<project>/output/presentation.pdf` | yes | PDF via Chrome CDP |
+| Report | stdout | no | Markdown summary |
+
+</output_contract>
+
+## External state
+
+<external_state>
+
+| Resource | Path | Access | Format |
+|----------|------|--------|--------|
+| Source data files | Working directory | R | xlsx, pptx, csv, json, sqlite, images |
+| Chrome browser | System | R/W | CDP protocol for PDF export |
+| Local HTTP server | `localhost:8080` | R | Python http.server (temporary, for PDF export) |
+
+</external_state>
+
+## Pre-flight
+
+<pre_flight>
+
+1. `python3 --version` → if missing: "Python 3 required for data extraction and PDF export." — stop.
+2. Run `scripts/check-deps.py` → if dependencies missing: install required Python libraries (`openpyxl`, `python-pptx`, `Pillow`) — continue after install.
+3. Source data available → if no data files and no description in $ARGUMENTS: AUQ with options `["Sim, rodar /inspire-me", "Não, vou te passar as infos agora"]` — proceed with whatever the user provides.
+4. Brand identity clarified → if not provided: ask for primary color, font preference, logo via AUQ — use defaults if user skips.
+
+</pre_flight>
+
+## Steps
+
+### 1. Discovery and setup
+
+Parse `$ARGUMENTS` for the presentation description. If insufficient, ask with `AskUserQuestion`:
+- Data sources (xlsx, pptx, csv, json, sqlite, images)
+- Presentation topic, audience, purpose
+- Brand identity: primary color, font preference, logo
+- Slide dimensions (default: 1440×810 / 16:9)
+
+Create the project structure:
+```
+<project>/
+├── data/           # extraction scripts, SQLite DB, validation JSON
+├── output/         # final deliverables
+│   ├── css/        # stylesheets
+│   ├── js/         # renderer and helpers
+│   └── img/        # extracted and processed images
+```
+
+Extract image assets immediately if source files contain images — CSS `filter` properties fail silently in Chrome print mode. Create processed versions with Python (Pillow) during extraction, not at render time.
+
+### 2. Data extraction
 
 Read `references/data-extraction.md` for source-type handling, dependency map, and validation format.
 
-1. **Analyze source files.** Understand the structure: sheets, tables, relationships, field types, data ranges. Map out how the data connects before writing a single line of extraction code. Sloppy analysis here cascades into broken slides downstream.
+1. Analyze source file structure: sheets, tables, relationships, field types, data ranges.
+2. Design a SQLite schema tailored to serve the presentation — normalize for querying, denormalize for simpler JSON generation.
+3. Write `data/extract.py` to parse source files and populate SQLite. Handle edge cases: empty cells, merged rows, inconsistent dates, encoding issues.
+4. Generate `data/validation.json` — document-centric cross-reference with `_meta`, `primary_items`, `excluded_items`, `invalidated_items`, `reference_index`, `summary_stats`.
+5. **Gate: present validation summary to user.** Show discrepancies, totals, filtered items. User must approve data before proceeding — wrong data in a client presentation destroys credibility faster than any design flaw.
 
-2. **Design a SQLite schema.** Tailor the schema to serve the presentation. Normalize where it aids querying, denormalize where it simplifies JSON generation. The schema serves the slides, not academic purity — a join-heavy schema that makes JSON generation painful is a bad schema.
+If no data files exist (user provided only a description), skip this step — build the JSON manually in Step 3.
 
-3. **Write the extraction script.** Create `data/extract.py` to parse source files and populate the SQLite database. The script must handle edge cases: empty cells, merged rows, inconsistent date formats, encoding issues.
-
-4. **Generate the validation dataset.** Write `data/validation.json` — a document-centric cross-reference that catches mismatches before they reach slides:
-   - `_meta`: generation info (timestamp, source files, filter parameters)
-   - `primary_items`: main entities with cross-references to related data
-   - `excluded_items`: items filtered out, each with an explicit reason
-   - `invalidated_items`: items that failed validation, each with a business reason
-   - `reference_index`: inverse index by key reference for fast lookup
-   - `summary_stats`: aggregated totals by category
-
-5. **Present the validation summary to the user.** Show discrepancies, totals, and filtered items explicitly. **Gate: the user must approve the data before Phase 2.** This is non-negotiable. Wrong data in a client presentation destroys credibility faster than any design flaw.
-
-## Phase 2 — JSON Generation
+### 3. JSON generation
 
 Read `references/json-contract.md` for schema rules and null handling.
 
-1. **Write the generator script.** Create `data/generate.py` that queries the SQLite database and produces `output/data.json`. The script transforms relational data into the flat structure the renderer expects.
+1. Write `data/generate.py` that queries SQLite and produces `output/data.json`.
+2. Enforce fixed schema contract — ALL sections always present. Use `null` for objects or `[]` for arrays when empty. Structure never changes, only content.
+3. Support filter parameters via command-line arguments (`--cutoff`, `--category`, custom flags). Filters change content, not structure.
+4. Validate: every section the renderer expects must exist in the generated JSON.
 
-2. **Enforce the fixed schema contract.** ALL sections must always be present in the JSON structure. When a section has no data, use `null` for objects or `[]` for arrays. The JSON structure never changes — only content does. This is the single most important architectural decision in the pipeline. Violating it causes cascading renderer failures that are painful to debug.
-
-3. **Support filter parameters.** Accept command-line arguments (`--cutoff`, `--category`, custom flags) that control which data appears. Filters change content, not structure. Running the generator with different filters must produce JSON with identical keys — only the values change.
-
-4. **Validate the output.** Before proceeding, verify that every section the renderer expects exists in the generated JSON. A missing key here means a broken slide later.
-
-## Phase 3 — HTML Renderer
+### 4. HTML rendering
 
 Read `references/html-renderer.md` for component patterns, CSS naming, and typography.
 
-1. **Build the HTML shell.** Read `templates/shell.html` and adapt for the project: title, meta tags, Google Fonts link, viewport settings. The shell is the container — it loads CSS, JS, and the data file, then calls the renderer.
+1. Build HTML shell from `templates/shell.html`: title, meta tags, Google Fonts, viewport.
+2. Define brand identity via CSS custom properties from `templates/base-styles.css`: `--primary`, `--primary-light`, `--primary-muted`, typography, surface colors. Write to `output/css/styles.css`.
+3. Build slide renderer from `templates/renderer-base.js`: function array pipeline, spread support, null guards, helper functions (`el`, `slide`, `header`, `nextSlide`). Write to `output/js/renderer.js`.
+4. Build each slide type with meticulous visual hierarchy: cover, summary/metrics, data slides, detail slides, closing slide. Start with 5–7 core types — add more only if data demands it.
+5. Open in browser: `open output/index.html`.
+6. **Refinement loop.** Ask: "How can I make what's here more polished?" — not "What else can I add?" Iterate until approved.
 
-2. **Define the brand identity via CSS custom properties.** Read `templates/base-styles.css` and set:
-   - `--primary`, `--primary-light`, `--primary-muted` from the brand color
-   - Typography: heading font, body font, monospace font
-   - Surface colors, accent colors, border radii
-   - Slide dimensions if non-default (adjust `--slide-width`, `--slide-height`)
-
-   Write the adapted stylesheet to `output/css/styles.css`.
-
-3. **Build the slide renderer.** Read `templates/renderer-base.js` and construct the rendering engine:
-   - **Function array pipeline:** each slide type is an independent function `(data) → HTMLElement | null`
-   - **Spread support:** functions may return arrays for multi-slide sections (e.g., paginated detail cards)
-   - **Null guard on every renderer:** `if (!data.section || !data.section.length) return null` — missing data produces no slide, not a broken slide
-   - **Helper functions:** `el(tag, attrs, children)`, `slide(opts)`, `header(tag, title, subtitle)`, `nextSlide()`
-
-   Write the renderer to `output/js/renderer.js`.
-
-4. **Build each slide type with meticulous attention to visual hierarchy:**
-   - **Cover slide:** title, subtitle, date, branding — sets the visual tone for everything that follows
-   - **Summary/metrics slides:** KPI cards with large numbers, trend indicators, category breakdowns
-   - **Data slides:** tables with zebra striping, bar charts via CSS, timelines with milestones
-   - **Detail slides:** cards with rich content, tags, status badges, cross-references
-   - **Closing slide:** contact information, next steps, call to action
-
-   Start with 5–7 core slide types. Add more only if the data demands it — over-engineering slide types creates maintenance burden without visual payoff.
-
-5. **Open in the browser for validation.**
-
-   ```bash
-   open output/index.html
-   ```
-
-6. **Refinement loop.** Ask the user for feedback. At each iteration, ask: "How can I make what's here more polished?" — not "What else can I add?" Refinement over addition. Iterate until approved.
-
-## Phase 4 — PDF Export
+### 5. PDF export
 
 Read `references/pdf-export.md` for CDP setup and all workarounds.
 
-1. **Start a local server if needed.** Chrome requires HTTP for proper font loading and asset resolution:
-   ```bash
-   python3 -m http.server 8080 --directory output/
-   ```
+1. Start local server: `python3 -m http.server 8080 --directory output/`.
+2. Run `scripts/export-pdf.py` with slide dimensions.
+3. Chrome runs headed (not headless) — the user sees exactly what's being exported.
+4. Verify PDF: page count matches slide count, images render correctly, no blank pages, no clipped content, no missing fonts. Re-export if verification fails.
 
-2. **Run the export script:**
-   ```bash
-   python3 <skill-dir>/scripts/export-pdf.py --url <server-url> --output output/presentation.pdf --width 1440 --height 810
-   ```
+### 6. Report
 
-3. **The script handles all CDP complexity:**
-   - Temporary `--user-data-dir` (works even with Chrome already open)
-   - `--remote-allow-origins=*` (required since Chrome 113+)
-   - `@page { size: WxH }` injection via `Runtime.evaluate`
-   - Font loading wait before capture
-   - Retry loop with 30-second timeout
-   - Automatic cleanup of temp directories
+<report>
 
-4. **Chrome runs headed, not headless.** The user sees exactly what's being exported. Transparency builds trust. Headless mode hides rendering issues that only surface in the final PDF.
+Present concisely:
+- **Pipeline completed:** phases executed, artifacts created (list file paths)
+- **Data validation:** summary of extraction results and user-approved data
+- **Slide count:** number and types of slides rendered
+- **PDF status:** exported successfully or skipped (with reason)
+- **Audit results:** self-audit + content audit summary
+- **Errors:** issues encountered and how they were handled (or "none")
 
-5. **Verify the PDF output.** Page count must match slide count. Images must render correctly. No blank pages, no clipped content, no missing fonts. If verification fails, diagnose and re-export — do not deliver a broken PDF.
+</report>
+
+## Next action
+
+Share the presentation with stakeholders. Run `/push` if working inside a git repo.
+
+## Self-audit
+
+<self_audit>
+
+Before presenting the Report, verify:
+
+1. **Pre-flight passed?** — Python available, dependencies installed, data source confirmed
+2. **Steps completed?** — list any skipped phases with reason (e.g., "no data files — JSON built manually")
+3. **Output exists?** — `output/index.html` renders in browser, `output/data.json` has valid structure, `output/css/` and `output/js/` populated
+4. **Fixed schema intact?** — JSON structure has all expected keys, no missing sections
+5. **Anti-patterns clean?** — no CSS filters for print, no generic fonts, no hardcoded paths, no base64 embedded images
+6. **Approval gates honored?** — data validation approved by user before rendering
+
+If any check fails, note it in the Report.
+
+</self_audit>
+
+## Content audit
+
+<content_audit>
+
+Before finalizing output, verify:
+
+1. **Data accuracy?** — cross-reference rendered slide content against `data/validation.json` totals and categories. Numbers on slides must match source data exactly.
+2. **Visual hierarchy correct?** — cover slide sets tone, metrics use large numbers with trend indicators, data slides have proper zebra striping and alignment.
+3. **Self-contained HTML?** — presentation works offline. Only Google Fonts as external dependency. No CDN libraries, no remote images, no API calls.
+4. **PDF fidelity?** — if exported, PDF page count matches slide count. No blank pages, no clipped content, no missing fonts. Images render correctly (no CSS filter reliance).
+5. **Brand consistency?** — CSS custom properties match the agreed brand identity. Typography is distinctive (not Arial/Inter/Roboto). Color palette applied consistently across all slide types.
+
+</content_audit>
+
+## Error handling
+
+| Failure | Strategy |
+|---------|----------|
+| Python not installed | Report: "Python 3 required" — stop |
+| Missing Python libraries | Auto-install via `pip install` — continue |
+| Source file parse error | Report file and error details, suggest format fix — stop |
+| SQLite schema mismatch | Report column/type mismatch, suggest schema correction — stop |
+| Chrome not available for PDF | Skip PDF export, report: "Chrome required for PDF" — deliver HTML only |
+| CDP connection failure | Retry once with fresh `--user-data-dir`, report if still failing — stop |
+| Partial completion | Report what succeeded, suggest manual fix for remainder |
+
+## Anti-patterns
+
+- **Generic fonts (Arial, Inter, Roboto).** Use distinctive typography (DM Sans, JetBrains Mono, Space Grotesk) — because generic fonts make presentations look templated and unmemorable.
+- **CSS filters for print output.** `brightness()`, `grayscale()`, etc. fail silently in Chrome print mode — because the PDF will look different from the browser preview with no error.
+- **Hardcoded absolute paths in scripts.** Use relative paths from project root — because scripts break when the project moves or another user runs them.
+- **Changing JSON structure per filter.** Filters change content, structure stays fixed — because the renderer depends on consistent keys and will break on missing sections.
+- **Skipping the data validation gate.** Wrong data in slides is worse than no slides — because a single wrong number in a client presentation destroys trust.
+- **`white-space: normal` on badges/tags.** Use `nowrap` — because line breaks in small UI elements look broken.
+- **Headless Chrome for export.** Use headed mode — because headless hides rendering issues that only surface in the final PDF.
+- **Over-engineering slide types.** Start with 5–7 core types — because more types create maintenance burden without visual payoff.
+- **Generating HTML without understanding data first.** Data extraction (Step 2) must complete before rendering (Step 4) — because slides built on assumed data structure will need full rewrites.
+- **Embedding base64 images in HTML.** Use file references in `output/img/` — because base64 bloats the HTML file and makes debugging image issues impossible.
 
 ## Guidelines
 
-- **Quality at every phase.** Each phase produces a deliverable that must stand on its own. The extraction script should be clean and documented. The JSON should be human-readable. The HTML should be beautiful. The PDF should be pixel-perfect. Meticulous craftsmanship — not "good enough."
+- **Quality at every phase.** Each phase produces a deliverable that must stand on its own. Extraction scripts should be clean. JSON should be human-readable. HTML should be beautiful. PDF should be pixel-perfect — because meticulous craftsmanship at each stage prevents compounding errors.
 
-- **Self-contained HTML.** Every presentation must work standalone. Inline CSS or local files in `output/css/`. Only Google Fonts as external dependency. No CDN libraries, no remote images, no API calls.
+- **Self-contained HTML.** Every presentation must work standalone. Inline CSS or local files in `output/css/`. Only Google Fonts as external dependency — because presentations are often shared offline or on restricted networks.
 
-- **Dark themes for technical/data presentations.** Default to dark backgrounds (#0a0a0a to #1a1a1a) for engineering reports, technical data, analytics dashboards. Light themes for business, educational, or client-facing corporate decks. Ask if ambiguous.
+- **Dark themes for technical presentations.** Default to dark backgrounds (#0a0a0a to #1a1a1a) for engineering reports, analytics dashboards. Light themes for business or client-facing decks. Ask if ambiguous — because the wrong theme undermines the content's credibility with its audience.
 
-- **Pre-process image assets.** Extract images from source files (PPTX, XLSX) early in Phase 0. Store in `output/img/` as actual files. Never rely on CSS `filter: brightness()`, `filter: grayscale()`, or any CSS filter for print — Chrome's print engine ignores them silently. If you need a processed version of an image, create it with Python (Pillow) during extraction.
+- **Fixed JSON schema is the contract.** Once defined in Step 3, it never changes. Filters change content, not structure — because renderer stability depends on predictable keys.
 
-- **Fixed JSON schema.** The JSON structure is a contract between generator and renderer. Once defined in Phase 2, it never changes. Filters change content, not structure. This prevents the renderer from breaking when different filter combinations exclude data.
+- **Validation before rendering.** The validation dataset catches data mismatches before they reach slides. Present discrepancies explicitly — because the user must confirm data correctness before visual work begins.
 
-- **Validation before rendering.** The validation dataset in Phase 1 exists to catch data mismatches — wrong date ranges, missing cross-references, inconsistent totals — before they reach slides. Present discrepancies to the user explicitly. They must confirm the data is correct.
+- **Pre-process image assets.** Extract images from source files early. Store in `output/img/` as actual files. Create processed versions with Python (Pillow) — because CSS filters are unreliable in print mode.
 
-- **Avoid these anti-patterns:**
-  - Generic fonts (Arial, Inter, Roboto) — use distinctive typography (DM Sans, JetBrains Mono, Space Grotesk, etc.)
-  - CSS filters for print output — they fail silently in Chrome print mode
-  - Hardcoded absolute paths in scripts — use relative paths from project root
-  - Changing JSON structure per filter — filters change content, structure stays fixed
-  - Skipping the validation gate — wrong data in slides is worse than no slides
-  - `white-space: normal` on badges/tags — use `nowrap` to prevent line breaks in small elements
-  - Headless Chrome for export — use headed mode so the user sees what's happening
-  - Over-engineering slide types — start with 5–7 core types, add only if data demands it
-  - Generating HTML without understanding the data first — Phase 1 must complete before Phase 3
-  - Embedding base64 images in HTML — use file references in `output/img/` for maintainability
+- **Refinement over addition.** Ask "How can I make this more polished?" not "What else can I add?" — because polish compounds while feature additions create complexity.

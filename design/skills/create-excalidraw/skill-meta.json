@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "create-excalidraw",
+  "plugin": "design",
+  "created": "2026-03-18",
+  "lastModified": "2026-03-24",
+  "lineCount": 255,
+  "skeleton": {
+    "inputContract": true,
+    "outputContract": true,
+    "externalState": true,
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": true,
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 8,
+  "approvalGates": 0,
+  "references": [
+    "design-aesthetics.md",
+    "element-types.md",
+    "excalidraw-schema.md",
+    "icon-libraries.md"
+  ],
+  "templates": [
+    "business-flow-swimlane-template.excalidraw",
+    "class-diagram-template.excalidraw",
+    "data-flow-diagram-template.excalidraw",
+    "er-diagram-template.excalidraw",
+    "flowchart-template.excalidraw",
+    "mindmap-template.excalidraw",
+    "relationship-template.excalidraw",
+    "sequence-diagram-template.excalidraw"
+  ],
+  "scripts": [
+    "add-arrow.py",
+    "add-icon-to-diagram.py",
+    "split-excalidraw-library.py"
+  ],
+  "dependencies": {
+    "tools": ["python3"],
+    "configs": [],
+    "skills": []
+  },
+  "audit": {
+    "lastRun": null,
+    "score": null,
+    "gaps": []
+  }
+}
