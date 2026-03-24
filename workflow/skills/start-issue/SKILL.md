@@ -65,6 +65,7 @@ Turn an issue with high-level acceptance criteria into a detailed implementation
 | CDP practices | `references/cdp-best-practices.md` | R | Markdown |
 | Dev guidelines | `references/development-guidelines.md` | R | Markdown |
 | TDD methodology | `references/tdd-methodology.md` | R | Markdown |
+| Execution strategy | `references/execution-strategy.md` | R | Markdown |
 
 </external_state>
 
@@ -133,9 +134,18 @@ If ARCHITECTURE.md exists but is stale, update it with what you discover during 
 1. **CDP already configured?** Look for `.claude/project-settings.json` with `chrome.cdp` field. Store the `pages` map for verification checkboxes.
 2. **Web project with frontend?** Check for frontend framework signals (react, vue, svelte, next, etc.). Store the result for Step 3.
 
-### 2b. Check Agent Teams capability
+### 2b. Determine execution strategy
 
-Run `echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to determine if Agent Teams is enabled (value `1`). Store the result — you **MUST** use it in Step 3.
+Run `echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to check if Agent Teams is enabled (value `1`). If not enabled, strategy is always **Sequential** — skip the rest of this step.
+
+If enabled, read `references/execution-strategy.md` for the full decision matrix. After building the plan in Step 3 (but before presenting), classify each step as sequential or parallelizable, then evaluate:
+
+1. **Are parallelizable steps present?** → if no: **Sequential**
+2. **Is the work templated?** (same pattern repeated on independent targets, no shared state, no feedback needed) → if yes: **Agent**
+3. **Do parallel steps share state or need coordination?** (same files, exchanging data, iterative feedback) → if yes: **Teammate**
+4. **Default** for parallelizable steps without clear signals → **Agent** (simpler, cheaper)
+
+Store the chosen strategy — it determines the "Execution strategy" section in Step 3 and the spawn behavior in Step 7.
 
 ### 2c. Enforce development standards
 
@@ -162,7 +172,7 @@ Sizing: 2-8 Steps total, 2-6 checkboxes per Step. Each checkbox = one focused ac
 
 **Mandatory split rule.** If plan has **more than 8 steps**, split into multiple smaller issues — all added to Backlog. Each issue independently completable with 3-8 steps.
 
-If Agent Teams is enabled, add an **Execution mode** section at the top of the issue body (before What/Why) with teammate assignments, prompt pattern, task pattern, and audit pattern. Also add inline reminders in parallelizable steps. Read `references/guidelines.md` § "Verification is part of the plan" and § "Checkbox ownership with Agent Teams" for the verification matrix and ownership rules.
+If Agent Teams is enabled, add an **Execution strategy** section at the top of the issue body (before What/Why) based on the strategy chosen in Step 2b. Read `references/execution-strategy.md` for the strategy templates (Agent, Teammate, Sequential). Also add inline reminders in parallelizable steps. Read `references/guidelines.md` § "Verification is part of the plan" and § "Checkbox ownership with Agent Teams" for the verification matrix and ownership rules.
 
 **Include a task preview** after the fenced code block listing Step titles as bullet points.
 
@@ -207,17 +217,27 @@ Check if Priority and Size are set. If missing, infer from plan (P0/P1/P2 and S/
 
 Parse Steps from the approved plan. Create a `TaskCreate` for each Step (not each checkbox). Set up `addBlockedBy` dependencies between sequential tasks.
 
-### 7. Spawn teammates (automatic when Execution mode is present)
+### 7. Spawn workers (automatic when Execution strategy is present)
 
-If the approved issue body contains an "Execution mode" section, spawn teammates immediately — no second approval.
+If the approved issue body contains an "Execution strategy" section, spawn workers immediately — no second approval. The strategy determines the spawn mechanism:
 
-Each teammate receives the standardized prompt pattern pointing to the issue. Teammates must have explicit tool access: `Bash`, `Read`, `Write`, `Edit`, `Grep`, `Glob`, `Agent`, `TaskCreate`, `TaskUpdate` at minimum.
+**Agent strategy:**
+- Use `Agent` tool with `run_in_background: true` for each batch
+- Each agent receives full instructions in its prompt (golden example + target list)
+- No `TeamCreate`, no internal tasks — agents return results and die
+- Lead collects results via completion notifications, validates, marks issue checkboxes
+- GitHub issue checkboxes are the **sole tracker** — no local task board duplication
 
-**Checkbox ownership.** Teammates track progress via internal tasks. The lead monitors via `TaskList`, verifies output, then marks issue checkboxes. This prevents race conditions.
+**Teammate strategy:**
+- Use `TeamCreate` + `Agent` with `team_name` for coordinated workers
+- Each teammate receives the standardized prompt pattern pointing to the issue
+- Teammates must have explicit tool access: `Bash`, `Read`, `Write`, `Edit`, `Grep`, `Glob`, `Agent`, `TaskCreate`, `TaskUpdate` at minimum
+- **Checkbox ownership:** teammates track progress via internal tasks. Lead monitors via `TaskList`, verifies output, then marks issue checkboxes. This prevents race conditions
+- **Shutdown protocol** required when teammates complete their batch
 
-**Progressive audit.** When a teammate reports completion, spawn a background audit agent to verify against the verification matrix. The final verification step consolidates results.
+**Sequential strategy:** Skip this step — lead executes directly.
 
-If no Execution mode section, skip this step.
+**Progressive audit (both strategies).** When a worker reports completion, spawn a background audit agent to verify against the verification matrix. The final verification step consolidates results.
 
 ### 8. Report
 
@@ -267,7 +287,7 @@ Before finalizing output, verify:
 | No board exists | Offer to create one via AUQ → proceed or stop |
 | Board has no Backlog/Todo items | Inform user → stop |
 | Branch already exists | Offer to checkout existing or create new → AUQ |
-| Agent Teams check fails | Default to sequential execution (no Execution mode section) |
+| Agent Teams check fails | Default to sequential execution (no Execution strategy section) |
 
 ## Anti-patterns
 

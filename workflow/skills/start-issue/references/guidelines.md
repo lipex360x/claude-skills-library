@@ -79,3 +79,11 @@ When the plan uses Agent Teams, the verification step checkboxes must name speci
 ## Checkbox ownership with Agent Teams
 
 When teammates run in parallel, they must NEVER edit the issue body directly. Progress tracking uses internal tasks (`TaskCreate`/`TaskUpdate`) — one task per unit of work within their assigned Step, with task names matching the sub-section headers from the issue. The lead monitors progress via `TaskList` and marks issue checkboxes only after verifying each teammate's output in the verification step. This prevents race conditions (GitHub's issue API has no merge — last write wins) and ensures checkboxes reflect verified completion.
+
+## Execution strategy is a first-class decision
+
+The choice between Agent, Teammate, and Sequential is not cosmetic — it determines cost, complexity, and correctness. Read `references/execution-strategy.md` for the full decision matrix. Default to Agent for independent work and Teammate only when coordination is genuinely needed. Sequential is always valid — parallelism is an optimization, not a requirement. The strategy must be chosen in Step 2b and reflected in the "Execution strategy" section of the issue body before the plan is presented to the user.
+
+## Agent strategy: issue checkboxes are the sole tracker
+
+When using Agent strategy, do NOT create internal tasks (`TaskCreate`) to mirror issue checkboxes. Agents run in background, return results, and die. The lead validates each agent's output and marks issue checkboxes directly. This avoids the dual-tracking problem where internal tasks and issue checkboxes diverge. The GitHub issue is the single source of truth.

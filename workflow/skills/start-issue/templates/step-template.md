@@ -5,19 +5,33 @@ Use this structure when rewriting the issue body with a detailed plan. Adapt to 
 ## Template
 
 ```markdown
-## Execution mode
+## Execution strategy
 
-> **MUST use Agent Teams (`TeamCreate`).** Do NOT fall back to isolated worktree agents.
+> **[Agent pattern / Teammate pattern]** — [1-line rationale from decision matrix].
 
-After completing Step [N] ([last sequential step]):
+[Choose ONE of the templates below based on Step 2b decision. Remove this section entirely if Sequential or Agent Teams is not enabled.]
+
+### If Agent pattern:
+
+> **Agent pattern** — steps are independent and follow the same template. Workers run in background and return results. Lead validates and marks checkboxes.
+
+After completing Step [N] (last sequential step), spawn background agents:
+- Agent 1: Step [X] — [scope] ([count] items)
+- Agent 2: Step [Y] — [scope] ([count] items)
+
+**Agent prompt pattern:** "[Context + golden example]. For each item in your batch: [read input], [produce output]. Report completion when done."
+
+### If Teammate pattern:
+
+> **Teammate pattern** — steps have dependencies or shared state requiring coordination.
+
+After completing Step [N] (last sequential step):
 - `[teammate-name]`: Steps [X-Y] — [what this teammate owns]
 - `[teammate-name]`: Steps [W-Z] — [what this teammate owns]
 
 **Teammate prompt pattern:** "Read issue #<number> Step X via `gh issue view`. Create one internal task per sub-section in your Step. Execute each unit, mark internal tasks as completed. Do NOT edit the issue body — lead verifies and marks checkboxes."
 
 **Teammate task pattern:** Create one task per sub-section in your assigned Step. Task names must match sub-section headers for lead monitoring.
-
-_Remove this section entirely if Agent Teams is not enabled._
 
 ## What
 
