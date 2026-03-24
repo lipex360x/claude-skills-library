@@ -1,30 +1,36 @@
-# /cancel-issue
+# cancel-issue
 
-Cancel an issue — closes it on GitHub with a reason, moves the card to "Cancelled" on the project board, unblocks dependent issues, and cleans up branches/PRs.
+> Cancel an issue — closes it on GitHub with a reason, moves the card to "Cancelled" on the project board, unblocks dependent issues, and cleans up branches/PRs.
 
-## Triggers
+Closes a GitHub issue with a recorded cancellation reason, moves its board card to "Cancelled", notifies and unblocks dependent issues, and optionally cleans up associated branches and pull requests. Preserves the full decision trail in GitHub history.
 
-- `/cancel-issue <number>`
-- "cancel issue", "drop issue", "cancel #N", "won't do", "close as not planned"
+## Usage
+
+```text
+/cancel-issue [issue-number]
+```
+
+> [!TIP]
+> Also activates when you say "cancel issue", "drop issue", "cancel #N", "won't do", "close as not planned", or want to cancel an issue.
 
 ## How it works
 
-1. **Select issue** — from argument or current branch name
-2. **Ask reason** — presents common cancellation reasons via selectable options
-3. **Close issue** — closes on GitHub with `--reason "not planned"` and posts a cancellation comment
-4. **Move card** — moves to "Cancelled" column on the project board
-5. **Unblock dependents** — scans for `Blocks #N` annotations and reverse dependencies, notifies blocked issues, moves unblocked cards to "Ready"
-6. **Clean up** — prompts to close open PRs and delete associated branches
-7. **Summary** — reports all actions taken
+1. **Validate and select issue** — Resolve the issue number from arguments or branch name
+2. **Ask cancellation reason and close** — Prompt for reason, close as "not planned"
+3. **Move card to "Cancelled"** — Update the board card status via GraphQL
+4. **Unblock dependent issues** — Notify and update issues that were blocked by this one
+5. **Clean up branch and PR** — Optionally close PRs and delete branches
+6. **Report** — Summary with closed issue, unblocked issues, and cleanup actions
 
 ## Directory structure
 
 ```text
 cancel-issue/
-├── SKILL.md
-├── README.md
+├── SKILL.md              # Core skill instructions
+├── README.md             # This file
+├── skill-meta.json       # Skill metadata
 └── references/
-    └── project-board-operations.md    # Commands for moving cards on the board
+    └── project-board-operations.md  # Board GraphQL patterns
 ```
 
 ## Installation

@@ -1,8 +1,8 @@
 # extract-design-system
 
-> Analyze a design image and create a full design system project with separated artboards (foundations, components, sections) via MCP tools.
+> Analyze a design image and create a full design system project with separated artboards via MCP tools.
 
-Reverse-engineers the visual language from reference images — extracting colors, typography, spacing, and component patterns — then builds a complete project with parallel subagents, each writing an artboard. The user stays on the project hub watching thumbnails appear progressively.
+Reverse-engineers the visual language from reference images — extracting colors, typography, spacing, and component patterns — then builds a complete project with parallel subagents, each writing an artboard. The user stays on the project hub watching thumbnails appear progressively as agents complete their work.
 
 ## Usage
 
@@ -11,27 +11,31 @@ Reverse-engineers the visual language from reference images — extracting color
 ```
 
 > [!TIP]
-> Also activates when providing a reference image, screenshot, or mockup and asking to extract a design system, create artboards, build a component library, or reverse-engineer visual patterns — even without explicitly saying "design system."
+> Also activates when you provide a reference image, screenshot, or mockup and want to extract a design system, create artboards, build a component library, or reverse-engineer visual patterns — even without explicitly saying "design system."
 
 ## How it works
 
-1. **Discover** — finds reference images in `design/` and extracts the full visual language (hex colors, typography, spacing rhythm, component patterns)
-2. **Plan** — splits the design system into 3-6 artboards (Foundations, Components, Hero & Navigation, Content Sections, Footer & CTA)
-3. **Design Brief** — presents extracted tokens and artboard plan for user approval
-4. **Design Spec** — compiles a self-contained reference document passed to every subagent
-5. **Phase A: Setup** — creates the project, writes `tokens.css`, opens the hub, and batch-creates artboard skeletons (shimmer cards appear immediately)
-6. **Phase B: Agents** — spawns one agent per artboard in parallel; each writes HTML via `curl` to the HTTP API, and thumbnails appear progressively on the hub
+1. **Discover and analyze reference image** — Read images from `design/` and extract the full visual language: hex colors, typography, spacing rhythm, and component patterns
+2. **Plan artboards** — Split the design system into 3–6 artboards (Foundations, Components, Hero & Navigation, Content Sections, Footer & CTA)
+3. **Present Design Brief** — Show extracted design tokens and artboard plan for user approval before proceeding
+4. **Build Design Spec** — Compile a self-contained reference document passed verbatim to every subagent
+5. **Setup and launch agents** — Phase A: create project, write tokens.css, open hub, batch-create artboard skeletons. Phase B: spawn one agent per artboard in parallel
+6. **Final verification** — Verify all thumbnails are visible on the hub and present screenshot to user
+7. **Refinement** — User reviews artboards and requests adjustments; only affected agents are re-launched
+8. **Report** — Summary of project slug, artboard count, design tokens, completion status, and audit results
 
 ## Directory structure
 
 ```text
 extract-design-system/
-├── SKILL.md                        # Core instructions and hub-centric build process
+├── SKILL.md              # Core skill instructions
+├── README.md             # This file
+├── skill-meta.json       # Skill metadata
 ├── references/
-│   ├── agent-prompt.md             # Prompt template and curl instructions for subagents
-│   └── artboard-guidelines.md      # Standard artboard structure and content guidelines
+│   ├── agent-prompt.md        # Prompt template and curl instructions for subagents
+│   └── artboard-guidelines.md # Standard artboard structure and content guidelines
 └── templates/
-    └── design-spec.md              # Design spec template passed to every agent
+    └── design-spec.md         # Design spec template passed to every agent
 ```
 
 ## Installation

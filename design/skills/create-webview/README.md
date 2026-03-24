@@ -1,65 +1,48 @@
 # create-webview
 
-Create beautiful data-driven HTML presentations from structured data sources — full pipeline from extraction to PDF.
+> Create beautiful data-driven HTML presentations from structured data sources.
 
-## Trigger phrases
-
-- `/create-webview <data-sources-or-description>` — start a new presentation
-- "create a presentation", "make slides from this data", "generate a report"
-- "data to slides", "build a webview", "turn this spreadsheet into slides"
-- Also activates when the user wants to turn spreadsheets, databases, or structured data into visual presentations — even without explicitly saying "webview"
-
-## How it works
-
-1. **Discovery & Setup** — detect source files, install dependencies, create project structure
-2. **Data Extraction** — parse sources (Excel, PowerPoint, CSV, JSON, images) into SQLite, generate validation dataset
-3. **JSON Generation** — query SQLite → produce fixed-schema JSON (structure never changes, only content)
-4. **HTML Renderer** — build dynamic slide deck with function-array pipeline, CSS custom properties for branding
-5. **PDF Export** — Chrome CDP export with all workarounds (temp user-data-dir, @page injection, font loading)
-
-Key design decisions: validation gate after extraction (user must approve data), fixed JSON schema contract (prevents renderer breakage), pre-processed images (CSS filters fail in Chrome print), headed Chrome for export (user sees what's happening).
+Transforms data from any source (Excel, PowerPoint, CSV, JSON, SQLite, images) into polished HTML slide presentations with optional PDF export. Full pipeline: data extraction into SQLite, fixed-schema JSON generation, dynamic HTML rendering with branded CSS, and Chrome CDP export.
 
 ## Usage
 
+```text
+/create-webview [data-sources-or-description]
 ```
-/create-webview data from report.xlsx and images from presentation.pptx
-/create-webview create a quarterly report from the sales database
-/create-webview build slides from the CSV files in data/
-```
+
+> [!TIP]
+> Also activates when you say "create a presentation", "make slides from this data", "build a webview", "data to slides", "generate a report", or want to turn spreadsheets or databases into visual presentations — even without explicitly saying "webview."
+
+## How it works
+
+1. **Discovery and setup** — Detect source files, gather brand identity and slide dimensions, create project structure with data and output directories
+2. **Data extraction** — Parse sources into SQLite, generate validation dataset, and gate on user approval before proceeding
+3. **JSON generation** — Query SQLite to produce fixed-schema JSON with filter support; structure never changes, only content
+4. **HTML rendering** — Build dynamic slide deck with function-array pipeline, CSS custom properties for branding, and iterative refinement loop
+5. **PDF export** — Chrome CDP export with headed browser, temp user-data-dir, @page injection, and font loading workarounds
+6. **Report** — Summary of pipeline phases, data validation results, slide count, and PDF export status
 
 ## Directory structure
 
-```
+```text
 create-webview/
-├── SKILL.md                      # Core instructions — 4-phase pipeline
-├── README.md                     # This file
+├── SKILL.md              # Core skill instructions
+├── README.md             # This file
+├── skill-meta.json       # Skill metadata
 ├── references/
-│   ├── data-extraction.md        # Source type handling, SQLite patterns, validation format
-│   ├── json-contract.md          # Fixed schema rules, null handling, filter params
-│   ├── html-renderer.md          # Slide architecture, CSS patterns, JS renderer
-│   ├── pdf-export.md             # CDP setup, Chrome flags, all workarounds
-│   └── known-pitfalls.md         # Cross-phase gotchas with solutions
-├── templates/
-│   ├── shell.html                # Minimal HTML shell (head + #slides + script)
-│   ├── base-styles.css           # CSS with brand variables, slide base, typography
-│   └── renderer-base.js          # JS core: el(), slide(), header(), fetch+render loop
-└── scripts/
-    ├── check-deps.py             # Detect source types → install required Python libs
-    └── export-pdf.py             # Generic CDP export (--url, --output, --width, --height)
+│   ├── data-extraction.md     # Source type handling, SQLite patterns, validation format
+│   ├── html-renderer.md       # Slide architecture, CSS patterns, JS renderer
+│   ├── json-contract.md       # Fixed schema rules, null handling, filter params
+│   ├── known-pitfalls.md      # Cross-phase gotchas with solutions
+│   └── pdf-export.md          # CDP setup, Chrome flags, all workarounds
+├── scripts/
+│   ├── check-deps.py          # Detect source types and install required Python libs
+│   └── export-pdf.py          # Generic CDP export (--url, --output, --width, --height)
+└── templates/
+    ├── base-styles.css        # CSS with brand variables, slide base, typography
+    ├── renderer-base.js       # JS core: el(), slide(), header(), fetch+render loop
+    └── shell.html             # Minimal HTML shell (head + #slides + script)
 ```
-
-## Output
-
-Each presentation generates a self-contained project:
-
-- `data/extract.py` — source-to-SQLite extraction
-- `data/generate.py` — SQLite-to-JSON with fixed schema
-- `data/validation.json` — cross-reference dataset for data verification
-- `output/index.html` — presentation shell
-- `output/css/styles.css` — branded stylesheet
-- `output/js/renderer.js` — dynamic slide renderer
-- `output/data.json` — presentation data
-- `output/presentation.pdf` — exported PDF (optional)
 
 ## Installation
 

@@ -2,7 +2,7 @@
 
 > List all open issues grouped by board column with priority sorting and next-issue suggestion.
 
-Fetches all open issues, groups them by project board status column, sorts by priority labels (P0-P3), detects blocked issues via dependency references, and suggests the highest-priority unblocked issue to work on next.
+Lists all open issues for the current repo, grouped by project board status column and sorted by priority, with dependency detection and a next-issue suggestion to help decide what to work on next.
 
 ## Usage
 
@@ -11,22 +11,28 @@ Fetches all open issues, groups them by project board status column, sorts by pr
 ```
 
 > [!TIP]
-> Also activates when the user says "show issues", "what issues are open", or wants an overview of all open work.
+> Also activates when you say "list issues", "show issues", "what issues are open", "issues list", or want an overview of all open work.
 
 ## How it works
 
-1. **Detect repo and board** — finds the project board for the current repo
-2. **Fetch and cross-reference** — retrieves all open issues and maps them to board columns (Backlog → Todo → Ready → In Progress → In Review)
-3. **Dependency detection** — scans issue bodies for "Blocked by #N" / "Depends on #N" / "After #N" patterns, checks if referenced issues are still open
-4. **Suggest next issue** — identifies the highest-priority non-blocked issue as the recommended next pick
+1. **Detect repo URL** — Identify the current repository via `gh repo view`
+2. **Discover project board** — Find the linked project board via GraphQL
+3. **Fetch board items** — Query all board items with their status columns
+4. **Fetch open issues and cross-reference** — Enrich with labels, size, and dependencies
+5. **Group and sort** — Organize issues by column, sort by priority within each group
+6. **Present results as table** — Render grouped markdown tables
+7. **Suggest next issue** — Recommend the highest-priority unblocked issue to start
+8. **Report** — Summary with issue counts per column and next-issue suggestion
 
 ## Directory structure
 
 ```text
 list-issues/
-├── SKILL.md                              # Core instructions
+├── SKILL.md              # Core skill instructions
+├── README.md             # This file
+├── skill-meta.json       # Skill metadata
 └── references/
-    └── project-board-operations.md       # Board query patterns
+    └── project-board-operations.md  # Board GraphQL patterns
 ```
 
 ## Installation

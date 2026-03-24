@@ -2,7 +2,7 @@
 
 > Postgres performance optimization and best practices from Supabase.
 
-Comprehensive Postgres optimization guide maintained by Supabase, containing rules across 8 priority categories -- from critical (query performance, connection management, security/RLS) to incremental (advanced features). Each rule includes detailed explanations, incorrect vs. correct SQL examples, query plan analysis, and specific performance metrics.
+Review and optimize Postgres queries, schemas, and configurations using Supabase best practices across 8 rule categories prioritized by impact. Each rule includes detailed explanations, incorrect vs. correct SQL examples, query plan analysis, and specific performance metrics.
 
 ## Usage
 
@@ -11,38 +11,36 @@ Comprehensive Postgres optimization guide maintained by Supabase, containing rul
 ```
 
 > [!TIP]
-> Also activates when writing, reviewing, or optimizing Postgres queries, schema designs, or database configurations.
+> Also activates when writing, reviewing, or optimizing Postgres queries, schema designs, or database configurations — even if they don't explicitly mention Postgres, even if they're just writing a migration, or even if the question is about "my query is slow."
 
 ## How it works
 
-1. **Rule-based analysis** -- Applies prioritized rules across 8 categories (query performance, connection management, security/RLS, schema design, concurrency/locking, data access patterns, monitoring, advanced features)
-2. **Error-first examples** -- Each rule shows the incorrect pattern first, then the correct approach with quantified impact (e.g., 10-100x faster)
-3. **Reference lookup** -- Reads individual rule files from `references/` for detailed explanations and SQL examples
-
-## Rule categories by priority
-
-| Priority | Category | Impact |
-|----------|----------|--------|
-| 1 | Query Performance | CRITICAL |
-| 2 | Connection Management | CRITICAL |
-| 3 | Security & RLS | CRITICAL |
-| 4 | Schema Design | HIGH |
-| 5 | Concurrency & Locking | MEDIUM-HIGH |
-| 6 | Data Access Patterns | MEDIUM |
-| 7 | Monitoring & Diagnostics | LOW-MEDIUM |
-| 8 | Advanced Features | LOW |
+1. **Identify scope** — Determine what the user needs reviewed and classify items by rule categories
+2. **Load relevant rules** — Read reference files matching the identified scope, starting with highest-priority categories
+3. **Apply rules and produce findings** — Compare user's code against loaded rules, recording violations with severity and recommended fixes
+4. **Present the review** — Deliver findings grouped by severity in a structured table with corrected SQL
+5. **Refine if needed** — Re-evaluate findings based on user questions or additional context
+6. **Report** — Present categories reviewed, findings by severity, audit results, and any errors
 
 ## Directory structure
 
 ```text
 review-postgres/
-├── SKILL.md              # Core instructions (Agent Skills spec)
+├── SKILL.md              # Core skill instructions
 ├── README.md             # This file
-└── references/           # Individual rule files
+├── skill-meta.json       # Skill metadata
+└── references/           # Individual rule files (34 files)
     ├── _template.md      # Reference template
     ├── _sections.md      # Section definitions
     ├── _contributing.md  # Writing guidelines
-    └── *.md              # Individual references
+    ├── query-*.md        # Query performance rules
+    ├── conn-*.md         # Connection management rules
+    ├── security-*.md     # Security & RLS rules
+    ├── schema-*.md       # Schema design rules
+    ├── lock-*.md         # Concurrency & locking rules
+    ├── data-*.md         # Data access pattern rules
+    ├── monitor-*.md      # Monitoring & diagnostics rules
+    └── advanced-*.md     # Advanced feature rules
 ```
 
 ## Installation

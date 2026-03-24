@@ -1,35 +1,46 @@
 # start-issue
 
-> Pull an issue and start implementation — reads the issue, expands acceptance criteria into a detailed step-by-step plan with checkboxes, creates branch and tasks.
+> Pull an issue and start implementation — reads the issue, expands acceptance criteria into a detailed step-by-step plan with checkboxes, rewrites the issue, creates branch and tasks.
 
-Turns an issue with high-level acceptance criteria into a detailed implementation plan with TDD-ordered Steps and checkboxes, then sets up the branch and task board. One approval gate: the proposed plan.
+Turns an issue with high-level acceptance criteria into a detailed implementation plan with Steps and checkboxes, then sets up the branch and tasks. One approval gate: the proposed plan. Everything else is automated.
 
 ## Usage
 
 ```text
-/start-issue <issue-number>
+/start-issue [issue-number]
 ```
 
 > [!TIP]
-> Also activates when the user says "start issue", "work on issue #N", "pull from backlog", "start #N", or wants to begin implementing an issue.
+> Also activates when you say "start issue", "work on issue #N", "pull from backlog", "start #N", or want to begin implementing an issue.
 
 ## How it works
 
-1. **Select issue** — picks from Backlog milestone by number or presents a list for selection
-2. **Analyze the issue** — fetches issue details and reads issue comments for actionable context (file paths, scope transfers, partial completion notes), then reads the codebase (ARCHITECTURE.md first, then exploration narrowed by comment insights if available); detects CDP config for web projects; checks Agent Teams availability
-3. **Propose the detailed plan** — expands acceptance criteria into Steps with concrete checkboxes, file paths, and TDD order. Splits into multiple issues if 8+ steps. Adds Agent Teams execution mode if enabled
-4. **Update the issue** — rewrites the issue body with the approved plan (creates additional issues if split)
-5. **Create branch** — `feat/<number>-<slug>` from main
-6. **Create tasks** — one task per Step with dependency tracking
-7. **Spawn teammates** — if Agent Teams is enabled and the plan includes parallel steps, offers to launch teammates
+1. **Select issue** — Pick from Backlog/Todo issues by number or present a list
+2. **Analyze the issue** — Fetch details, read comments for context, explore the codebase
+3. **Propose the detailed plan** — Expand acceptance criteria into Steps with checkboxes, file paths, and TDD order
+4. **Update the issue** — Rewrite the issue body with the approved plan
+5. **Create branch linked to issue** — Create `feat/<number>-<slug>` from main
+6. **Create tasks** — One task per Step with dependency tracking
+7. **Spawn teammates (automatic when Execution mode is present)** — Launch parallel teammates if Agent Teams is enabled
+8. **Report** — Summary with branch name, step count, and task list
 
 ## Directory structure
 
 ```text
 start-issue/
-├── SKILL.md              # Core instructions
-├── references/           # CDP best practices
-└── templates/            # Step template format
+├── SKILL.md              # Core skill instructions
+├── README.md             # This file
+├── skill-meta.json       # Skill metadata
+├── references/
+│   ├── anti-patterns.md              # Common mistakes to avoid
+│   ├── cdp-best-practices.md         # Chrome DevTools Protocol practices
+│   ├── development-guidelines.md     # General development guidelines
+│   ├── guidelines.md                 # Skill-specific guidelines
+│   ├── project-board-operations.md   # Board GraphQL patterns
+│   ├── project-board-setup.md        # Board column definitions
+│   └── tdd-methodology.md            # Test-driven development methodology
+└── templates/
+    └── step-template.md              # Step checkbox format template
 ```
 
 ## Installation

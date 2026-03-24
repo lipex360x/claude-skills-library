@@ -1,29 +1,37 @@
-# /open-pr
+# open-pr
 
-Create a pull request from the current branch, linking it to the open issue. Handles scope transfers for incomplete tasks and moves the card to "Ready to PR" on the project board.
+> Create a pull request from the current branch, linking it to the open issue.
 
-## Triggers
+Creates a pull request from the current branch, links it to the related issue, resolves incomplete checkboxes with scope transfer options, and moves the project board card to "In review."
 
-- `/open-pr [title]`
-- "open pr", "make a pull request", "submit for review"
+## Usage
+
+```text
+/open-pr [title]
+```
+
+> [!TIP]
+> Also activates when you say "create pr", "open pr", "pr create", "make a pull request", "submit for review", or want to open a PR for the current branch.
 
 ## How it works
 
-1. **Validate branch** — ensures you're not on `main`, pushes unpushed commits
-2. **Link to issue** — extracts issue number from branch name (e.g., `42-add-feature` → #42)
-3. **Build PR content** — derives title from arguments, issue, or commits; builds body with summary, test plan, and `Closes #N`
-4. **Readiness check** — verifies all issue checkboxes are complete. If unchecked items exist, offers four options per item: move to another issue (with bidirectional scope transfer comments), create a new backlog issue, mark as done, or skip with justification (leaves a "Scope skip" comment on the issue with the reason). Scans for `.fixme`, `.skip`, `.todo`, and `only` markers in test files
-5. **Move card** — moves the issue card to "In review" on the project board
-6. **Create and report** — creates the PR with `gh pr create` and reports the URL
+1. **Link to issue** — Extract the issue number from the branch name
+2. **Build PR content** — Derive title and body with summary, test plan, and `Closes #N`
+3. **PR readiness check** — Verify all issue checkboxes are complete, handle incomplete items with scope transfer options
+4. **Move card to "In review"** — Update the board card status via GraphQL
+5. **Create PR** — Create the pull request via `gh pr create`
+6. **Suggest merge** — Offer to run `/close-pr` when ready
+7. **Report** — Summary with PR URL and linked issue
 
 ## Directory structure
 
 ```text
 open-pr/
-├── SKILL.md
-├── README.md
+├── SKILL.md              # Core skill instructions
+├── README.md             # This file
+├── skill-meta.json       # Skill metadata
 └── references/
-    └── project-board-operations.md    # Commands for moving cards on the board
+    └── project-board-operations.md  # Board GraphQL patterns
 ```
 
 ## Installation

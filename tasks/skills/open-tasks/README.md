@@ -2,7 +2,7 @@
 
 > Reopen the task visibility board and resume task tracking.
 
-Enables the task board by setting the always-open flag, so tasks are created and tracked for the rest of the session.
+Enables the task board by setting the always-open config flag to true, so tasks are created and tracked for non-trivial work throughout the session. Creates the config file automatically if it doesn't exist.
 
 ## Usage
 
@@ -11,19 +11,22 @@ Enables the task board by setting the always-open flag, so tasks are created and
 ```
 
 > [!TIP]
-> Also activates when saying "show tasks", "tv open", "start tracking", or wanting to enable the task board.
+> Also activates when you say "show tasks", "tv open", "start tracking", or want to enable the task board.
 
 ## How it works
 
-1. **Enable** — sets `task-visibility.always-open` to `true` in `~/.brain/config/behavior.config.json`
-2. **Resume** — task creation and tracking resumes as normal
-3. **Confirm** — reports that the board is open
+1. **Update config** — sets `task-visibility.always-open` to `true` in the behavior config
+2. **Verify config change** — re-reads the config file to confirm the value persisted
+3. **Resume tracking** — task creation and tracking resumes for non-trivial work
+4. **Report** — confirms the board is open and task tracking is enabled
 
 ## Directory structure
 
 ```text
 open-tasks/
-└── SKILL.md              # Core instructions
+├── SKILL.md              # Core skill instructions
+├── README.md             # This file
+└── skill-meta.json       # Skill metadata
 ```
 
 ## Installation

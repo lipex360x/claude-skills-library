@@ -1,30 +1,40 @@
-# /close-pr
+# close-pr
 
-Merge the current branch's PR, write a detailed implementation summary on the issue, notify unblocked issues, and move the card to Done.
+> Merge the open pull request for the current branch, write a detailed implementation summary on the issue, and move the card to Done.
 
-## Triggers
+Merges the current branch's PR with a detailed implementation summary comment on the linked issue, updates ARCHITECTURE.md if needed, moves the board card to "Done", and notifies unblocked issues — closing the full development loop.
 
-- `/close-pr`
-- "close pr", "merge pr", "merge this", "land the pr"
+## Usage
+
+```text
+/close-pr
+```
+
+> [!TIP]
+> Also activates when you say "close pr", "merge pr", "merge pull request", "merge this", "land the pr", or want to finalize and merge the current branch's PR.
 
 ## How it works
 
-1. **Find the PR** — locates the open PR for the current branch
-2. **Determine target branch** — reads `pr-merge-to` from `.claude/project-settings.json` (default: `main`)
-3. **Write implementation summary** — posts a detailed comment on the linked issue covering what was built, key decisions, files changed, test coverage, and verification steps
-4. **Move card** — Ready to PR → merge → Done
-5. **Notify unblocked issues** — scans for `Blocks #N` in the issue body, comments on unblocked issues and moves their cards to "Ready"
-6. **Milestone check** — reports milestone progress or completion
-7. **Switch branch** — checks out the target branch and pulls
+1. **Find the PR** — Locate the open PR for the current branch
+2. **Determine target branch** — Identify the base branch for the merge
+3. **Write implementation summary on the issue** — Post a detailed summary comment
+4. **Update ARCHITECTURE.md** — Reflect architectural changes if applicable
+5. **Review gate** — Present summary for approval before merging
+6. **Merge the PR** — Execute the merge via GitHub CLI
+7. **Move card to "Done"** — Update the board card status via GraphQL
+8. **Notify unblocked issues** — Comment on issues that are now unblocked
+9. **Switch to base branch** — Checkout the target branch locally
+10. **Report** — Summary with merge result, issue updates, and board status
 
 ## Directory structure
 
 ```text
 close-pr/
-├── SKILL.md
-├── README.md
+├── SKILL.md              # Core skill instructions
+├── README.md             # This file
+├── skill-meta.json       # Skill metadata
 └── references/
-    └── project-board-operations.md    # Commands for moving cards on the board
+    └── project-board-operations.md  # Board GraphQL patterns
 ```
 
 ## Installation
