@@ -16,11 +16,47 @@ allowed-tools:
 
 Explore a codebase like an agent would, surface architectural friction, and propose module-deepening refactors as GitHub issue RFCs. Based on John Ousterhout's "A Philosophy of Software Design" — deep modules (small interface, large implementation) improve testability, navigability, and agent output quality.
 
-## Input
+## Input contract
+
+<input_contract>
 
 - **Required:** A codebase with source files to analyze (the current working directory)
 - **Optional:** Specific area or module to focus on (if not provided, explore the entire codebase)
 - **Skip for tiny projects:** If the codebase has fewer than 5 source files, inform the user that architecture analysis isn't meaningful at this scale and suggest waiting until the project grows
+
+</input_contract>
+
+## Output contract
+
+<output_contract>
+
+- A numbered list of deepening candidates with friction signals, dependency categories, and effort estimates (step 2)
+- Three radically different interface designs for the chosen candidate, with a comparative analysis and recommendation (step 4)
+- A GitHub issue RFC with problem description, chosen design, migration plan, and verification criteria (step 6)
+- A final report summarizing what was analyzed, what was proposed, and next steps (step 7)
+
+</output_contract>
+
+## External state
+
+<external_state>
+
+- **GitHub repo** — the skill creates issues via `gh issue create`; requires an authenticated `gh` CLI and a remote repository
+- **ARCHITECTURE.md** — if present in the project root, read it first to orient exploration (but verify against actual code)
+- **Backlog milestone** — if a milestone named "Backlog" exists, the created issue is added to it
+- **`refactor` label** — applied to the created issue; must exist in the repository or `gh` will create it
+
+</external_state>
+
+## Pre-flight
+
+<pre_flight>
+
+1. Verify the current directory is a codebase with source files (not an empty or non-code directory)
+2. Count source files — if fewer than 5, inform the user and exit gracefully
+3. Check that `gh` CLI is available and authenticated (`gh auth status`); if not, warn the user that the RFC will be saved as a local markdown file instead
+
+</pre_flight>
 
 ## Steps
 
@@ -97,6 +133,63 @@ Add to the Backlog milestone if it exists. Apply `refactor` label.
 
 Present the issue URL to the user.
 
+### 7. Report
+
+Summarize the session:
+
+- **Codebase analyzed** — what areas were explored and total friction signals found
+- **Candidate chosen** — which deepening opportunity was selected and why
+- **Design selected** — which interface design was picked (minimalist / flexible / ergonomic / hybrid)
+- **Issue created** — link to the GitHub issue RFC
+- **Suggested next steps** — when to implement the refactor, whether to run the skill again on other candidates
+
+## Next action
+
+After the RFC issue is created, the user can:
+- Assign the issue and start implementing the refactor
+- Run this skill again to explore additional candidates from step 2
+- Schedule a follow-up run after the next development surge
+
+## Self-audit
+
+<self_audit>
+
+Before presenting the final report, verify:
+
+1. Every candidate in step 2 includes concrete file paths, not vague module names
+2. All three sub-agent designs in step 4 are genuinely different approaches, not variations of the same idea
+3. The RFC issue includes interface signatures, usage examples, migration steps, and verification criteria — not just a description of the problem
+4. No absolute or local paths (`/Users/...`, `~/.brain/`) appear in the GitHub issue content
+5. The recommendation in step 4 is opinionated with clear reasoning, not a neutral comparison
+
+</self_audit>
+
+## Content audit
+
+<content_audit>
+
+- Issue title is specific (e.g., "Deepen notification module: consolidate 4 files into single boundary") not generic ("Refactor notifications")
+- Issue body uses project-relative paths only
+- Migration plan is a concrete sequence of moves, not a wish list
+- Verification criteria are testable conditions, not subjective judgments
+- All content in the issue is in English
+
+</content_audit>
+
+## Error handling
+
+- **No friction found** — celebrate it. Tell the user the codebase is well-structured and suggest re-running after the next development surge.
+- **Sub-agent failure** — proceed with the remaining designs. Two designs are enough for a meaningful comparison; one is enough to draft an RFC.
+- **`gh` CLI unavailable** — write the RFC as a local markdown file instead of a GitHub issue, and inform the user they can create the issue manually later.
+
+## Anti-patterns
+
+- **Blind proposals.** Proposing refactors without reading the code first — because the friction signal comes from exploration, not assumptions.
+- **Rewrite mentality.** Suggesting rewrites instead of deepening — because the goal is consolidation, not starting over.
+- **Test amnesia.** Ignoring existing tests when proposing changes — because understanding what's tested prevents regressions and informs migration plans.
+- **Vague issues.** Creating issues with generic "improve this" descriptions — because every issue needs concrete file paths, interface signatures, and migration steps.
+- **Over-splitting.** Breaking a small refactor into many issues — because if a refactor is small enough to do in one PR, don't create 5 issues for it.
+
 ## Guidelines
 
 - **Deep modules over shallow.** The goal is always to reduce interface surface area while increasing implementation depth. A module with 1 method hiding 500 lines of logic is better than 10 modules with 50 lines each — because the 1-method module is trivially testable at the boundary and agents navigate it without confusion.
@@ -114,15 +207,3 @@ Present the issue URL to the user.
 - **English for all issue content.** Issues are public and portable — always write in English. Communication with the user follows their language preference.
 
 - **No local paths in issues.** Use project-relative paths only. Never reference `~/.brain/`, `/Users/...`, or any absolute paths in issue content.
-
-- **Handle these edge cases:**
-  - No friction found — celebrate it. Tell the user the codebase is well-structured and suggest re-running after the next development surge
-  - Sub-agent failure — proceed with the remaining designs. Two designs are enough for a meaningful comparison; one is enough to draft an RFC
-  - `gh` CLI unavailable — write the RFC as a local markdown file instead of a GitHub issue, and inform the user they can create the issue manually later
-
-- **Avoid these anti-patterns:**
-  - Proposing refactors without reading the code first — the friction signal comes from exploration, not assumptions
-  - Suggesting rewrites instead of deepening — the goal is consolidation, not starting over
-  - Ignoring existing tests — understand what's tested before proposing changes
-  - Creating issues with vague "improve this" descriptions — every issue needs concrete file paths, interface signatures, and migration steps
-  - Over-splitting — if a refactor is small enough to do in one PR, don't create 5 issues for it

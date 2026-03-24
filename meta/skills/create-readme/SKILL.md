@@ -14,12 +14,54 @@ allowed-tools:
 
 Generate or review README.md files that are appealing, informative, and easy to read.
 
-## Input
+## Input contract
 
-- `$ARGUMENTS` — optional. Accepts a target directory path (defaults to project root) or an explicit mode override (`create` or `review`).
+<input_contract>
+
+| Input | Source | Required | Validation | On invalid |
+|-------|--------|----------|------------|------------|
+| `$ARGUMENTS` | invocation | no | Optional directory path or mode override (`create` / `review`). Defaults to project root with auto-detect. | Use project root, auto-detect mode |
+
 - If no arguments provided, auto-detect mode based on whether `README.md` exists at the target path.
 
-## Process
+</input_contract>
+
+## Output contract
+
+<output_contract>
+
+| Artifact | Path | Persists | Format |
+|----------|------|----------|--------|
+| README.md | `{target-path}/README.md` | yes | GitHub Flavored Markdown |
+| Review findings | stdout | no | Markdown numbered list |
+| Report | stdout | no | Markdown summary |
+
+</output_contract>
+
+## External state
+
+<external_state>
+
+| Resource | Path | Access | Format |
+|----------|------|--------|--------|
+| Reference READMEs list | `references/readme-references.md` | R | Markdown with file paths |
+| Reference README samples | `references/*.md` (excluding readme-references.md) | R | Markdown |
+| Existing README (review mode) | `{target-path}/README.md` | R/W | Markdown |
+
+</external_state>
+
+## Pre-flight
+
+<pre_flight>
+
+1. Parse `$ARGUMENTS` for directory path or mode override → default to project root.
+2. Check if `README.md` exists at the target path → determines mode (create vs review).
+3. Scan project for minimum context (source files, package.json, config) → if empty project: AUQ asking what the project is about before continuing.
+4. If monorepo with multiple READMEs and target is root: note sub-READMEs exist, focus on root only.
+
+</pre_flight>
+
+## Steps
 
 ### 1. Detect mode
 
@@ -41,7 +83,7 @@ Build a README from scratch by analyzing the project.
 
 1. Scan the project: package.json, source structure, config files, CI/CD, tests, docs.
 2. Read `references/readme-references.md` for the list of local reference READMEs. Read at least 2 that match the project type for structure and tone inspiration.
-3. Re-read the formatting rules and anti-patterns below before drafting — the draft must pass all of them. Every section must earn its place, structure must be scannable, and no anti-pattern should slip through.
+3. Re-read the formatting rules (Guidelines section) and anti-patterns below before drafting — the draft must pass all of them. Every section must earn its place, structure must be scannable, and no anti-pattern should slip through.
 4. Draft the README.
 5. Present the draft to the user before writing.
 
@@ -70,19 +112,64 @@ Analyze the existing README against the formatting standards and reference patte
 
    Do not rewrite the README — let the user choose which improvements to apply.
 
-### 4. Formatting rules
+### 4. Report
 
-Apply these in both modes:
+<report>
 
-- **Language: English by default.** Always write READMEs in English unless the user explicitly requests another language. READMEs are public-facing documentation — English maximizes reach. If the user says "em português", "en español", or similar, follow their request.
-- **GFM** (GitHub Flavored Markdown) for all formatting.
-- **GitHub admonitions** (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`) where they add clarity — not decoration.
-- **No emoji overuse.** One or two in the title is fine. Emoji-heavy section headers are not.
-- **No LICENSE, CONTRIBUTING, CHANGELOG sections.** Those have dedicated files.
-- **Project logo/icon** in the header if one exists in the repo.
-- **Concise.** Every section must earn its place. If it doesn't help the reader set up, use, or understand the project — cut it.
-- **Scannable.** Tables over prose for structured data. Code blocks with syntax highlighting. Short paragraphs. White space.
-- **Navigation.** For READMEs over 100 lines, add a content index (inline or vertical) and back-to-top links after major sections.
+Present concisely:
+- **Mode:** create or review
+- **Target:** path to README.md
+- **Action taken:** file created / findings presented
+- **References used:** which reference READMEs were consulted
+- **Errors:** issues encountered (or "none")
+
+</report>
+
+## Next action
+
+If create mode: review the generated README for accuracy, then commit. If review mode: choose which suggestions to apply, then run the skill again to verify.
+
+## Self-audit
+
+<self_audit>
+
+Before presenting the Report, verify:
+
+1. **Pre-flight passed?** — mode detected, project context gathered
+2. **Steps completed?** — list any skipped steps with reason
+3. **Output exists?** — README written (create) or findings presented (review)
+4. **Formatting rules applied?** — GFM, admonitions, navigation, conciseness all checked
+5. **Anti-patterns clean?** — scan output for emoji soup, boilerplate, wall-of-text
+6. **References consulted?** — at least 2 reference READMEs read and applied
+
+</self_audit>
+
+## Content audit
+
+<content_audit>
+
+Before finalizing output, verify:
+
+1. **GFM compliance?** — all formatting uses GitHub Flavored Markdown correctly
+2. **Section justification?** — every section earns its place; no filler content
+3. **Navigation present?** — content index and back-to-top links for READMEs over 100 lines
+4. **Accuracy?** — project details (tech stack, commands, paths) match actual project state
+5. **Badge validity?** — only badges for active, maintained integrations
+6. **Language correct?** — English by default unless user explicitly requested another language
+
+Audit is scoped to content generated in THIS session.
+
+</content_audit>
+
+## Error handling
+
+| Failure | Strategy |
+|---------|----------|
+| Empty project (no source files) | AUQ: "What is this project about?" → use answer as context |
+| Target path doesn't exist | AUQ: "Path not found. Which directory?" with suggestions |
+| Reference READMEs missing | Proceed without references, warn user about reduced quality |
+| README write fails | Present content in stdout, warn about file creation failure |
+| Monorepo ambiguity | AUQ: "Multiple READMEs found. Which one?" with paths |
 
 ## Anti-patterns
 
@@ -92,3 +179,21 @@ Apply these in both modes:
 - **Copy-paste boilerplate** — generic template content that doesn't match the project (e.g., "Built with love" footer, placeholder author names, irrelevant sections).
 - **Feature laundry list** — long bullet lists of features without context or examples. Show, don't tell — a code snippet beats a bullet point.
 - **Stale screenshots** — screenshots of UI that no longer matches the current state. If you can't keep them updated, prefer text descriptions.
+
+## Guidelines
+
+- **Language: English by default.** Always write READMEs in English unless the user explicitly requests another language. READMEs are public-facing documentation — English maximizes reach. If the user says "em português", "en español", or similar, follow their request.
+
+- **GFM everywhere.** GitHub Flavored Markdown for all formatting. Use GitHub admonitions (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`) where they add clarity — not decoration.
+
+- **No emoji overuse.** One or two in the title is fine. Emoji-heavy section headers are not.
+
+- **Dedicated files stay separate.** No LICENSE, CONTRIBUTING, CHANGELOG sections in the README. Those have dedicated files.
+
+- **Project logo/icon.** Include in the header if one exists in the repo.
+
+- **Concise.** Every section must earn its place. If it doesn't help the reader set up, use, or understand the project — cut it.
+
+- **Scannable.** Tables over prose for structured data. Code blocks with syntax highlighting. Short paragraphs. White space.
+
+- **Navigation.** For READMEs over 100 lines, add a content index (inline or vertical) and back-to-top links after major sections.

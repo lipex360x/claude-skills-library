@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "install-skill",
+  "plugin": "meta",
+  "created": "2025-12-15",
+  "lastModified": "2026-03-24",
+  "lineCount": 214,
+  "skeleton": {
+    "inputContract": true,
+    "outputContract": true,
+    "externalState": true,
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": "N/A — skill does not generate verifiable content (installation workflow)",
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 13,
+  "approvalGates": 2,
+  "references": [],
+  "templates": [],
+  "scripts": [],
+  "dependencies": {
+    "tools": ["npx", "git", "bash"],
+    "configs": ["STRUCTURE.md", "README.md"],
+    "skills": []
+  },
+  "audit": {
+    "lastRun": null,
+    "score": null,
+    "gaps": []
+  }
+}

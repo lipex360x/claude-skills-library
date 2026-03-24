@@ -1,13 +1,50 @@
 ---
 name: sync-claude
-description: Synchronize the Claude Code environment (skills-library + .brain) across machines. Pulls latest from both repos, rebuilds symlinks via setup.sh, and verifies the installation. Use this skill when the user says "sync claude", "sync skills", "sync brain", "pull skills", "update claude code", "update skills", "atualiza skills", "sincroniza", or wants to bring their environment up to date — even if they don't explicitly say "sync."
+description: >-
+  Synchronize the Claude Code environment (skills-library + .brain) across
+  machines. Pulls latest from both repos, rebuilds symlinks via setup.sh, and
+  verifies the installation. Use this skill when the user says "sync claude",
+  "sync skills", "sync brain", "pull skills", "update claude code", "update
+  skills", "atualiza skills", "sincroniza", or wants to bring their environment
+  up to date — even if they don't explicitly say "sync."
 user-invocable: true
-allowed-tools: Bash, AskUserQuestion, Read, Glob, Grep
+allowed-tools:
+  - Bash
+  - AskUserQuestion
+  - Read
+  - Glob
+  - Grep
 ---
+
+# Sync Claude
 
 Synchronize the Claude Code environment on this machine. Pull latest state from remote repos, rebuild symlinks, and verify everything is in sync.
 
+## Input contract
+
+<input_contract>
+
+| Input | Source | Required | Validation | On invalid |
+|-------|--------|----------|------------|------------|
+| *(none)* | — | — | — | — |
+
+This skill takes no arguments. It operates on the well-known paths for `skills-library` and `.brain`.
+
+</input_contract>
+
+## Output contract
+
+<output_contract>
+
+| Artifact | Location | Persists | Format |
+|----------|----------|----------|--------|
+| Sync report | stdout | no | Markdown summary (repos pulled, symlinks verified, issues found) |
+
+</output_contract>
+
 ## External state
+
+<external_state>
 
 | Resource | Path | Access | Format |
 |----------|------|--------|--------|
@@ -16,28 +53,31 @@ Synchronize the Claude Code environment on this machine. Pull latest state from 
 | setup.sh | `~/www/claude/.brain/scripts/setup.sh` | Execute | Bash script that creates symlinks |
 | symlinked skills | `~/.claude/skills/` | Read (verify) | Symlinks to skills-library |
 
-## Steps
+</external_state>
 
-### 1. Pre-flight checks
+## Pre-flight
 
-Verify both directories exist:
+<pre_flight>
+
+1. **Verify directories exist:**
 
 ```bash
 ls -d ~/www/claude/skills-library/ 2>/dev/null && echo "skills-library: OK" || echo "skills-library: MISSING"
 ls -d ~/www/claude/.brain/ 2>/dev/null && echo ".brain: OK" || echo ".brain: MISSING"
 ```
 
-If either is missing, use `AskUserQuestion` for each missing directory with options `["Clone it", "Skip this repo"]`.
+2. **Handle missing directories:** If either is missing, use `AskUserQuestion` for each missing directory with options `["Clone it", "Skip this repo"]`.
+   - If "Clone it":
+     - For skills-library: `git clone <remote-url> ~/www/claude/skills-library/`
+     - For .brain: `git clone <remote-url> ~/www/claude/.brain/`
+   - Detect the remote URL from the other repo if it exists (same GitHub owner), or ask the user.
+3. **Both missing and skipped → stop.** If both directories are missing and the user skipped both, there is nothing to sync.
 
-If "Clone it":
-- For skills-library: `git clone <remote-url> ~/www/claude/skills-library/`
-- For .brain: `git clone <remote-url> ~/www/claude/.brain/`
+</pre_flight>
 
-Detect the remote URL from the other repo if it exists (same GitHub owner), or ask the user.
+## Steps
 
-If both are missing and both skipped, stop — nothing to sync.
-
-### 2. Check working tree status
+### 1. Check working tree status
 
 For each existing directory, check for uncommitted changes:
 
@@ -51,7 +91,7 @@ If either has uncommitted changes, use `AskUserQuestion` with options:
 - `"Skip this repo"` — leave it as-is, continue with the other
 - `"Abort"` — stop the entire sync
 
-### 3. Pull latest
+### 2. Pull latest
 
 For each repo that passed the working tree check:
 
@@ -67,7 +107,7 @@ Capture the output to report what changed. If `git pull` fails (diverged branche
 
 Track results per repo: commits pulled count, or "already up to date", or "skipped".
 
-### 4. Rebuild symlinks
+### 3. Rebuild symlinks
 
 Run setup.sh to recreate all symlinks:
 
@@ -77,7 +117,7 @@ bash ~/www/claude/.brain/scripts/setup.sh
 
 Capture the output — it reports which links were created, updated, or already correct.
 
-### 5. Verify sync
+### 4. Verify sync
 
 Run three checks against `~/.claude/skills/`:
 
@@ -96,7 +136,7 @@ for link in ~/.claude/skills/*/; do
 done
 ```
 
-setup.sh already reports warnings for these during step 4, but this step verifies nothing was missed.
+setup.sh already reports warnings during step 3, but this step verifies nothing was missed.
 
 Possible issues:
 - **Broken symlinks** — target removed or renamed
@@ -109,7 +149,7 @@ If any issues are found, use `AskUserQuestion` with options:
 - `"Both"` — remove orphans and re-run setup.sh
 - `"Skip"` — leave as-is, just report them
 
-### 6. Report
+### 5. Report
 
 Present a concise summary:
 
@@ -130,6 +170,38 @@ Present a concise summary:
 ```
 
 If any repo was skipped or had errors, note it clearly.
+
+## Next action
+
+> _Skipped: "N/A — sync-claude is a terminal operation with no follow-up skill."_
+
+## Self-audit
+
+<self_audit>
+
+Before delivering the sync report, verify:
+- [ ] Every repo that was pulled shows the correct before/after commit hashes
+- [ ] setup.sh ran exactly once (after both pulls completed)
+- [ ] Verification checks ran and results are included in the report
+- [ ] Any skipped repos or errors are clearly noted
+- [ ] No destructive git commands were used (no `--force`, `--hard`, `clean -f`)
+
+</self_audit>
+
+## Content audit
+
+> _Skipped: "N/A — transient status report, not persistent content."_
+
+## Error handling
+
+| Error | Cause | Recovery |
+|-------|-------|----------|
+| Directory missing | `skills-library` or `.brain` not cloned on this machine | AUQ: offer to clone or skip |
+| Dirty working tree | Uncommitted changes in a repo | AUQ: stash and pull, skip, or abort |
+| Git pull fails | Diverged branches or network error | AUQ: rebase, skip, or abort |
+| setup.sh not found | `.brain` was skipped or clone failed | Skip symlink rebuild, note in report |
+| Broken symlinks | Target skill removed or renamed after pull | AUQ: remove, re-run setup.sh, both, or skip |
+| Unmanaged directories | Leftover from manual installs or old setups | AUQ: remove, re-run setup.sh, both, or skip |
 
 ## Anti-patterns
 

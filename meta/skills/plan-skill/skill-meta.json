@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "plan-skill",
+  "plugin": "meta",
+  "created": "2025-12-15",
+  "lastModified": "2026-03-24",
+  "lineCount": 252,
+  "skeleton": {
+    "inputContract": true,
+    "outputContract": true,
+    "externalState": true,
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": true,
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 7,
+  "approvalGates": 1,
+  "references": [
+    "completeness-checklist.md",
+    "decision-model.md"
+  ],
+  "templates": [
+    "spec-template.md"
+  ],
+  "scripts": [],
+  "dependencies": {
+    "tools": [],
+    "configs": ["CLAUDE.md"],
+    "skills": []
+  },
+  "audit": {
+    "lastRun": null,
+    "score": null,
+    "gaps": []
+  }
+}
