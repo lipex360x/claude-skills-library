@@ -1,6 +1,11 @@
 ---
 name: create-hook
-description: Guide the user through creating or improving Claude Code hooks — from choosing the right event to writing the script and registering in settings.json. Use this skill when the user mentions "create a hook", "new hook", "add a hook", "improve a hook", "PostToolUse", "PreToolUse", "PreCompact", "SessionStart", or wants event-driven automation — even if they don't explicitly say "hook."
+description: >-
+  Guide the user through creating or improving Claude Code hooks — from choosing
+  the right event to writing the script and registering in settings.json. Use
+  this skill when the user mentions "create a hook", "new hook", "add a hook",
+  "improve a hook", "PostToolUse", "PreToolUse", "PreCompact", "SessionStart",
+  or wants event-driven automation — even if they don't explicitly say "hook."
 user-invocable: true
 allowed-tools:
   - Read
@@ -17,16 +22,59 @@ Step-by-step guide for building Claude Code hooks. Hooks are bash scripts (or pr
 
 ## Input contract
 
-- **Required:** intent — what the hook should do (the action and when it should fire)
-- **Optional:** event (must be one of: `PreToolUse`, `PostToolUse`, `PreCompact`, `Stop`, `SubagentStop`, `SessionStart`, `SessionEnd`, `UserPromptSubmit`, `Notification`), type (`command` or `prompt`), location (`local` or `global`)
+<input_contract>
 
-If the user provides only the intent, derive the remaining inputs through the process steps below.
+| Input | Source | Required | Validation | On invalid |
+|-------|--------|----------|------------|------------|
+| `intent` | $ARGUMENTS or conversation | yes | Description of what the hook should do and when | AUQ: "What should the hook do, and when should it trigger?" |
+| `event` | $ARGUMENTS or conversation | no | One of: PreToolUse, PostToolUse, PreCompact, Stop, SubagentStop, SessionStart, SessionEnd, UserPromptSubmit, Notification | Derive from intent in Step 2 |
+| `type` | $ARGUMENTS or conversation | no | One of: command, prompt | Default to command (Step 3) |
+| `location` | $ARGUMENTS or conversation | no | One of: local, global | AUQ with options in Step 6 |
 
-## Process
+</input_contract>
+
+## Output contract
+
+<output_contract>
+
+| Artifact | Path | Persists | Format |
+|----------|------|----------|--------|
+| Hook script | `.claude/hooks/<name>.sh` (local) or `~/.brain/hooks/templates/<name>.sh` (global) | yes | Bash script |
+| Settings registration | `.claude/settings.json` (local) or `~/.brain/config/settings.json` (global) | yes | JSON |
+| STRUCTURE.md update | `~/.brain/STRUCTURE.md` (global only) | yes | Markdown |
+| Report | stdout | no | Markdown summary |
+
+</output_contract>
+
+## External state
+
+<external_state>
+
+| Resource | Path | Access | Format |
+|----------|------|--------|--------|
+| Local settings | `.claude/settings.json` | R/W | JSON |
+| Global settings | `~/.brain/config/settings.json` | R/W | JSON |
+| Hook scripts dir (local) | `.claude/hooks/` | W | Bash |
+| Hook templates dir (global) | `~/.brain/hooks/templates/` | W | Bash |
+| Structure file | `~/.brain/STRUCTURE.md` | R/W | Markdown |
+
+</external_state>
+
+## Pre-flight
+
+<pre_flight>
+
+1. User provided intent (what + when) → if missing: AUQ with concrete examples — stop if no response.
+2. If location is global: verify `~/.brain/config/settings.json` exists → if missing: "Global settings not found. Run sync-claude first." — stop.
+3. If location is local: verify `.claude/` directory exists → if missing: create it.
+
+</pre_flight>
+
+## Steps
 
 ### 1. Understand the intent
 
-Ask the user:
+Clarify with the user:
 - What should happen? (the action — remind, validate, block, inject context)
 - When should it trigger? (the event — after a commit, before compaction, at session start)
 - Should it block or just inform? (blocking = non-zero exit code)
@@ -62,20 +110,17 @@ Match the user's intent to the right hook event:
 | `command` (bash script) | Deterministic logic, pattern matching, file checks | **0 tokens** |
 | `prompt` (instruction text) | Needs LLM reasoning, content analysis, judgment calls | Variable |
 
-**Default to `command`** — bash hooks are deterministic (0% fail rate) and cost nothing. Use `prompt` only when the hook genuinely needs LLM reasoning (e.g., "check if the code follows our style guide").
+**Default to `command`** — bash hooks are deterministic (0% fail rate) and cost nothing. Use `prompt` only when the hook genuinely needs LLM reasoning.
 
 ### 4. Write the matcher
 
-The matcher filters which events trigger the hook. Format depends on the event:
-
+The matcher filters which events trigger the hook:
 - **Empty string `""`** — match all events of this type
-- **Tool name** — for `PreToolUse`/`PostToolUse`: `"Bash"`, `"Edit"`, `"Write"`
-- **Pattern** — match specific conditions in the script itself (via `jq` on stdin)
+- **Tool name** — for PreToolUse/PostToolUse: `"Bash"`, `"Edit"`, `"Write"`
 
 For fine-grained filtering, use a broad matcher and filter inside the script:
 
 ```bash
-# Match all Bash calls, but only act on git commit
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // ""')
 [ "$TOOL" = "Bash" ] || exit 0
 echo "$INPUT" | jq -r '.tool_input.command // ""' | grep -q "git commit" || exit 0
@@ -110,30 +155,19 @@ exit 0
 
 **Script rules:**
 - **Always `set -e`** — fail fast on errors.
-- **Always `exit 0` for no-ops** — a non-zero exit on PreToolUse blocks the tool call. Only return non-zero intentionally to block.
+- **Always `exit 0` for no-ops** — a non-zero exit on PreToolUse blocks the tool call.
 - **Read stdin once** — `INPUT=$(cat)` captures the JSON input. Parse with `jq`.
-- **Output = message** — everything sent to stdout becomes a message Claude sees. Keep it concise.
-- **No side effects** — hooks inform and remind. Don't modify files, commit, or push from a hook. If the hook needs to trigger an action, output a reminder and let Claude do it.
+- **Output = message** — stdout becomes a message Claude sees. Keep it concise.
+- **No side effects** — hooks inform and remind. Don't modify files, commit, or push.
 - **Idempotent** — running twice should produce the same result or gracefully skip.
-- **Graceful degradation** — if a required file or tool is missing, `exit 0` silently. Don't crash on missing dependencies.
-
-**Input JSON format (PreToolUse/PostToolUse):**
-
-```json
-{
-  "tool_name": "Bash",
-  "tool_input": {
-    "command": "git commit -m 'feat: add auth'"
-  }
-}
-```
+- **Graceful degradation** — if a required file or tool is missing, `exit 0` silently.
 
 ### 6. Determine location
 
 Use `AskUserQuestion` with options `["Local (this project)", "Global (.brain/)"]`.
 
-- **Local:** Write script to `.claude/hooks/<name>.sh` in the project. Register in `.claude/settings.json`.
-- **Global:** Write script to `~/www/claude/.brain/hooks/templates/<name>.sh`. Register in `~/www/claude/.brain/config/settings.json`. Update `~/www/claude/.brain/STRUCTURE.md`.
+- **Local:** Write script to `.claude/hooks/<name>.sh`. Register in `.claude/settings.json`.
+- **Global:** Write script to `~/.brain/hooks/templates/<name>.sh`. Register in `~/.brain/config/settings.json`. Update `~/.brain/STRUCTURE.md`.
 
 ### 7. Register in settings.json
 
@@ -157,9 +191,6 @@ Add the hook to the appropriate `settings.json`:
 }
 ```
 
-**For global hooks:** use `~/.brain/hooks/templates/<name>.sh` in the command path.
-**For local hooks:** use relative path `.claude/hooks/<name>.sh`.
-
 If the event already has hooks registered, append to the existing array — don't overwrite.
 
 ### 8. Test the hook
@@ -174,32 +205,88 @@ Trigger the event manually and verify:
 
 Validate before finalizing:
 
-- [ ] Event matches the intent? (prevention = PreToolUse, reaction = PostToolUse, etc.)
+- [ ] Event matches the intent?
 - [ ] Type is `command` unless LLM reasoning is genuinely needed?
-- [ ] Matcher is specific enough? (not triggering on every Bash call when it should only match `git commit`)
+- [ ] Matcher is specific enough?
 - [ ] Script uses `set -e` and handles missing dependencies gracefully?
 - [ ] Output is concise — one clear message, not a wall of text?
-- [ ] Script is idempotent — running twice is harmless?
-- [ ] Registered in the correct settings.json (local vs global)?
+- [ ] Script is idempotent?
+- [ ] Registered in the correct settings.json?
 - [ ] No side effects — hook informs, doesn't act?
 - [ ] STRUCTURE.md updated (for global hooks)?
 
 Present the review to the user before writing the file.
 
-## Hook vs Command vs Skill — when to use which
+### 10. Report
 
-| Use a **hook** when... | Use a **command** when... | Use a **skill** when... |
-|---|---|---|
-| Must happen automatically, every time | User explicitly triggers with `/name` | Multi-step workflow with references |
-| Event-driven (after commit, at start) | On-demand action | Needs LLM reasoning throughout |
-| Zero-fail-rate enforcement needed | Single focused action | Coordinates subagents |
-| Deterministic logic, no LLM needed | <30 lines of instructions | Should auto-trigger by description |
+<report>
+
+Present concisely:
+- **Hook:** name, event, type, location
+- **Script:** path to the created script
+- **Registration:** settings.json path updated
+- **Audit results:** self-audit + review checklist summary
+- **Errors:** issues encountered (or "none")
+
+</report>
+
+## Next action
+
+Test the hook by triggering its event in a live session. If it needs adjustment, describe what changed and re-run `/create-hook`.
+
+## Self-audit
+
+<self_audit>
+
+Before presenting the Report, verify:
+
+1. **Pre-flight passed?** — intent clarified, location determined
+2. **Steps completed?** — script written, registered, tested
+3. **Output exists?** — hook script at declared path, settings.json updated
+4. **Review passed?** — all 9 review checks green
+5. **Anti-patterns clean?** — no side effects, no broad matchers, no chatty output
+6. **STRUCTURE.md updated?** — for global hooks only
+
+</self_audit>
+
+## Content audit
+
+<content_audit>
+
+Before finalizing output, verify:
+
+1. **Script correctness?** — `set -e`, `INPUT=$(cat)`, proper exit codes
+2. **Matcher specificity?** — not triggering on unrelated events
+3. **Registration valid?** — JSON structure matches settings.json schema
+4. **Idempotent?** — running the hook twice produces same result
+
+</content_audit>
+
+## Error handling
+
+| Failure | Strategy |
+|---------|----------|
+| `jq` not available | Suggest install: `brew install jq` → stop |
+| Settings.json malformed | Report parse error with path → stop |
+| Hook script fails test | Show error output, suggest fix → do not register |
+| Event name invalid | Show valid events table → AUQ to re-select |
+| Permission denied on script | `chmod +x` and retry |
 
 ## Anti-patterns
 
-- **Side effects in hooks.** Hooks should inform, not act. A hook that runs `git push` or edits files creates unpredictable behavior — the user didn't ask for it, and it can't be reviewed before execution.
-- **Overly broad matchers.** A PostToolUse hook with `matcher: ""` that doesn't filter internally fires on every single tool call — thousands per session. Always filter to the specific tool and input pattern you care about.
-- **Prompt hooks for deterministic logic.** If the check is "does this file exist?" or "does this string match?", use a bash script (0 tokens). Prompt hooks cost tokens and add latency. Reserve them for genuine judgment calls.
-- **Non-zero exit by accident.** On `PreToolUse`, a non-zero exit **blocks the tool call**. Use `|| exit 0` guards generously to prevent accidental blocking. Only exit non-zero when you intentionally want to prevent the action.
-- **Chatty output.** Hooks run frequently. A 10-line message after every `git commit` creates noise. Keep output to 1-3 lines — a clear reminder or status, not a tutorial.
-- **Hardcoded absolute paths.** Use `$HOME/.brain/` or relative paths, not `/Users/someone/`.
+- **Side effects in hooks.** Hooks should inform, not act. A hook that runs `git push` or edits files creates unpredictable behavior — because the user didn't ask for it and it can't be reviewed before execution.
+- **Overly broad matchers.** A PostToolUse hook with `matcher: ""` that doesn't filter internally fires on every tool call — because thousands of triggers per session create noise and waste.
+- **Prompt hooks for deterministic logic.** If the check is "does this file exist?", use bash (0 tokens) — because prompt hooks cost tokens and add latency for no benefit.
+- **Non-zero exit by accident.** On PreToolUse, a non-zero exit blocks the tool call — because missing `|| exit 0` guards cause accidental blocking of legitimate operations.
+- **Chatty output.** Hooks run frequently. A 10-line message after every tool call creates noise — because concise 1-3 line messages are actionable while walls of text are ignored.
+- **Hardcoded absolute paths.** Use `$HOME/.brain/` or relative paths — because hardcoded paths break when the hook runs on a different machine.
+
+## Guidelines
+
+- **Default to `command` type.** Bash hooks are deterministic (0% fail rate) and cost nothing. Only use `prompt` when the hook genuinely needs LLM reasoning — because unnecessary prompt hooks waste tokens and add latency.
+
+- **Hook vs command vs skill.** Use a hook when enforcement must happen automatically every time (event-driven, zero-fail-rate). Use a command when the user explicitly triggers with `/name`. Use a skill for multi-step workflows with references — because choosing the wrong mechanism leads to either missed enforcement or unnecessary complexity.
+
+- **Inform, don't act.** Hooks output reminders and status. They do not modify files, commit, or push — because side effects in hooks are invisible to the user and can't be reviewed before execution.
+
+- **Test before registering.** Always verify the hook fires correctly and stays silent on unrelated events — because a registered hook that misfires disrupts every session until someone debugs it.

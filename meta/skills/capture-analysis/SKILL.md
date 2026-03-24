@@ -1,22 +1,72 @@
 ---
 name: capture-analysis
-description: Capture skill gaps, workflow frictions, and pattern improvements as structured entries in an analysis file. Use when the user says "/capture-analysis", "analisa isso", "estuda isso", "documenta essa melhoria", "adiciona no analysis", "lessons learned", or wants to record a finding for future skill updates — even if they don't explicitly say "analysis."
+description: >-
+  Capture skill gaps, workflow frictions, and pattern improvements as structured
+  entries in an analysis file. Use when the user says "/capture-analysis",
+  "analisa isso", "estuda isso", "documenta essa melhoria", "adiciona no
+  analysis", "lessons learned", or wants to record a finding for future skill
+  updates — even if they don't explicitly say "analysis."
 user-invocable: true
 allowed-tools:
   - Read
   - Write
   - Glob
+  - Bash
 ---
 
-# Analysis
+# Capture Analysis
 
 Capture learnings during work sessions as structured, project-agnostic entries in `analysis.md`. This file is a feedback buffer between skill users and skill maintainers — consistent format in, reliable implementation out.
+
+## Input contract
+
+<input_contract>
+
+| Input | Source | Required | Validation | On invalid |
+|-------|--------|----------|------------|------------|
+| `action` | $ARGUMENTS | no | One of: free text, `remove <N>`, empty | AUQ: "What do you want to capture?" |
+| `entry number` | $ARGUMENTS (remove flow) | conditional | Positive integer matching existing entry | List valid entry numbers and stop |
+
+</input_contract>
+
+## Output contract
+
+<output_contract>
+
+| Artifact | Path | Persists | Format |
+|----------|------|----------|--------|
+| Analysis entry | `./analysis.md` | yes | Markdown (numbered entry) |
+| .gitignore update | `./.gitignore` | yes | Text append |
+| Report | stdout | no | Markdown summary |
+
+</output_contract>
+
+## External state
+
+<external_state>
+
+| Resource | Path | Access | Format |
+|----------|------|--------|--------|
+| Analysis file | `./analysis.md` | R/W | Markdown |
+| Gitignore | `./.gitignore` | R/W | Text |
+
+</external_state>
+
+## Pre-flight
+
+<pre_flight>
+
+1. If `$ARGUMENTS` matches remove pattern (`remove <N>` or `remover <N>`) → switch to Remove entry flow.
+2. If `$ARGUMENTS` is empty → AUQ: "What do you want to capture?" — stop if no response.
+3. Run `date "+%H:%M"` for the current timestamp.
+
+</pre_flight>
 
 ## Steps
 
 ### 1. Load or create
 
-Check if `analysis.md` exists at the project root. Run `date "+%H:%M"` for the current timestamp.
+Check if `analysis.md` exists at the project root.
 
 - **File exists** → read it, note the last entry number.
 - **File doesn't exist** → check `.gitignore` for `analysis.md`. If not present, append `analysis.md` to `.gitignore` (this file contains session-specific learnings, not project code). Then create it with the header:
@@ -32,14 +82,7 @@ Purpose: project-agnostic learnings to feed back into skills.
 
 ### 2. Parse the input
 
-**Input contract:**
-- **No arguments** → prompt the user for what to capture.
-- **Free text** → extract the learning (main flow below).
-- **`remove <N>` or `remover <N>`** → go to the **Remove entry** flow. `N` must be a positive integer matching an existing entry number. If `N` is not a number, out of range, or the file has no entries, tell the user what went wrong and list valid entry numbers (or state the file is empty).
-
-If `$ARGUMENTS` matches the remove pattern, go to the **Remove entry** flow below.
-
-Otherwise, extract from the user's description:
+Extract from the user's description:
 - **What happened** — the concrete trigger situation
 - **What's missing or broken** — current vs expected behavior
 - **What should change** — proposal with enough detail to implement
@@ -78,7 +121,7 @@ Update the `Source session:` line in the header to the current date and time.
 
 Tell the user: entry number, title, and total entry count. One line.
 
-## Remove entry
+### 6. Remove entry (conditional flow)
 
 When the user says `/capture-analysis remove N` or marks an item as implemented:
 
@@ -89,20 +132,74 @@ When the user says `/capture-analysis remove N` or marks an item as implemented:
 5. If no entries remain, delete the file entirely (`rm analysis.md`).
 6. Confirm: "Removed entry N: [title]. [M entries remaining / File removed.]"
 
+### 7. Report
+
+<report>
+
+Present concisely:
+- **Action:** entry added, updated, or removed
+- **Entry:** number and title
+- **Total entries:** current count in `analysis.md`
+- **Audit results:** self-audit summary
+- **Errors:** issues encountered (or "none")
+
+</report>
+
+## Next action
+
+Review accumulated entries periodically and feed them into skill updates via `/update-skill`.
+
+## Self-audit
+
+<self_audit>
+
+Before presenting the Report, verify:
+
+1. **Pre-flight passed?** — input source identified, timestamp obtained
+2. **Steps completed?** — entry written or removed as requested
+3. **Output exists?** — `analysis.md` updated with correct entry number and structure
+4. **No duplicates?** — existing entries scanned before writing
+5. **Anti-patterns clean?** — entry is project-agnostic, actionable, and identifies affected skill
+
+</self_audit>
+
+## Content audit
+
+<content_audit>
+
+Before finalizing output, verify:
+
+1. **Project-agnostic?** — no project-specific file paths, domain terms, or business logic in the entry
+2. **Skill identified?** — `**Skill:**` field present with backtick-wrapped name and scope hint
+3. **Actionable proposal?** — proposed solution names a specific skill, section, and change
+4. **One concern per entry?** — no mixed issues in a single entry
+
+</content_audit>
+
+## Error handling
+
+| Failure | Strategy |
+|---------|----------|
+| `analysis.md` not found (remove flow) | Report "No analysis file found" → stop |
+| Invalid entry number | List valid entry numbers → stop |
+| `.gitignore` not found | Create it with `analysis.md` entry |
+| Vague input | Ask ONE clarifying question, then proceed |
+
+## Anti-patterns
+
+- **Project-specific content.** Domain terms, specific file paths from the current project, business logic — because entries must be reusable across all projects that consume the skill.
+- **Vague entries without proposals.** "Improve X" without saying how — because skill maintainers cannot implement without concrete changes to specific sections.
+- **Duplicate entries.** Adding a new entry when the same concern exists — because duplicates create confusion and waste review time. Always scan and update instead.
+- **One-time fixes as entries.** Recording something that happened once and won't recur — because analysis entries should capture repeatable patterns, not incidents.
+
 ## Guidelines
 
-- **Project-agnostic content only.** Never reference project-specific files, domain terms, or business logic. Generalize: "when a migration introduces new tables" not "the Supabase migration for the owners table". This file feeds into global skills that work across all projects — project-specific details make entries unusable outside their origin context.
+- **Project-agnostic content only.** Never reference project-specific files, domain terms, or business logic. Generalize: "when a migration introduces new tables" not "the Supabase migration for the owners table" — because this file feeds into global skills that work across all projects.
 
-- **Always identify the affected skill.** Every entry must have a `**Skill:**` field after the title. Infer the skill from context — which skill was running when the issue occurred, or which skill the user references. If ambiguous, ask. Format: backtick-wrapped skill name + parenthetical scope hint (e.g., `` `create-diagram` (Phase 3 Excalidraw agent) ``). This makes entries scannable and unambiguous when consumed in a different session.
+- **Always identify the affected skill.** Every entry must have a `**Skill:**` field. Infer the skill from context — which skill was running when the issue occurred. Format: backtick-wrapped skill name + parenthetical scope hint — because this makes entries scannable and unambiguous when consumed in a different session.
 
-- **One concern per entry.** If the user describes multiple issues, create multiple entries. Mixed entries are harder to implement and harder to remove when partially done.
+- **One concern per entry.** If the user describes multiple issues, create multiple entries — because mixed entries are harder to implement and harder to remove when partially done.
 
-- **Actionable proposals.** Every entry must end with something a skill maintainer can implement — a specific change to a specific skill, command, or workflow. "Improve the push skill" is not actionable. "Add a pre-commit check for ARCHITECTURE.md drift to the push skill's Step 3" is.
+- **Actionable proposals.** Every entry must end with something a skill maintainer can implement — a specific change to a specific skill section — because "improve the push skill" is not actionable while "add a pre-commit check to push Step 3" is.
 
-- **Stale entry awareness.** When loading an existing file, check the `Source session` date. If entries are older than 2 weeks with no action, mention it to the user: "This file has entries from [date] — want to review them before adding more?"
-
-- **Avoid these anti-patterns:**
-  - Project-specific content (domain terms, specific file paths from the current project, business logic)
-  - Vague entries without concrete proposals ("improve X" without saying how)
-  - Duplicate entries — always check existing entries before adding; update if same concern with new context
-  - Entries that describe a one-time fix, not a repeatable pattern (if it only happened once and won't recur, it's not worth a skill change)
+- **Stale entry awareness.** When loading an existing file, check the `Source session` date. If entries are older than 2 weeks, mention it: "This file has entries from [date] — want to review them before adding more?" — because stale entries lose context and may no longer be relevant.

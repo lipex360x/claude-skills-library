@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "improve-codebase-architecture",
+  "plugin": "meta",
+  "created": "2025-12-15",
+  "lastModified": "2026-03-24",
+  "lineCount":      209,
+  "skeleton": {
+    "inputContract": true,
+    "outputContract": true,
+    "externalState": true,
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": true,
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 7,
+  "approvalGates": 2,
+  "references": ["dependency-categories.md", "rfc-template.md"],
+  "templates": [],
+  "scripts": [],
+  "dependencies": {
+    "tools": ["gh"],
+    "configs": ["ARCHITECTURE.md"],
+    "skills": []
+  },
+  "audit": { "lastRun": null, "score": null, "gaps": [] }
+}
