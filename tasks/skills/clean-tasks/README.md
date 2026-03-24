@@ -2,7 +2,7 @@
 
 > Remove completed tasks from the task visibility board, keeping pending and in-progress items.
 
-Tidies up the task list by deleting all completed tasks while leaving pending and in-progress items untouched.
+Tidies up the task list by identifying and deleting all completed tasks while preserving pending and in-progress items. Useful for keeping the task board focused on active work without manual cleanup.
 
 ## Usage
 
@@ -11,20 +11,21 @@ Tidies up the task list by deleting all completed tasks while leaving pending an
 ```
 
 > [!TIP]
-> Also activates when saying "remove done tasks", "clear completed", "tv clean", or wanting to tidy up the task list.
+> Also activates when you say "remove done tasks", "clear completed", "tv clean", or want to tidy up the task list.
 
 ## How it works
 
-1. **List** — reads all tasks from the task board
-2. **Filter** — identifies tasks with completed status
-3. **Delete** — removes each completed task using `TaskUpdate` with status `deleted`
-4. **Confirm** — reports how many tasks were removed
+1. **Find completed tasks** — scans the task board for all tasks with completed status
+2. **Delete completed tasks** — removes each completed task using `TaskUpdate` with status `deleted`
+3. **Report** — confirms how many tasks were removed, how many remain, and any errors
 
 ## Directory structure
 
 ```text
 clean-tasks/
-└── SKILL.md              # Core instructions
+├── SKILL.md              # Core skill instructions
+├── README.md             # This file
+└── skill-meta.json       # Skill metadata
 ```
 
 ## Installation

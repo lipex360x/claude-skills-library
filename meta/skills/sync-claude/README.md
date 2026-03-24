@@ -1,44 +1,37 @@
 # sync-claude
 
-Synchronize the Claude Code environment (skills-library + .brain) across machines in one command.
+> Synchronize the Claude Code environment (skills-library + .brain) across machines.
 
-## What it does
-
-- Pulls latest from both `skills-library` and `.brain` git repos
-- Rebuilds all symlinks via `setup.sh`
-- Verifies the installation and reports discrepancies
-- Handles dirty working trees and diverged branches gracefully
-
-## Install
-
-**Global (recommended):**
-
-```bash
-npx @anthropic-ai/claude-code-skills add lipex360x/claude-skills-library/meta/skills/sync-claude -a claude-code -y
-```
-
-**Local (project-only):**
-
-```bash
-npx @anthropic-ai/claude-code-skills add lipex360x/claude-skills-library/meta/skills/sync-claude --copy -a claude-code -y
-```
+Pulls latest from both `skills-library` and `.brain` repos, rebuilds all symlinks via `setup.sh`, and verifies the installation. Handles dirty working trees and diverged branches gracefully with user-driven choices.
 
 ## Usage
 
-```
+```text
 /sync-claude
 ```
 
-Or use natural language:
-- "sync my skills"
-- "pull latest skills"
-- "update claude code environment"
-- "sync brain"
+> [!TIP]
+> Also activates when you say "sync claude", "sync skills", "sync brain", "pull skills", "update claude code", "update skills", "atualiza skills", "sincroniza", or want to bring your environment up to date.
 
-## Triggers
+## How it works
 
-Activates when the user mentions syncing, pulling, or updating the Claude Code environment, skills, or brain config — even without saying "sync" explicitly.
+1. **Check working tree status** — Detects uncommitted changes in each repo; offers stash-and-pull, skip, or abort
+2. **Pull latest** — Runs `git pull` on both repos; handles diverged branches with rebase/skip/abort options
+3. **Rebuild symlinks** — Executes `setup.sh` to recreate all skill symlinks after both pulls complete
+4. **Verify sync** — Checks for broken symlinks, unmanaged directories, and wrong targets in `~/.claude/skills/`
+5. **Report** — Shows per-repo status (commits pulled, branch), symlink count, and any discrepancies
 
-## Plugin
+## Directory structure
 
-`meta` — alongside `/install-skill`, `/uninstall-skill`
+```text
+sync-claude/
+├── SKILL.md              # Core skill instructions
+├── README.md             # This file
+└── skill-meta.json       # Skill metadata
+```
+
+## Installation
+
+```bash
+npx skills add lipex360x/claude-skills-library --skill sync-claude
+```

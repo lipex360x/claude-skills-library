@@ -2,7 +2,7 @@
 
 > Close the task visibility board and stop task tracking for the session.
 
-Shuts down the task board by deleting all tasks and disabling the always-open setting, effectively stopping task tracking until reopened.
+Shuts down the task board by deleting all tasks and disabling the always-open config flag. Warns before closing if any tasks are still in-progress, ensuring no active work is accidentally lost.
 
 ## Usage
 
@@ -11,22 +11,23 @@ Shuts down the task board by deleting all tasks and disabling the always-open se
 ```
 
 > [!TIP]
-> Also activates when saying "stop tracking", "tv close", "hide tasks", or wanting to disable the task board.
+> Also activates when you say "stop tracking", "tv close", "hide tasks", or want to disable the task board.
 
 ## How it works
 
-1. **Pre-check** — reads config to verify the board isn't already closed
-2. **Safety check** — warns before closing if any tasks are still in-progress
-3. **Delete** — removes all tasks from the task list using `TaskUpdate` with status `deleted`
-4. **Disable** — sets `task-visibility.always-open` to `false` in config
-5. **Verify** — reads config again to confirm the change persisted
-6. **Confirm** — reports the board is closed and how many tasks were removed
+1. **Check for in-progress tasks** — warns the user if any tasks are still active before proceeding
+2. **Delete all tasks** — removes every task from the board using `TaskUpdate` with status `deleted`
+3. **Update config** — sets `task-visibility.always-open` to `false` in the behavior config
+4. **Verify config change** — re-reads the config file to confirm the change persisted
+5. **Report** — confirms the board is closed, how many tasks were removed, and any errors
 
 ## Directory structure
 
 ```text
 close-tasks/
-└── SKILL.md              # Core instructions
+├── SKILL.md              # Core skill instructions
+├── README.md             # This file
+└── skill-meta.json       # Skill metadata
 ```
 
 ## Installation
