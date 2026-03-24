@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "update-skill",
+  "plugin": "meta",
+  "created": "2026-03-24",
+  "lastModified": "2026-03-24",
+  "lineCount": 236,
+  "skeleton": {
+    "inputContract": true,
+    "outputContract": true,
+    "externalState": true,
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": true,
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 9,
+  "approvalGates": 0,
+  "references": [
+    "review-checklist.md",
+    "scoped-audit-mapping.md",
+    "skeleton-template.md",
+    "skill-meta-spec.md"
+  ],
+  "templates": [],
+  "scripts": [],
+  "dependencies": {
+    "tools": [],
+    "configs": ["STRUCTURE.md"],
+    "skills": []
+  },
+  "audit": {
+    "lastRun": null,
+    "score": null,
+    "gaps": []
+  }
+}
