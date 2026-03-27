@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "teach-me",
+  "plugin": "learning",
+  "created": "2026-03-27",
+  "lastModified": "2026-03-27",
+  "lineCount": 242,
+  "skeleton": {
+    "inputContract": true,
+    "outputContract": true,
+    "externalState": true,
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": true,
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 10,
+  "approvalGates": 0,
+  "references": [
+    "hint-escalation.md",
+    "replay-mode.md",
+    "study-guide.md"
+  ],
+  "templates": [],
+  "scripts": [],
+  "dependencies": {
+    "tools": ["Read", "Bash", "Write", "Edit", "Glob", "Grep"],
+    "configs": [],
+    "skills": []
+  },
+  "audit": {
+    "lastRun": "2026-03-27 (derived from real session — 17 analysis entries)",
+    "score": "40/41 (4 warnings, 0 failures, 4 N/A)",
+    "gaps": ["activation testing with 3+ trigger phrases pending", "systematic failure mode testing pending"]
+  }
+}

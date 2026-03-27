@@ -2,7 +2,7 @@
 
 > Production-ready skills for Claude Code — organized as plugins.
 
-A collection of **37 skills** across **8 plugins**, each following a canonical 13-section skeleton that ensures consistency, quality, and self-auditing. Every skill is a `/command` — invoke it by name and it handles the rest.
+A collection of **38 skills** across **9 plugins**, each following a canonical 13-section skeleton that ensures consistency, quality, and self-auditing. Every skill is a `/command` — invoke it by name and it handles the rest.
 
 [Installation](#installation) • [Skill anatomy](#skill-anatomy) • [Plugins](#plugins) • [Adding new skills](#adding-new-skills)
 
@@ -89,7 +89,7 @@ Sections longer than ~15 lines are extracted to `references/` with a `Read refer
 
 ## Plugins
 
-Skills are organized into **8 plugin groups** by domain. Each plugin is a directory containing related skills. Invoke any skill directly by name (e.g., `/push`, `/create-skill`).
+Skills are organized into **9 plugin groups** by domain. Each plugin is a directory containing related skills. Invoke any skill directly by name (e.g., `/push`, `/create-skill`).
 
 ---
 
@@ -200,6 +200,18 @@ Skills are organized into **8 plugin groups** by domain. Each plugin is a direct
 | [sync-claude](./meta/skills/sync-claude/) | Synchronize the Claude Code environment (skills-library + .brain) across machines — pull, rebuild symlinks, verify. |
 | [uninstall-skill](./meta/skills/uninstall-skill/) | Uninstall a skill by name, local or global. |
 | [update-skill](./meta/skills/update-skill/) | Scoped edits to existing skills — reads skill-meta.json, modifies affected sections, verifies skeleton compliance. |
+
+[Back to top](#claude-skills-library)
+
+---
+
+### learning
+
+> Guided learning sessions with TDD, progressive hints, and study guides.
+
+| Skill | Description |
+|-------|-------------|
+| [teach-me](./learning/skills/teach-me/) | Guided TDD teaching sessions — reads student code, provokes with questions, explains only when asked. Supports replay mode and gist-based study guides. |
 
 [Back to top](#claude-skills-library)
 
