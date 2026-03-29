@@ -17,6 +17,8 @@ allowed-tools:
 
 Close a GitHub issue with a recorded reason, move its board card to "Cancelled", unblock dependent issues, and clean up associated branches and PRs. Preserves the full decision trail in GitHub history.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

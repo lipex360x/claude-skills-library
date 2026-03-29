@@ -14,6 +14,8 @@ allowed-tools:
 
 Generate or review README.md files that are appealing, informative, and easy to read.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

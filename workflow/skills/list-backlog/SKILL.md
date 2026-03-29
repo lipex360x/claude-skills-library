@@ -14,6 +14,8 @@ allowed-tools:
 
 List all issues in the "Backlog" column of the project board for the current repo, with dependency detection and optional size sorting.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

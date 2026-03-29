@@ -19,6 +19,8 @@ allowed-tools:
 
 Discover and install skills from the open agent skills ecosystem.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

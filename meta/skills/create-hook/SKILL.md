@@ -20,6 +20,8 @@ allowed-tools:
 
 Step-by-step guide for building Claude Code hooks. Hooks are bash scripts (or prompts) triggered by events — deterministic, zero-fail-rate enforcement that runs outside the LLM.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

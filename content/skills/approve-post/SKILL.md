@@ -19,6 +19,8 @@ allowed-tools:
 
 Finalize a LinkedIn draft — review both language versions, publish to local files, and optionally sync to Google Drive.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

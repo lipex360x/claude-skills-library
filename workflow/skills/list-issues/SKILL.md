@@ -14,6 +14,8 @@ allowed-tools:
 
 List all open issues for the current repo, grouped by project board status column and sorted by priority, with dependency detection and next-issue suggestion.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 > _Skipped: "No input — lists all open issues for the current repo."_

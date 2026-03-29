@@ -16,6 +16,8 @@ allowed-tools:
 
 Explore a codebase like an agent would, surface architectural friction, and propose module-deepening refactors as GitHub issue RFCs. Based on John Ousterhout's "A Philosophy of Software Design" — deep modules (small interface, large implementation) improve testability, navigability, and agent output quality.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

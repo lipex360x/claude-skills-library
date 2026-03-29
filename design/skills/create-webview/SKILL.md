@@ -21,6 +21,8 @@ argument-hint: "[data-sources-or-description]"
 
 Transform structured data from any source (Excel, PowerPoint, CSV, JSON, SQLite, images) into polished HTML slide presentations with optional PDF export.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

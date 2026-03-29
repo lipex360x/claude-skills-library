@@ -21,6 +21,8 @@ allowed-tools:
 
 Analyze raw input (document, conversation, verbal idea) and produce a structured spec file. The spec pre-makes 90% of decisions so `/create-skill` can execute without ambiguity. The output is a self-contained spec — a fresh session can read it and build the skill without prior context.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

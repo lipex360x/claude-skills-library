@@ -18,6 +18,8 @@ allowed-tools:
 
 Close the task visibility board, delete all tasks, and disable task tracking for the session.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

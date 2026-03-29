@@ -22,6 +22,8 @@ argument-hint: "[brief description of what's blocking you]"
 
 Structured exploration session that unblocks thinking on any topic — career, creative, business, relationships, health, or learning. Combines deep questioning, optional document analysis, and web research to generate actionable insights.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

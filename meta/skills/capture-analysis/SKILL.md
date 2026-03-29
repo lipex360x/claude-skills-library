@@ -18,6 +18,8 @@ allowed-tools:
 
 Capture learnings during work sessions as structured, project-agnostic entries in `analysis.md`. This file is a feedback buffer between skill users and skill maintainers — consistent format in, reliable implementation out.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

@@ -22,6 +22,8 @@ allowed-tools:
 
 Evaluate one or more existing skills against the review checklist from `/create-skill` and produce structured, machine-consumable audit reports. This skill is **read-only** — it never modifies the audited skill.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

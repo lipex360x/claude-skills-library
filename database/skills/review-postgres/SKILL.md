@@ -16,6 +16,8 @@ allowed-tools:
 
 Review and optimize Postgres queries, schemas, and configurations using Supabase best practices across 8 rule categories prioritized by impact.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

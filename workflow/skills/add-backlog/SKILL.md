@@ -19,6 +19,8 @@ argument-hint: <description>
 
 Create a GitHub issue with structured acceptance criteria and add it to the project board's **Backlog** column. Ensures every issue is board-tracked, scope-analyzed, and blocker-aware.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

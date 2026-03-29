@@ -19,6 +19,8 @@ allowed-tools:
 
 Generate a continuation prompt the user can paste into a new Claude Code conversation to resume work seamlessly. Captures branch state, conversation decisions, and pending work — the things a fresh session cannot recover from git alone.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

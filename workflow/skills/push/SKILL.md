@@ -22,6 +22,8 @@ allowed-tools:
 
 Stage, commit, push, and update the related GitHub issue — all in one command. Default behavior: draft the commit message and proceed immediately. Only stop and ask when something goes wrong.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

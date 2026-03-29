@@ -24,6 +24,8 @@ allowed-tools:
 
 Create compelling written content and persuasive copy that sounds like the user wrote it — not like AI. Combines storytelling science, conversion copywriting principles, insights from 38 product leaders, and the user's personal voice profile.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>
@@ -302,6 +304,6 @@ Read `references/storytelling-science.md` for the neuroscience behind these patt
 
 - **Structure serves story.** Choose the framework (ABT, Story Circle, Pyramid) that best serves the content, not the one that's easiest to fill — because forcing content into the wrong structure produces awkward writing.
 
-- **Platform-aware writing.** LinkedIn: 210-char hook, 1000-3000 chars, generous line breaks, 3-5 hashtags, end with specific question (comments > likes). Marketing pages: one idea per section, logical persuasive flow toward CTA. Read `references/copy-frameworks.md` for page structure templates.
+- **Platform-aware writing.** LinkedIn: 210-char hook, up to 3000 chars, generous line breaks, no hashtags, end with specific question (comments > likes). Marketing pages: one idea per section, logical persuasive flow toward CTA. Read `references/copy-frameworks.md` for page structure templates.
 
 - **Iterate, don't restart.** When the user gives feedback, refine the existing draft. Starting over wastes the thinking embedded in the current version — because first drafts capture insights that rewrites often lose.

@@ -21,6 +21,8 @@ argument-hint: "<diagram description>"
 
 Generate visually polished Excalidraw diagrams from natural language descriptions. Every diagram should look intentionally designed — not like default AI output.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

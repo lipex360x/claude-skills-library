@@ -22,6 +22,8 @@ argument-hint: "[project-slug]"
 
 Extract a design system from a reference image and create a complete project with separated artboards. The user stays on the project hub throughout — thumbnails appear progressively as each agent completes its artboard.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

@@ -25,6 +25,8 @@ argument-hint: "[spec-file]"
 
 Step-by-step factory for building structurally consistent Claude Code skills. Every output follows the 13-section canonical skeleton.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

@@ -22,6 +22,8 @@ allowed-tools:
 
 Capture the user's **writing voice** from conversations and persist it to a voice profile. The goal: generate content (posts, articles, social media) that sounds like the user wrote it — not like an AI wrote it.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

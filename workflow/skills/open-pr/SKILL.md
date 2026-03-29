@@ -18,6 +18,8 @@ argument-hint: [title]
 
 Create a pull request from the current branch, link it to the related issue, resolve incomplete checkboxes, and move the project board card to "In review."
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

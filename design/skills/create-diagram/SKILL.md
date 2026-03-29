@@ -23,6 +23,8 @@ argument-hint: "[diagram-description-or-reference-image]"
 
 Generate professional diagrams through a spec-driven workflow: define the structure in a JSON spec, preview as HTML, then convert to editable Excalidraw — ensuring visual fidelity across formats.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

@@ -25,6 +25,8 @@ argument-hint: "<skill-name> [change description]"
 
 Surgical edits to existing skills — instant context via `skill-meta.json`, scoped changes, and skeleton compliance verification after every modification.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>

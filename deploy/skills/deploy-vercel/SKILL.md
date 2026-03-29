@@ -16,6 +16,8 @@ allowed-tools:
 
 Deploy, manage, and develop projects on the Vercel platform using the `vercel` (or `vc`) CLI. Run `vercel <command> -h` for full flag details on any command.
 
+**IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
+
 ## Input contract
 
 <input_contract>
