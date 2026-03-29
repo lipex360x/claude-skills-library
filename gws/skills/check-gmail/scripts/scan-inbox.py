@@ -7,7 +7,9 @@ and tail-stripping breakage (lesson 3). Uses gws-claude.sh wrapper (lesson 1).
 
 Outputs clean JSON to stdout. Progress to stderr.
 
-Usage: python3 scan-inbox.py [maxResults]
+Usage: python3 scan-inbox.py [maxResults] [account]
+
+  account: "personal" (default) | "ireland" | "cct"
 """
 
 import json
@@ -15,8 +17,23 @@ import os
 import subprocess
 import sys
 
-GWS = os.path.expanduser("~/.brain/integrations/gws/gws-claude.sh")
-MAX_RESULTS = int(sys.argv[1]) if len(sys.argv) > 1 else 50
+ACCOUNT_MAP = {
+    "personal": os.path.expanduser("~/.brain/integrations/gws/gws-claude.sh"),
+    "ireland": os.path.expanduser("~/.brain/integrations/gws-ireland/gws-claude.sh"),
+    "cct": os.path.expanduser("~/.brain/integrations/gws-cct/gws-claude.sh"),
+}
+
+# Parse args: scan-inbox.py [maxResults] [account]
+MAX_RESULTS = 50
+ACCOUNT = "personal"
+
+for arg in sys.argv[1:]:
+    if arg.isdigit():
+        MAX_RESULTS = int(arg)
+    elif arg in ACCOUNT_MAP:
+        ACCOUNT = arg
+
+GWS = ACCOUNT_MAP[ACCOUNT]
 
 
 def gws_call(args, params=None, body=None):
@@ -79,14 +96,13 @@ def extract_email(from_header):
 
 
 # --- Pre-flight auth check ---
-print("Pre-flight: checking auth...", file=sys.stderr)
+print(f"Pre-flight: checking auth ({ACCOUNT})...", file=sys.stderr)
 try:
     profile = gws_call(["gmail", "users", "getProfile"], params={"userId": "me"})
     email = profile.get("emailAddress", "unknown")
     print(f"Auth OK: {email}", file=sys.stderr)
 except SystemExit:
-    print("\nAuth failed. Re-authenticate with:", file=sys.stderr)
-    print("  ~/.brain/integrations/gws/gws-auth.sh", file=sys.stderr)
+    print(f"\nAuth failed for account: {ACCOUNT}", file=sys.stderr)
     sys.exit(1)
 
 # --- List inbox messages ---
