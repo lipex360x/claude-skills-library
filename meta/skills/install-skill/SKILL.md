@@ -1,5 +1,6 @@
 ---
 name: install-skill
+model: sonnet
 description: >-
   Install a skill from an npx skills link, with local or global selection. Use
   this skill when the user says "install skill", "add skill", "skill install",
@@ -106,6 +107,8 @@ Run the npx command with `--copy -a claude-code -y` flags. If the command fails 
 Find the new skill directory in `.claude/skills/`. Read its SKILL.md — if missing or has no frontmatter (`name`, `description`), the package is malformed. Warn and stop.
 
 **Quality gate:** Confirm SKILL.md has at minimum `name`, `description`, and `user-invocable` in frontmatter. If `description` lacks trigger phrases, flag as a quality concern.
+
+**Model selection:** If the skill's frontmatter has no `model:` field, evaluate its complexity. Operational skills (clear script, API calls, structured data, CLI commands) get `model: sonnet`. Analytical/creative skills (deep reasoning, architecture, creative writing) keep the default (opus). Add the field to the frontmatter if missing.
 
 ### 7. Determine target plugin group (global only)
 

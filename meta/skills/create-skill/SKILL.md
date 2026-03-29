@@ -131,6 +131,8 @@ Read `references/skeleton-template.md` — the mandatory starting point. Every s
 
 Frontmatter → Title+Intro → Input contract → Output contract → External state → Pre-flight → Steps (Report always last) → Next action → Self-audit → Content audit → Error handling → Anti-patterns → Guidelines
 
+**Model selection in frontmatter:** Evaluate if the skill is operational (follows a clear script, calls APIs, processes structured data, runs CLI commands) or analytical/creative (requires deep reasoning, architecture analysis, creative writing, nuanced judgment). Operational skills get `model: sonnet` in the frontmatter. Analytical/creative skills omit `model:` (defaults to opus). When in doubt, omit — it's safer to use opus than to underpower a complex skill.
+
 **Writing rules:**
 
 - Sections are never omitted — use `> _Skipped: "reason"_` when not applicable

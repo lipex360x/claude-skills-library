@@ -1,5 +1,6 @@
 ---
 name: list-issues
+model: sonnet
 description: >-
   List all open issues grouped by board column with priority sorting and
   next-issue suggestion. Use this skill when the user says "list issues",

@@ -1,5 +1,6 @@
 ---
 name: capture-analysis
+model: sonnet
 description: >-
   Capture skill gaps, workflow frictions, and pattern improvements as structured
   entries in an analysis file. Use when the user says "/capture-analysis",

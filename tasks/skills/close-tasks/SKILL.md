@@ -1,5 +1,6 @@
 ---
 name: close-tasks
+model: sonnet
 description: >-
   Close the task visibility board and stop task tracking for the session. Use
   this skill when the user says "close tasks", "stop tracking", "tv close",

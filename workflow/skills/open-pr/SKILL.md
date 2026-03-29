@@ -1,5 +1,6 @@
 ---
 name: open-pr
+model: sonnet
 description: >-
   Create a pull request from the current branch, linking it to the open issue.
   Use this skill when the user says "create pr", "open pr", "pr create",

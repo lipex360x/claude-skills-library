@@ -1,5 +1,6 @@
 ---
 name: find-skills
+model: sonnet
 description: >-
   Discover and install agent skills from the open skills ecosystem. Use when the
   user says "find a skill", "is there a skill for X", "search skills", "how do I

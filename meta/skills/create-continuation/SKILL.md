@@ -1,5 +1,6 @@
 ---
 name: create-continuation
+model: sonnet
 description: >-
   Generate a continuation prompt to paste into a new Claude Code conversation.
   Use this skill when the user wants to switch sessions, is hitting context

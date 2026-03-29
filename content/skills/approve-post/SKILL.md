@@ -1,5 +1,6 @@
 ---
 name: approve-post
+model: sonnet
 description: >-
   Approve the current draft, generate English translation, and publish to local
   files and Google Drive. Use this skill when the user says "approve post",

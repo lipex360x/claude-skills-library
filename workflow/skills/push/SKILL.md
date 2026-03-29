@@ -1,5 +1,6 @@
 ---
 name: push
+model: sonnet
 description: >-
   Commit, push, and update GitHub issue checkboxes in one command. Analyzes
   changes, drafts a conventional commit message, stages, commits (with husky

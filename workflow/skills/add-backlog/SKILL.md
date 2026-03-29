@@ -1,5 +1,6 @@
 ---
 name: add-backlog
+model: sonnet
 description: >-
   Create a GitHub issue and add it to the project board's Backlog column. Use
   this skill when the user says "add to backlog", "create backlog issue",
