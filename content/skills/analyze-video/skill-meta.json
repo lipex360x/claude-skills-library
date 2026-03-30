@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "analyze-video",
+  "plugin": "content",
+  "created": "2026-03-30",
+  "lastModified": "2026-03-30",
+  "lineCount": 267,
+  "skeleton": {
+    "inputContract": true,
+    "outputContract": true,
+    "externalState": true,
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": true,
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 7,
+  "approvalGates": 2,
+  "references": [],
+  "templates": [
+    "extract-questions.md",
+    "extract-tutorial.md",
+    "analyze-frames.md"
+  ],
+  "scripts": [
+    "clean-srt.py"
+  ],
+  "dependencies": {
+    "tools": ["yt-dlp", "ffmpeg", "jq", "python3"],
+    "configs": [],
+    "skills": []
+  },
+  "audit": {
+    "lastRun": null,
+    "score": null,
+    "gaps": []
+  }
+}
