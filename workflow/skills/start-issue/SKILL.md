@@ -79,6 +79,7 @@ Turn an issue with high-level acceptance criteria into a detailed implementation
 2. `gh auth status` → if not authenticated: "Run `gh auth login` first." — stop.
 3. Current directory is a git repo → if not: "Must run inside a git repo." — stop.
 4. Working tree is clean → if dirty: warn user about uncommitted changes, suggest stashing.
+5. **Read ARCHITECTURE.md** → if `./ARCHITECTURE.md` exists, read it NOW and store the content. This is the primary codebase context (~2k tokens). Do NOT spawn an Explore agent or scan the codebase if ARCHITECTURE.md provides sufficient context. Only explore when: (a) ARCHITECTURE.md doesn't exist (create it), or (b) the issue touches areas not covered by it. This check saves ~50k tokens per invocation.
 
 </pre_flight>
 
@@ -124,13 +125,12 @@ gh issue view <number> --json comments --jq '.comments[] | {author: .author.logi
 
 Scan comments for: file paths, scope transfers from `/open-pr` or `/close-pr`, partial completion notes, blocker resolutions, implementation hints. Store as **comment insights** to narrow exploration scope.
 
-**Analyze the current codebase.** Start by checking for `ARCHITECTURE.md` at the project root. If it exists, read it first — it contains stack, layers, patterns, schema, auth model, and routes (~2k tokens vs ~53k for full exploration). Only spawn an exploration agent if ARCHITECTURE.md is missing, incomplete, or stale.
+**Codebase context — ARCHITECTURE.md is the gate.** Pre-flight already loaded ARCHITECTURE.md. Use it as the primary source. Do NOT spawn an Explore agent unless:
+- ARCHITECTURE.md was missing (create it after exploring)
+- The issue touches areas not described in ARCHITECTURE.md (explore only those areas, not the full codebase)
+- Comments point to specific files not in ARCHITECTURE.md (read those files directly, not via Explore)
 
-Apply comment insights to narrow exploration — if comments point to specific files, target those instead of a full scan. If comments plus ARCHITECTURE.md provide sufficient context, skip exploration entirely.
-
-**If ARCHITECTURE.md doesn't exist, create it.** Explore the codebase and generate it at the project root. This file is the living context document — `/close-pr` updates it after each merge.
-
-If ARCHITECTURE.md exists but is stale, update it with what you discover during exploration.
+If ARCHITECTURE.md exists and covers the issue scope: **zero exploration needed**. Read specific files mentioned in comments or ARCHITECTURE.md directly with the Read tool. An Explore agent costs ~50k tokens — never spawn one when a few targeted reads suffice.
 
 **CDP detection (for web projects).** Check:
 1. **CDP already configured?** Look for `.claude/project-settings.json` with `chrome.cdp` field. Store the `pages` map for verification checkboxes.
@@ -329,6 +329,7 @@ Before finalizing output, verify:
 Read `references/anti-patterns.md` for the full list (13 items). Key traps:
 
 - **Generic checkboxes without file paths.** "Add tests" instead of specifying the test file and expected behavior — because vague checkboxes produce vague implementations.
+- **Spawning Explore when ARCHITECTURE.md exists.** An Explore agent costs ~50k tokens. ARCHITECTURE.md has the same context in ~2k tokens — because it's updated by `/close-pr` after every merge. Read it first. Only explore areas it doesn't cover.
 - **Skipping Agent Teams check.** Proposing a plan without checking the env var first — because if enabled, the Execution mode section is mandatory.
 - **Multiple agents editing the same issue body.** Last write wins, earlier edits silently lost — because GitHub's issue API has no merge.
 
