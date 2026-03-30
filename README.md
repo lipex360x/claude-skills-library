@@ -2,7 +2,7 @@
 
 > Production-ready skills for Claude Code — organized as plugins.
 
-A collection of **37 skills** across **8 plugins**, each following a canonical 13-section skeleton that ensures consistency, quality, and self-auditing. Every skill is a `/command` — invoke it by name and it handles the rest.
+A collection of **39 skills** across **8 plugins**, each following a canonical 13-section skeleton that ensures consistency, quality, and self-auditing. Every skill is a `/command` — invoke it by name and it handles the rest.
 
 [Installation](#installation) • [Skill anatomy](#skill-anatomy) • [Plugins](#plugins) • [Adding new skills](#adding-new-skills)
 
@@ -180,6 +180,7 @@ Skills are organized into **8 plugin groups** by domain. Each plugin is a direct
 | [create-continuation](./meta/skills/create-continuation/) | Generate a continuation prompt for seamless session handoffs to a new conversation. |
 | [create-hook](./meta/skills/create-hook/) | Guide for creating or improving Claude Code hooks. |
 | [create-readme](./meta/skills/create-readme/) | Create or review a README.md for the project. |
+| [create-script](./meta/skills/create-script/) | Create bash scripts with the right structure — operational template for stateful scripts, direct for utilities. |
 | [create-skill](./meta/skills/create-skill/) | Guide for creating, reviewing, and improving Claude Code skills. |
 | [find-skills](./meta/skills/find-skills/) | Discover and install agent skills from the open ecosystem. |
 | [improve-codebase-architecture](./meta/skills/improve-codebase-architecture/) | Explore a codebase for architectural friction and propose deep-module refactors as GitHub issue RFCs. |
@@ -187,6 +188,7 @@ Skills are organized into **8 plugin groups** by domain. Each plugin is a direct
 | [plan-skill](./meta/skills/plan-skill/) | Plan and spec out a skill from raw input — produces a structured spec consumed by `/create-skill`. |
 | [sync-claude](./meta/skills/sync-claude/) | Synchronize the Claude Code environment (skills-library + .brain) across machines — pull, rebuild symlinks, verify. |
 | [uninstall-skill](./meta/skills/uninstall-skill/) | Uninstall a skill by name, local or global. |
+| [update-script](./meta/skills/update-script/) | Audit and upgrade existing bash scripts to follow operational patterns — flags, dry-run, validation, idempotency. |
 | [update-skill](./meta/skills/update-skill/) | Scoped edits to existing skills — reads skill-meta.json, modifies affected sections, verifies skeleton compliance. |
 
 [Back to top](#claude-skills-library)
