@@ -211,6 +211,23 @@ Present concisely:
 - **Reminder** — use `closes #N` in PR descriptions
 - **Next step** — "Start with Step 1"
 
+## Post-flight
+
+<post_flight>
+
+After presenting the Report, verify external state:
+
+1. **All issues exist on GitHub?** — for each created issue, `gh issue view <N> --json number` must succeed.
+2. **Board has 7 Status columns?** — query Status field options and verify all 7 present (Backlog, Todo, Ready, In Progress, In review, Done, Cancelled).
+3. **All issues have Priority and Size set?** — query board items and verify no null fields.
+4. **Branch exists on remote?** — `git ls-remote origin feature/<slug>` must return a commit hash.
+5. **Repo topics are lowercase-hyphenated?** — `gh repo view --json repositoryTopics` — no underscores or camelCase.
+6. **If split rule triggered:** verify max 8 steps per issue (count checkboxes in each issue body).
+
+If any check fails, report the specific failure and the fix command.
+
+</post_flight>
+
 ## Next action
 
 Run `/start-issue <number>` to begin working on the first issue (Phase 1).

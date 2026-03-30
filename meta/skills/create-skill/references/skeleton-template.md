@@ -23,14 +23,15 @@ Every skill follows this 13-section structure. Sections are never omitted — wh
 | 5 | External state | Table | `<external_state>` | Yes |
 | 6 | Pre-flight | Numbered list | `<pre_flight>` | **No** |
 | 7 | Steps | Numbered `###` headers | — | No |
-| 8 | Next action | 1-3 lines | — | Yes |
-| 9 | Self-audit | Numbered list | `<self_audit>` | **No** |
-| 10 | Content audit | Numbered list or criteria | `<content_audit>` | Yes |
-| 11 | Error handling | Table | — | Yes |
-| 12 | Anti-patterns | Bullet list | — | **No** |
-| 13 | Guidelines | Bullet list | — | **No** |
+| 8 | Post-flight | Numbered list | `<post_flight>` | Yes |
+| 9 | Next action | 1-3 lines | — | Yes |
+| 10 | Self-audit | Numbered list | `<self_audit>` | **No** |
+| 11 | Content audit | Numbered list or criteria | `<content_audit>` | Yes |
+| 12 | Error handling | Table | — | Yes |
+| 13 | Anti-patterns | Bullet list | — | **No** |
+| 14 | Guidelines | Bullet list | — | **No** |
 
-**Never-skip sections:** Pre-flight, Self-audit, Anti-patterns, and Guidelines always have content — every skill validates something, audits its own execution, has failure modes to avoid, and has principles to follow.
+**Never-skip sections:** Pre-flight, Post-flight (when the skill modifies external state), Self-audit, Anti-patterns, and Guidelines always have content — every skill validates something, verifies its effects, audits its own execution, has failure modes to avoid, and has principles to follow.
 
 ## Section reference
 
@@ -200,7 +201,51 @@ Guidelines for steps:
 - **One concern per step.** Each step should represent a focused work session.
 - **Report is always last.** It summarizes what happened, includes audit results, and closes the skill execution.
 
-### 8. Next action
+### 8. Post-flight
+
+Verification of external state after execution — the counterpart to Pre-flight. Pre-flight validates the environment before work begins; Post-flight validates the results landed correctly after work completes. Runs after the Report step but before presenting results to the user.
+
+Post-flight catches the most dangerous class of bugs: **silent failures** where the skill reports success but the mutation didn't land (GraphQL fails silently, `git push` times out, issue body update drops).
+
+```markdown
+## Post-flight
+
+<post_flight>
+
+After presenting the Report, verify external state:
+
+1. **Remote state landed?** — commits exist on origin (`git ls-remote`), PR created (`gh pr view`)
+2. **Board consistent?** — card in expected column (`gh project item-list`), fields set
+3. **Issue body matches intent?** — fetch and diff against expected content (`gh issue view`)
+4. **Working tree clean?** — no unstaged changes left behind (`git status --short`)
+5. **References bidirectional?** — scope transfers, blockers posted on both source and target
+
+If any check fails, report the specific failure and suggest the fix command. Do not silently retry — the user must know what drifted.
+
+</post_flight>
+```
+
+**When to skip:**
+
+```markdown
+## Post-flight
+
+> _Skipped: "No external state modified — conversational/read-only skill."_
+```
+
+**Scope:** Post-flight verifies **external state** (remote repos, GitHub API, board, files on disk). Self-audit verifies **process** (steps completed, gates honored, anti-patterns avoided). They are complementary — not redundant.
+
+Common post-flight checks by skill type:
+
+| Skill type | Post-flight checks |
+|---|---|
+| Git workflow (push, open-pr, close-pr) | Commits on remote, branch state, working tree clean |
+| Issue management (start-issue, add-backlog) | Issue body matches, board card in correct column, fields set |
+| Board operations (start-new-project) | Board has 7 columns, all items have status/priority/size |
+| File generation (create-skill, create-script) | Files exist on disk, symlinks resolve, registrations in STRUCTURE.md |
+| Scope transfers (open-pr, close-pr) | Comments posted bidirectionally, dependency annotations consistent |
+
+### 9. Next action
 
 What the user should do after this skill completes. Even simple suggestions help with workflow continuity.
 
@@ -218,7 +263,7 @@ Run `/open-pr` when all issue checkboxes are complete.
 > _Skipped: "Session complete — no follow-up needed."_
 ```
 
-### 9. Self-audit
+### 10. Self-audit
 
 Process verification that runs before the Report step. This section is **never skipped** — every skill verifies its own execution.
 
@@ -240,7 +285,7 @@ If any check fails, note it in the Report. Do not block — report the gap and l
 </self_audit>
 ```
 
-### 10. Content audit
+### 11. Content audit
 
 Verification of generated output accuracy and quality. Applies to skills that produce verifiable content (lessons, posts, diagrams, issue plans, skill files).
 
@@ -271,7 +316,7 @@ Read `references/content-audit-patterns.md` for the audit type taxonomy and conc
 > _Skipped: "N/A — skill does not generate verifiable content (read-only / state management)."_
 ```
 
-### 11. Error handling
+### 12. Error handling
 
 Declared strategy per failure type. When a skill calls external tools, APIs, or reads dependencies, it should declare how it handles failures.
 
@@ -294,7 +339,7 @@ Declared strategy per failure type. When a skill calls external tools, APIs, or 
 > _Skipped: "No external calls — no error surface."_
 ```
 
-### 12. Anti-patterns
+### 13. Anti-patterns
 
 Specific failure modes to avoid. This section is **never skipped** — every skill has traps. Named "Anti-patterns" (not "Avoid these", "What doesn't work", or inline in Guidelines). Always its own section.
 
@@ -308,7 +353,7 @@ Specific failure modes to avoid. This section is **never skipped** — every ski
 
 Format: **Bold name.** Description with consequence — because reason.
 
-### 13. Guidelines
+### 14. Guidelines
 
 Principles and reasoning that guide the skill's behavior. Separate from Anti-patterns (which name what to avoid). Guidelines name what to pursue and why.
 

@@ -288,6 +288,23 @@ Present concisely:
 - **Audit results** — self-audit summary (or "all checks passed")
 - **Errors** — issues encountered and how they were handled (or "none")
 
+## Post-flight
+
+<post_flight>
+
+After presenting the Report, verify external state:
+
+1. **On target branch?** — `git rev-parse --abbrev-ref HEAD` must equal target branch (usually `main`).
+2. **Feature branch deleted from remote?** — `git ls-remote origin <feature-branch>` must return empty.
+3. **Board card in "Done"?** — query board status for the closed issue. Must equal `"Done"`.
+4. **Implementation summary posted?** — `gh issue view <N> --json comments` must include a comment with "Implementation summary" or "## Summary".
+5. **Unblocked issues cleaned?** — for each issue reported as unblocked, fetch body and verify no `Depends on #<closed-issue>` remains.
+6. **ARCHITECTURE.md merged?** — if updated during PR, verify `git show HEAD:ARCHITECTURE.md` reflects the changes.
+
+If any check fails, report the specific failure and the fix command.
+
+</post_flight>
+
 ## Next action
 
 Run `/start-issue` to pick up the next issue from the board.

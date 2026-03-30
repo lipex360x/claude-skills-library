@@ -220,6 +220,22 @@ Present concisely:
 - **Audit results** — self-audit summary (or "all checks passed")
 - **Errors** — issues encountered and how they were handled (or "none")
 
+## Post-flight
+
+<post_flight>
+
+After presenting the Report, verify external state:
+
+1. **Issue on board?** — `gh project item-list <PROJECT> --owner "@me" --format json | jq '.items[] | select(.content.number == <N>)'` must return a result.
+2. **Card in "Backlog"?** — the `.status` field must equal `"Backlog"`.
+3. **Size field set?** — query board fields and verify Size is non-null for this item.
+4. **Blocker annotations valid?** — for each `Depends on #N` in the new issue body, verify issue #N exists: `gh issue view <N> --json number` must succeed.
+5. **Bidirectional dependencies?** — if blocker annotations were added, verify both source and target issues have matching annotations.
+
+If any check fails, report the specific failure and the fix command.
+
+</post_flight>
+
 ## Next action
 
 Run `/start-issue <number>` when ready to begin implementation.

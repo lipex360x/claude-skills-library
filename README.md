@@ -2,7 +2,7 @@
 
 > Production-ready skills for Claude Code — organized as plugins.
 
-A collection of **39 skills** across **8 plugins**, each following a canonical 13-section skeleton that ensures consistency, quality, and self-auditing. Every skill is a `/command` — invoke it by name and it handles the rest.
+A collection of **39 skills** across **8 plugins**, each following a canonical 14-section skeleton that ensures consistency, quality, and self-auditing. Every skill is a `/command` — invoke it by name and it handles the rest.
 
 [Installation](#installation) • [Skill anatomy](#skill-anatomy) • [Plugins](#plugins) • [Adding new skills](#adding-new-skills)
 
@@ -27,7 +27,7 @@ Common flags: `--copy` (no symlinks), `-a claude-code` (Claude Code only), `-y` 
 
 ## Skill anatomy
 
-Every skill follows a **13-section canonical skeleton** in its `SKILL.md`. Sections marked **never skip** must always contain real content — the rest use `> _Skipped: "reason"_` when not applicable.
+Every skill follows a **14-section canonical skeleton** in its `SKILL.md`. Sections marked **never skip** must always contain real content — the rest use `> _Skipped: "reason"_` when not applicable.
 
 | # | Section | XML tag | Skippable | Purpose |
 |---|---------|---------|-----------|---------|
@@ -38,12 +38,13 @@ Every skill follows a **13-section canonical skeleton** in its `SKILL.md`. Secti
 | 5 | External state | `<external_state>` | yes | Resources read/written outside skill dir |
 | 6 | Pre-flight | `<pre_flight>` | **never** | Environment checks before work begins |
 | 7 | Steps | — | no | Numbered workflow (`### 1.`, `### 2.`, ..., `### N. Report`) |
-| 8 | Next action | — | yes | What to do after skill completes |
-| 9 | Self-audit | `<self_audit>` | **never** | Verification checklist before Report |
-| 10 | Content audit | `<content_audit>` | yes | Output quality checks |
-| 11 | Error handling | — | yes | Failure modes + recovery strategies |
-| 12 | Anti-patterns | — | **never** | Named failure modes with reasoning |
-| 13 | Guidelines | — | **never** | Principles with "because" context |
+| 8 | Post-flight | `<post_flight>` | yes | Verify external state landed correctly after execution |
+| 9 | Next action | — | yes | What to do after skill completes |
+| 10 | Self-audit | `<self_audit>` | **never** | Verification checklist before Report |
+| 11 | Content audit | `<content_audit>` | yes | Output quality checks |
+| 12 | Error handling | — | yes | Failure modes + recovery strategies |
+| 13 | Anti-patterns | — | **never** | Named failure modes with reasoning |
+| 14 | Guidelines | — | **never** | Principles with "because" context |
 
 ### Frontmatter
 
@@ -65,7 +66,7 @@ argument-hint: "[optional-arg]"     # Optional — shows in autocomplete
 
 ```text
 <skill-name>/
-├── SKILL.md              # Required — 13-section skeleton (<500 lines)
+├── SKILL.md              # Required — 14-section skeleton (<500 lines)
 ├── README.md             # Required — public docs (usage, triggers, install)
 ├── skill-meta.json       # Required — metadata for auditing and registry
 ├── references/           # Optional — detailed guides loaded on demand

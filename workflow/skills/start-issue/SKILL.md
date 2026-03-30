@@ -266,6 +266,22 @@ Present concisely:
 - **Errors** — issues encountered (or "none")
 - **Next step** — "Start working on Step 1" or teammate status if Agent Teams active
 
+## Post-flight
+
+<post_flight>
+
+After presenting the Report, verify external state:
+
+1. **Issue body matches approved plan?** — fetch `gh issue view <N> --json body` and verify the Steps/checkboxes match the approved text. Issue update can fail silently.
+2. **Branch exists on remote?** — `git ls-remote origin feat/<N>-<slug>` must return a commit hash.
+3. **Board card in "In Progress"?** — query `gh project item-list <PROJECT> --owner "@me" --format json | jq '.items[] | select(.content.number == <N>) | .status'` — must equal `"In Progress"`.
+4. **Tasks match Step count?** — verify TaskList count matches the number of Steps in the approved plan.
+5. **If Agent Teams spawned:** verify Agent output or TeamCreate exists in conversation. If issue body has "Execution strategy" but no agents ran, flag it.
+
+If any check fails, report the specific failure and the fix command.
+
+</post_flight>
+
 ## Next action
 
 Begin working on Step 1 of the approved plan. If Agent Teams is active, teammates are already executing.

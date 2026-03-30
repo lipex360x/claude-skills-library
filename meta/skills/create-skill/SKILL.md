@@ -23,7 +23,7 @@ argument-hint: "[spec-file]"
 
 # Create Skill
 
-Step-by-step factory for building structurally consistent Claude Code skills. Every output follows the 13-section canonical skeleton.
+Step-by-step factory for building structurally consistent Claude Code skills. Every output follows the 14-section canonical skeleton.
 
 **IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise or ask the user to run manual commands.
 
@@ -127,9 +127,9 @@ Read `references/description-patterns.md` for examples and the "pushy" technique
 
 ### 4. Write the SKILL.md body
 
-Read `references/skeleton-template.md` — the mandatory starting point. Every skill follows the 13-section skeleton:
+Read `references/skeleton-template.md` — the mandatory starting point. Every skill follows the 14-section skeleton:
 
-Frontmatter → Title+Intro → Input contract → Output contract → External state → Pre-flight → Steps (Report always last) → Next action → Self-audit → Content audit → Error handling → Anti-patterns → Guidelines
+Frontmatter → Title+Intro → Input contract → Output contract → External state → Pre-flight → Steps (Report always last) → Post-flight → Next action → Self-audit → Content audit → Error handling → Anti-patterns → Guidelines
 
 **Model selection in frontmatter:** Evaluate if the skill is operational (follows a clear script, calls APIs, processes structured data, runs CLI commands) or analytical/creative (requires deep reasoning, architecture analysis, creative writing, nuanced judgment). Operational skills get `model: sonnet` in the frontmatter. Analytical/creative skills omit `model:` (defaults to opus). When in doubt, omit — it's safer to use opus than to underpower a complex skill.
 
@@ -166,7 +166,7 @@ Subagents start with a blank context. Read `references/subagent-patterns.md` for
 
 **Skeleton compliance gate** — verify before running the full review:
 
-1. All 13 sections present in correct order
+1. All 14 sections present in correct order
 2. Skipped sections have explicit justification
 3. Never-skip sections have real content
 4. XML tags on contracts and audit blocks
@@ -212,6 +212,23 @@ Push using `/push`. **Global mode:** if `.brain/` files were modified, push that
 - **Errors** — issues encountered or "none"
 
 </report>
+
+## Post-flight
+
+<post_flight>
+
+After presenting the Report, verify external state:
+
+1. **Symlink resolves?** — `ls -L ~/.claude/skills/<name>/SKILL.md` must succeed (dereference through symlink).
+2. **skill-meta.json valid?** — `python3 -c "import json; json.load(open('<path>/skill-meta.json'))"` must pass.
+3. **References exist on disk?** — for each entry in skill-meta.json `references` array, `test -f <skill-dir>/references/<filename>` must succeed.
+4. **Registered in STRUCTURE.md?** (global mode only) — `grep '<skill-name>' skills-library/STRUCTURE.md` must find the skill.
+5. **Registered in README.md?** (global mode only) — `grep '<skill-name>' skills-library/README.md` must find the skill in the plugin table.
+6. **README.md exists?** — `test -f <skill-dir>/README.md` must succeed.
+
+If any check fails, report the specific failure and the fix command.
+
+</post_flight>
 
 ## Next action
 
@@ -269,7 +286,7 @@ Before finalizing, verify the generated skill:
 
 ## Guidelines
 
-- **Skeleton is the factory standard.** Every skill follows the canonical 13-section skeleton — this is the structural guarantee that makes the library consistent and auditable.
+- **Skeleton is the factory standard.** Every skill follows the canonical 14-section skeleton — this is the structural guarantee that makes the library consistent and auditable.
 - **Depth adaptation over truncation.** Extract to references with inline summaries rather than cutting content — because token efficiency and completeness are both achievable through progressive disclosure.
 - **Reasoning over rigid rules.** "Avoid X because Y" works better than "NEVER do X" — because Claude 4.6 handles edge cases better with reasoning, and aggressive emphasis causes overtriggering.
 - **Description is the activation mechanism.** Invest more time here than any other element — because a skill with perfect structure but a weak description never fires when needed.

@@ -180,6 +180,21 @@ Present concisely:
 - **Audit results** — self-audit summary (or "all checks passed")
 - **Errors** — issues encountered (or "none")
 
+## Post-flight
+
+<post_flight>
+
+After presenting the Report, verify external state:
+
+1. **Commits on remote?** — run `git log origin/<branch> --oneline -1` and compare with last local commit hash. Must match.
+2. **Issue checkboxes persisted?** — if checkboxes were marked, fetch `gh issue view <N> --json body` and verify the checked items match what was reported. GraphQL updates can fail silently.
+3. **Working tree clean?** — run `git status --short`. Must be empty. Husky pre-commit hooks can modify files (prettier, lint-staged) that remain unstaged.
+4. **Branch tracking set?** — `git rev-parse --abbrev-ref --symbolic-full-name @{u}` must return `origin/<branch>`.
+
+If any check fails, report the specific failure and the fix command. Do not silently retry.
+
+</post_flight>
+
 ## Next action
 
 Run `/open-pr` when all issue checkboxes are complete.

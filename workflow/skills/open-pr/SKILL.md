@@ -203,6 +203,22 @@ Present concisely:
 - **Audit results** — self-audit summary (or "all checks passed")
 - **Errors** — issues encountered (or "none")
 
+## Post-flight
+
+<post_flight>
+
+After presenting the Report, verify external state:
+
+1. **PR exists and is open?** — `gh pr view --json number,state` must return state `"OPEN"`.
+2. **PR body contains `Closes #N`?** — `gh pr view --json body` must include the issue link. An orphaned PR breaks `/close-pr`.
+3. **Board card in "In review"?** — query board status for the linked issue. Must equal `"In review"`.
+4. **Scope transfer comments posted?** — for each transferred item, verify both source and target issues have comments: `gh issue view <N> --json comments`.
+5. **All checkboxes resolved?** — fetch issue body and verify zero `- [ ]` unchecked items remain.
+
+If any check fails, report the specific failure and the fix command.
+
+</post_flight>
+
 ## Next action
 
 Run `/close-pr` when the PR is approved and ready to merge.
