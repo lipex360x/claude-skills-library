@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "skeletonVersion": 1,
+  "name": "create-script",
+  "plugin": "meta",
+  "created": "2026-03-30",
+  "lastModified": "2026-03-30",
+  "lineCount": 210,
+  "skeleton": {
+    "inputContract": true,
+    "outputContract": true,
+    "externalState": true,
+    "preFlight": true,
+    "selfAudit": true,
+    "contentAudit": true,
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "steps": 7,
+  "approvalGates": 1,
+  "references": [],
+  "templates": [],
+  "scripts": [],
+  "dependencies": {
+    "tools": ["bash"],
+    "configs": [
+      "~/.brain/templates/operational-script.sh",
+      "~/.brain/scripts/setup.sh"
+    ],
+    "skills": []
+  },
+  "audit": {
+    "lastRun": null,
+    "score": null,
+    "gaps": []
+  }
+}

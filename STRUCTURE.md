@@ -32,7 +32,7 @@ skills-library/
 | **design** | Visual design: diagrams, design systems, presentations | create-diagram, create-excalidraw, create-webview, extract-design-system |
 | **database** | Database optimization and best practices | review-postgres |
 | **deploy** | Deployment and infrastructure | deploy-vercel |
-| **meta** | Claude Code skill/hook management and analysis | audit-skill, capture-analysis, create-continuation, create-hook, create-readme, create-skill, find-skills, improve-codebase-architecture, install-skill, plan-skill, sync-claude, uninstall-skill, update-skill |
+| **meta** | Claude Code skill/hook/script management and analysis | audit-skill, capture-analysis, create-continuation, create-hook, create-readme, create-script, create-skill, find-skills, improve-codebase-architecture, install-skill, plan-skill, sync-claude, uninstall-skill, update-script, update-skill |
 | **learning** | Guided learning sessions with TDD, progressive hints, and study guides | teach-me |
 | **tasks** | Task visibility board management | clean-tasks, close-tasks, open-tasks |
 

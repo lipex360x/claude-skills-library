@@ -156,6 +156,7 @@ Before proposing any plan, verify non-negotiable standards. If any are missing, 
 1. **TDD is mandatory.** Scan for TDD references. If absent, enforce test-first checkboxes in every behavioral Step. Read `references/tdd-methodology.md`.
 2. **No workarounds.** The plan must solve problems at root. Hardcoded values, temporary flags, monkey-patches signal the Step is incomplete.
 3. **No unnecessary code comments.** Only allowed for genuinely non-obvious logic. Never include "add comments" checkboxes.
+4. **Test isolation is mandatory for database/stateful projects.** Scan the codebase for database signals: `docker-compose*`, `.env*`, `prisma/`, `drizzle/`, `migrations/`, ORM config files (knex, sequelize, typeorm), BaaS references (supabase, firebase, neon, planetscale). Also check ARCHITECTURE.md for database mentions. Store the result as `has_database` flag. When true and no existing test isolation setup is found (`docker-compose.test.yml`, `.env.test`), the plan MUST include a test environment configuration Step as a prerequisite. Read `references/development-guidelines.md` § 1 for the full isolation requirements (env separation, runtime safety guard, high ports, teardown).
 
 ### 3. Propose the detailed plan
 
@@ -167,6 +168,11 @@ Transform acceptance criteria into Steps with checkboxes. Each criterion typical
 - **CDP already configured**: use `pages` map for verification checkboxes. If new routes, include checkbox to update `pages`.
 - **Web project without CDP**: include Step 1 — Configure CDP. Read `references/cdp-best-practices.md`.
 - **Not a web project**: skip CDP entirely.
+
+**Apply test isolation detection from Step 2c:**
+- **`has_database` is true and no test setup exists**: include an early Step — "Configure test environment" with checkboxes for: (1) create `docker-compose.test.yml` with isolated DB on high port, (2) create `.env.test` with local container URLs, (3) add runtime safety guard in global test setup, (4) configure test runner to load `.env.test`, (5) add `beforeAll`/`afterAll` for migrate/teardown.
+- **`has_database` is true but test setup exists**: verify the existing setup covers new changes. Include a checkbox to update if needed.
+- **No database signals**: skip test isolation entirely.
 
 Present the full proposed issue body in a fenced code block with: **What**, **Why**, **Acceptance criteria** (original), **Steps** (new detailed breakdown).
 
