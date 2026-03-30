@@ -215,6 +215,8 @@ Read `references/project-board-operations.md` for the full command reference.
 
 Find the project board. If no board exists, offer to create one via `references/project-board-setup.md`.
 
+**Validate board structure.** After finding the board, query the Status field options and compare against the expected 7 columns (Backlog, Todo, Ready, In Progress, In review, Done, Cancelled). If columns are missing (common when the board was created via GitHub UI with only 3 defaults), run the `updateProjectV2Field` mutation from `references/project-board-setup.md` § 2 to replace with the full 7. After updating, query items with null/empty status and re-assign them to "Backlog" — items in deleted columns lose their status silently.
+
 **Check for blockers.** Scan issue body for `> Blocked by #N`. If blocking issue is still open, flag with AUQ.
 
 **Move card to "Ready"** → then after plan approval, **move to "In Progress"**.

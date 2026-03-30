@@ -174,7 +174,7 @@ Apply labels. For multi-issue projects, include phase number in title. Assign to
 Always create a board — even with a single issue. Read `references/project-board-setup.md`.
 
 1. Create project — `gh project create --title "<name>" --owner "@me"`
-2. Configure Status field — 7 columns: Backlog, Todo, Ready, In Progress, In review, Done, Cancelled
+2. **Configure Status field (mandatory)** — GitHub creates boards with only 3 default columns (Todo, In Progress, Done). Immediately run the `updateProjectV2Field` mutation from `references/project-board-setup.md` § 2 to replace them with the full 7: Backlog, Todo, Ready, In Progress, In review, Done, Cancelled. Do NOT skip this step — workflow skills depend on all 7 columns.
 3. Create Priority field — P0, P1, P2
 4. Create Size field — XS, S, M, L, XL
 5. Add issues to project — `gh project item-add` for each
