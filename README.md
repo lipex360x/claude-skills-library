@@ -2,7 +2,7 @@
 
 > Production-ready skills for Claude Code — organized as plugins.
 
-A collection of **38 skills** across **9 plugins**, each following a canonical 13-section skeleton that ensures consistency, quality, and self-auditing. Every skill is a `/command` — invoke it by name and it handles the rest.
+A collection of **37 skills** across **8 plugins**, each following a canonical 13-section skeleton that ensures consistency, quality, and self-auditing. Every skill is a `/command` — invoke it by name and it handles the rest.
 
 [Installation](#installation) • [Skill anatomy](#skill-anatomy) • [Plugins](#plugins) • [Adding new skills](#adding-new-skills)
 
@@ -89,7 +89,7 @@ Sections longer than ~15 lines are extracted to `references/` with a `Read refer
 
 ## Plugins
 
-Skills are organized into **9 plugin groups** by domain. Each plugin is a directory containing related skills. Invoke any skill directly by name (e.g., `/push`, `/create-skill`).
+Skills are organized into **8 plugin groups** by domain. Each plugin is a directory containing related skills. Invoke any skill directly by name (e.g., `/push`, `/create-skill`).
 
 ---
 
@@ -164,18 +164,6 @@ Skills are organized into **9 plugin groups** by domain. Each plugin is a direct
 | Skill | Description |
 |-------|-------------|
 | [deploy-vercel](./deploy/skills/deploy-vercel/) | Deploy, manage, and develop projects on Vercel from the command line. |
-
-[Back to top](#claude-skills-library)
-
----
-
-### gws
-
-> Google Workspace automation: Gmail filters, inbox management.
-
-| Skill | Description |
-|-------|-------------|
-| [check-gmail](./gws/skills/check-gmail/) | Scan Gmail inbox, detect filter gaps, and update filters with structured user decisions. |
 
 [Back to top](#claude-skills-library)
 
