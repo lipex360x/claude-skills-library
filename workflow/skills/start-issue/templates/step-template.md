@@ -88,9 +88,27 @@ After completing Step [N] (last sequential step):
 ### Checkboxes
 - One action per checkbox — avoid "X and Y" (split into two)
 - Include file paths: `Create src/templates/readme.md` not just `Create readme template`
-- **TDD order:** for Steps with new behavior, place test checkboxes before implementation checkboxes. Example:
-  - `Add test for user creation in src/__tests__/user.test.ts — expect valid user object returned`
-  - `Implement user creation in src/services/user.ts`
+- **Vertical TDD slices** — pair each test with its implementation, one by one. Never group all tests together then all implementations. Use RED/GREEN labels:
+  ```
+  - [ ] RED: Write test "transfer reduces sender balance" in `account.test.ts`
+  - [ ] GREEN: Implement `Account.transfer(amount, target)` for the debit side
+  - [ ] RED: Write test "transfer rejects insufficient funds"
+  - [ ] GREEN: Add balance guard to `Account.transfer()`
+  ```
+  NOT this (horizontal TDD — forbidden):
+  ```
+  - [ ] Write tests in `account.test.ts` — transfer, deposit, withdraw
+  - [ ] Create Account entity, TransferService, repository
+  ```
+- **Rich domain entities, not anemic models** — when the issue involves domain logic, checkboxes must specify entity behavior, not just types/interfaces:
+  ```
+  - [ ] Create `Account` entity class in `domain/account.ts` — constructor enforces invariants (balance >= 0), `transfer(amount, target)` method with overdraft guard
+  - [ ] Create `Money` value object — immutable, currency-aware, `add()`/`subtract()` methods, factory from number with validation
+  ```
+  NOT this (anemic model):
+  ```
+  - [ ] Create `Account` entity type, AccountRepository interface
+  ```
 - For config tasks: `Configure Y in config-file.ext`
 
 ### Parallelizable Steps (Agent Teams)
