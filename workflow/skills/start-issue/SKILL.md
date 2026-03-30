@@ -170,7 +170,7 @@ Transform acceptance criteria into Steps with checkboxes. Each criterion typical
 - **Not a web project**: skip CDP entirely.
 
 **Apply test isolation detection from Step 2c:**
-- **`has_database` is true and no test setup exists**: include an early Step — "Configure test environment" with checkboxes for: (1) create `docker-compose.test.yml` with isolated DB on high port, (2) create `.env.test` with local container URLs, (3) add runtime safety guard in global test setup, (4) configure test runner to load `.env.test`, (5) add `beforeAll`/`afterAll` for migrate/teardown.
+- **`has_database` is true and no test setup exists**: include an early Step — "Configure test environment" with checkboxes for: (1) create `docker-compose.test.yml` with isolated DB on high port, (2) create `.env.test` with local container URLs, (3) add runtime safety guard in global test setup, (4) configure test runner to load `.env.test`, (5) add `beforeAll`/`afterAll` for migrate/teardown, (6) configure Husky with `pre-commit` hook running lint + type-check and `pre-push` hook running tests + build — ensures CI-breaking code never reaches remote.
 - **`has_database` is true but test setup exists**: verify the existing setup covers new changes. Include a checkbox to update if needed.
 - **No database signals**: skip test isolation entirely.
 

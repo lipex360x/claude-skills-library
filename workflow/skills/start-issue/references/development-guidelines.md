@@ -10,6 +10,7 @@ Tests must never touch production data. When the issue involves database changes
 - **Runtime safety guard.** Include a global test setup (e.g., `global-setup.ts`) that verifies target URLs point to local services (`127.0.0.1`, `localhost`) before running. If the check fails, abort with a clear error — this is the last line of defense against accidentally testing against production.
 - **High ports.** Bind all test services to high ports (e.g., 54321, 54322, 9090) in docker-compose to avoid collisions with dev servers and system services. Define ports in `.env.test` so they're easy to change.
 - **Full teardown.** Include a `global-teardown.ts` (or equivalent) that stops all test containers and processes when the suite finishes — success or failure. Use `docker compose down` to remove containers, networks, and volumes. Orphaned containers cause port conflicts on the next run.
+- **Husky git hooks.** Configure Husky as part of the test environment setup. `pre-commit` runs lint + type-check (via `lint-staged` to scope to changed files only). `pre-push` runs the full test suite + build. This catches CI-breaking code before it reaches the remote. Setup: `npx husky init`, then create `.husky/pre-commit` and `.husky/pre-push` with the appropriate commands. If the project uses a monorepo, scope hooks to the relevant workspace.
 
 ## 2. Visual verification via CDP (mandatory for web projects)
 

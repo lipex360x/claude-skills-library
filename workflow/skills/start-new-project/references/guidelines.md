@@ -11,6 +11,7 @@ Tests must never touch production data. When the project tech stack includes any
 - **Runtime safety guard.** Include a global test setup file (e.g., `global-setup.ts`) that verifies the target URLs point to local services (`127.0.0.1`, `localhost`) before any test runs. If the check fails, abort the test suite with a clear error. This is the last line of defense against accidentally running tests against production.
 - **High ports.** Bind all test services to high ports (e.g., 54321, 54322, 9090) in docker-compose to avoid collisions with dev servers and system services running on standard ports. Define these ports in `.env.test` so they're easy to change if a port is already taken.
 - **Full teardown.** Include a `global-teardown.ts` (or equivalent) that stops all test containers and processes when the suite finishes — success or failure. Use `docker compose down` to remove containers, networks, and volumes created during the run. Tests that leave orphaned containers waste resources and cause port conflicts on the next run.
+- **Husky git hooks.** Configure Husky as part of the test environment setup — `pre-commit` runs lint + type-check, `pre-push` runs tests + build. This ensures CI-breaking code never reaches the remote. Use `npx husky init` to scaffold, then add the hook scripts. Pair with `lint-staged` for pre-commit to only lint changed files.
 
 ## E2E state changes go through the UI
 

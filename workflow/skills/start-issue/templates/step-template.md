@@ -82,7 +82,7 @@ After completing Step [N] (last sequential step):
 - Start title with a verb: "Define", "Add", "Update", "Configure", "Implement"
 - Number Steps sequentially across the entire issue (Step 1, 2, 3... not per-section)
 - Include a verification checkbox as the last item when the Step has observable output
-- For changes involving databases or file I/O, include test environment setup early — create or verify `docker-compose.test.yml` (or `test` profile) to orchestrate the test stack. Configure `.env.test` pointing at local containers. This must exist before any test checkbox can run
+- For changes involving databases or file I/O, include test environment setup early — create or verify `docker-compose.test.yml` (or `test` profile) to orchestrate the test stack. Configure `.env.test` pointing at local containers. Configure Husky with `pre-commit` (lint + type-check via lint-staged) and `pre-push` (tests + build). This must exist before any test checkbox can run
 - For web projects with UI changes, include CDP setup as the first Step if `.claude/project-settings.json` doesn't exist yet. If it does, use the `pages` map to reference routes in verification checkboxes: "Navigate to [page] via CDP and take screenshot to verify [expected state]"
 
 ### Checkboxes
