@@ -47,6 +47,7 @@ Turn a project idea into a well-structured GitHub issue with phased checkboxes, 
 | Project board | GitHub Projects | yes | 7 columns, Priority + Size fields |
 | Feature branch | git | yes | `feature/<slug>` or `feature/<number>-<slug>` |
 | Labels | GitHub API | yes | Priority + type labels |
+| Topics | GitHub API | yes | Repo topics derived from stack + domain |
 
 </output_contract>
 
@@ -130,7 +131,7 @@ Before presenting, review critically: tighten vague checkboxes, remove redundanc
 
 **Wait for approval.** This is the second (and final) approval gate. Iterate until approved.
 
-### 5. Repo scaffolding (labels + milestone)
+### 5. Repo scaffolding (labels + milestone + topics)
 
 **Labels** — check with `gh label list`. If priority labels missing, offer to create P0/P1/P2 and type labels. Adapt to existing label schemes.
 
@@ -139,6 +140,20 @@ Before presenting, review critically: tighten vague checkboxes, remove redundanc
 ```bash
 gh api repos/{owner}/{repo}/milestones -f title="<name>" -f description="<goal>"
 ```
+
+**Topics** — derive from the tech stack, domain, and key patterns discussed. Add via:
+
+```bash
+gh repo edit --add-topic "topic1,topic2,topic3"
+```
+
+Topic sources (combine as applicable):
+- **Stack:** languages (typescript, python), frameworks (nextjs, hono, react), ORMs (drizzle, prisma), runtimes (bun, node)
+- **Domain:** the project's purpose (flashcards, ecommerce, cli-tool, api)
+- **Patterns:** architectural approaches (ddd, tdd, monorepo)
+- **Infra:** deployment targets (vercel, aws, docker)
+
+Keep to 10-20 topics. Use lowercase, hyphenated. Match existing GitHub topic conventions (e.g., `tailwindcss` not `tailwind-css`).
 
 ### 6. Create the GitHub issues
 
@@ -183,7 +198,7 @@ Optionally prefix with issue number: `feature/<number>-<slug>`.
 ### 9. Report
 
 Present concisely:
-- **What was done** — issues created, board configured, branch created
+- **What was done** — issues created, board configured, topics added, branch created
 - **Issue URL(s)** — linked
 - **Project board** — link (7 columns, priority and size configured)
 - **Branch name** — ready for development
@@ -206,7 +221,7 @@ Before presenting the Report, verify:
 
 1. **Pre-flight passed?** — gh authenticated, repo valid, remote exists
 2. **Steps completed?** — issues created, board configured, branch pushed
-3. **Output exists?** — issues on GitHub, board with 7 columns, branch on remote
+3. **Output exists?** — issues on GitHub, board with 7 columns, topics on repo, branch on remote
 4. **Anti-patterns clean?** — no generic checkboxes, TDD order enforced, no local paths
 5. **Approval gates honored?** — both gates (questions + structure) got user approval
 
