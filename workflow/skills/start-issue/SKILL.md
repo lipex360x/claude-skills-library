@@ -61,6 +61,7 @@ Turn an issue with high-level acceptance criteria into a detailed implementation
 | GitHub issue | `gh issue view` | R/W | Markdown body |
 | Project board | GitHub Projects API | R/W | GraphQL |
 | ARCHITECTURE.md | project root | R/W | Markdown |
+| quality.md | project root | R | Markdown |
 | Step template | `templates/step-template.md` | R | Markdown |
 | Board operations | `references/project-board-operations.md` | R | Markdown |
 | Board setup | `references/project-board-setup.md` | R | Markdown |
@@ -80,6 +81,7 @@ Turn an issue with high-level acceptance criteria into a detailed implementation
 3. Current directory is a git repo → if not: "Must run inside a git repo." — stop.
 4. Working tree is clean → if dirty: warn user about uncommitted changes, suggest stashing.
 5. **Read ARCHITECTURE.md** → if `./ARCHITECTURE.md` exists, read it NOW and store the content. This is the primary codebase context (~2k tokens). Do NOT spawn an Explore agent or scan the codebase if ARCHITECTURE.md provides sufficient context. Only explore when: (a) ARCHITECTURE.md doesn't exist (create it), or (b) the issue touches areas not covered by it. This check saves ~50k tokens per invocation.
+6. **Read quality.md** → if `./quality.md` exists, read it NOW and store the content. This file contains non-negotiable code quality standards (DOs, DON'Ts, DDD patterns, branching rules). Every checkbox in the plan must comply with these standards. If quality.md doesn't exist, skip — but if it does, it is mandatory context for planning.
 
 </pre_flight>
 
@@ -310,6 +312,7 @@ Before finalizing output, verify:
 2. **TDD order correct?** — test checkbox before implementation in every behavioral Step
 3. **Plan structure matches template?** — What/Why/Acceptance criteria/Steps format
 4. **Split rule respected?** — if 8+ steps, plan was split into multiple issues
+5. **quality.md compliance?** — if quality.md was loaded in pre-flight, scan every proposed checkbox against its DON'Ts. Flag any checkbox that would produce code violating a DON'T (e.g., a checkbox suggesting raw primitives instead of value objects, horizontal TDD, nested if/else, magic numbers, workarounds). The plan must not instruct what quality.md forbids.
 
 </content_audit>
 
