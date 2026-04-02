@@ -211,6 +211,8 @@ gh issue edit <number> --body "<approved body>" --add-assignee @me
 
 If split rule triggered, create additional issues and add to Backlog. Add cross-references and preserve labels.
 
+**Issue structure validation.** After writing the issue body, if `.claude/scripts/validate-issue.sh` exists in the project, run `bash .claude/scripts/validate-issue.sh <number>`. Fix any errors and re-edit the issue until validation passes. The plan must pass before work begins.
+
 ### 5. Create branch linked to issue
 
 ```bash

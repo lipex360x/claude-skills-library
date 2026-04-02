@@ -247,3 +247,5 @@ Before presenting the Report, verify:
 - **quality.md audit reminder.** Before staging, if `quality.md` exists in the project root and the changes are substantial (new files, new patterns), check whether a `quality.md` audit was mentioned in the conversation. If not, flag it in the report as a reminder. This is informational — do not block the push.
 
 - **Visual validation gate.** If the current step included Playwright visual verification (PW verify), check whether the user explicitly approved the visual results. If screenshots were only reviewed by the agent without user confirmation, flag this in the report as a reminder. This is informational — do not block the push.
+
+- **Issue structure validation.** If `.claude/scripts/validate-issue.sh` exists in the project, run it against the current issue after updating checkboxes (Step 5). Report validation errors/warnings in the push report. This is informational — do not block the push, but flag structural drift.
