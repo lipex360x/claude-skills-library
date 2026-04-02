@@ -187,7 +187,7 @@ After presenting the Report, verify:
 
 ## Next action
 
-Continue working through the current step's checkboxes. When all checkboxes in a step are done, update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure added during that step. Before running `/push`, audit all code written in the step against `quality.md` — check every file against every DON'T and DO rule. Fix violations before committing. This audit is mandatory and cannot be skipped. Then use `/push` to commit, push, and update the issue checkboxes.
+Continue working through the current step's checkboxes. When all checkboxes in a step are done, update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure added during that step. After completing a PW verify step (Playwright visual verification), present all screenshots to the user via `AskUserQuestion` and wait for their visual approval before proceeding. The user's validation is mandatory for any step involving visual/UI changes. Only after user approval, proceed to the quality.md audit and `/push`. Before running `/push`, audit all code written in the step against `quality.md` — check every file against every DON'T and DO rule. Fix violations before committing. This audit is mandatory and cannot be skipped. Then use `/push` to commit, push, and update the issue checkboxes.
 
 ## Self-audit
 

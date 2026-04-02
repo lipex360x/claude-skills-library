@@ -184,6 +184,8 @@ Sizing: 2-8 Steps total, 2-6 checkboxes per Step. Each checkbox = one focused ac
 
 **ARCHITECTURE.md maintenance.** The last checkbox of each Step should update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure introduced in that Step. This keeps the architecture doc current as the project grows and prevents future sessions from wasting tokens on codebase exploration.
 
+**Human visual validation.** For any Step that includes a PW verify checkbox (Playwright visual verification), add a subsequent checkbox: `- [ ] Human validation — present screenshots to user and wait for approval before proceeding`. This ensures the user can verify visual quality before the step is considered complete.
+
 **Mandatory quality.md audit.** Every Step must include a `quality.md` audit as its final action before `/push`. The agent must review all code written in the step against every rule in `quality.md`, fix violations, then commit. This audit cannot be skipped.
 
 **Mandatory split rule.** If plan has **more than 8 steps**, split into multiple smaller issues — all added to Backlog. Each issue independently completable with 3-8 steps.
