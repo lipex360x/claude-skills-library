@@ -137,6 +137,10 @@ If Agent Teams is enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`), add **Exec
 
 **Issue body backup (mandatory).** Every project plan MUST include a Phase 1 checkbox to scaffold issue body protection. Copy `templates/issue-backup.sh` to `.claude/scripts/`, `templates/pre-issue-edit-hook.sh` to `.claude/hooks/`, register the hook in `.claude/settings.json`, and add `.claude/issues.db` to `.gitignore`. Read `references/guidelines.md` § "Issue body backup" for the full checklist. After creating the issues in Step 6, run `issue-backup.sh snapshot-all` to seed the backup database.
 
+**Infrastructure abstraction (mandatory for projects with external dependencies).** When the project uses databases, external APIs, auth providers, or any service that could be swapped in the future, the plan MUST include a Phase 1 step to establish Repository interfaces (`Protocol`/`interface`) in the domain layer and Port/Adapter pattern for external services. Repository interfaces define data access contracts (`ThreadRepository`, `UserRepository`). Ports define external service contracts (`AuthPort`, `StoragePort`). Concrete implementations live in an `infra/<provider>/` layer (e.g., `infra/supabase/`, `infra/aws/`). Services depend on interfaces, never on implementations — this enables swapping infrastructure (Supabase → AWS, local auth → Cognito) by changing only the adapter with zero changes to domain or service code. Include this in the quality.md Backend DOs and add concrete interface examples in the Patterns section. Read `templates/quality-standards.md` § "Repository pattern" and § "Port/Adapter pattern" for the code templates.
+
+**Linter ignore audit (mandatory).** Every phase's final verification step MUST include: `- [ ] Audit linter ignore rules — review knip.json ignores, eslint-disable, noqa; remove if no longer needed, add justification comment if still required`. Suppression rules added during development tend to accumulate and become permanent workarounds. This checkpoint forces a cleanup pass before each phase is tagged as complete.
+
 Before presenting, review critically: tighten vague checkboxes, remove redundancy, ensure TDD order, verify file paths.
 
 **Wait for approval.** This is the second (and final) approval gate. Iterate until approved.
@@ -264,6 +268,7 @@ Before finalizing output, verify:
 2. **TDD order correct?** — test before implementation in every behavioral step
 3. **Phase structure balanced?** — no phase with 10+ steps, split rule respected
 4. **Board fields set?** — every issue has priority and size assigned
+5. **Linter ignore audit present?** — each phase's final verification step includes a checkbox to audit linter suppression rules (knip ignores, eslint-disable, noqa). If missing, add it before presenting the plan.
 
 </content_audit>
 

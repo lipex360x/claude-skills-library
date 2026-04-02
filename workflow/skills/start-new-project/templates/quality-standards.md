@@ -59,6 +59,8 @@ Non-negotiable rules for [project name]. Read this before writing any code.
 7. **DON'T mix domain logic with infrastructure.** No SQL, no HTTP, no subprocess inside domain entities.
 8. **DON'T use bare catch/except.** Always catch specific exceptions. Never `except: pass` or `catch (e) {}` without re-raising or returning `Err`.
 9. **DON'T use dynamic imports in route handlers.** No `await import("...")` inside request handlers. Static imports at the top.
+10. **DON'T import infrastructure in services.** No `from supabase import ...` or `import { createClient } from '@supabase/supabase-js'` in the service layer. Services depend on Repository/Port interfaces. Concrete clients belong in `infra/`.
+11. **DON'T couple domain to a specific provider.** No `SupabaseThread`, no `AWSUser`. Domain entities and value objects must be provider-agnostic. Provider-specific details live in the adapter that implements the port.
 
 ## DOs
 
@@ -71,6 +73,8 @@ Non-negotiable rules for [project name]. Read this before writing any code.
 7. **DO use lazy initialization.** `getDb()`, `get_supabase()` create connections on first call, not at import time.
 8. **DO use structured logging.** Silent in test, pretty in dev, JSON in prod. Logger is lazy-initialized.
 9. **DO configure security from day one.** CORS (origin from env), secure headers, rate limiting, input validation via schema (Pydantic, Zod, etc.).
+10. **DO use Repository interfaces for data access.** Define `Protocol`/`interface` in the domain layer (`domain/repositories/`). Implementations in `infra/<provider>/`. Services receive repositories via constructor injection.
+11. **DO use Port/Adapter for external services.** Auth, storage, messaging, LLM — define a Port (`Protocol`/`interface`) with the contract, implement an Adapter per provider. Swapping providers = new adapter file, zero service changes.
 
 ---
 
@@ -121,10 +125,18 @@ src/
 │   │   ├── email.ts         # Format validation, normalized lowercase
 │   │   ├── money.ts         # Currency-aware, immutable arithmetic
 │   │   └── date-range.ts    # Start < end invariant, contains(), overlaps()
-│   └── entities/            # Rich behavior, immutable, create()/reconstitute()
-│       ├── index.ts         # Barrel export
-│       ├── order.ts         # cancel(), addItem(), calculateTotal()
-│       └── user.ts          # changeEmail(), deactivate(), hasPermission()
+│   ├── entities/            # Rich behavior, immutable, create()/reconstitute()
+│   │   ├── index.ts         # Barrel export
+│   │   ├── order.ts         # cancel(), addItem(), calculateTotal()
+│   │   └── user.ts          # changeEmail(), deactivate(), hasPermission()
+│   ├── repositories/        # Data access interfaces (no infra imports)
+│   │   └── thread-repository.ts
+│   └── ports/               # External service contracts
+│       └── auth-port.ts
+├── infra/                   # Provider-specific implementations
+│   └── supabase/            # (or aws/, firebase/, etc.)
+│       ├── supabase-thread-repository.ts
+│       └── supabase-auth-adapter.ts
 ├── services/                # Use cases returning Result<T, Error>
 ├── routes/                  # HTTP handlers (unwrap Result → response)
 └── middleware/              # Cross-cutting concerns
@@ -139,10 +151,18 @@ app/
 │   │   ├── email.py         # Format validation, normalized lowercase
 │   │   ├── message_role.py  # Enum: user, assistant, system
 │   │   └── thread_title.py  # Non-empty, max length
-│   └── entities/            # Rich behavior, immutable, create()/reconstitute()
-│       ├── __init__.py
-│       ├── thread.py        # create(user_id, title), rename(), add_message()
-│       └── message.py       # create(thread_id, content, role)
+│   ├── entities/            # Rich behavior, immutable, create()/reconstitute()
+│   │   ├── __init__.py
+│   │   ├── thread.py        # create(user_id, title), rename(), add_message()
+│   │   └── message.py       # create(thread_id, content, role)
+│   ├── repositories/        # Data access Protocol interfaces
+│   │   └── thread_repository.py
+│   └── ports/               # External service contracts
+│       └── auth_port.py
+├── infra/                   # Provider-specific implementations
+│   └── supabase/            # (or aws/, firebase/, etc.)
+│       ├── supabase_thread_repository.py
+│       └── supabase_auth_adapter.py
 ├── core/                    # Result types, config, shared infra
 ├── services/                # Use cases returning Result[T, ServiceError]
 ├── routes/                  # HTTP handlers (unwrap Result → response)
@@ -352,6 +372,138 @@ export class AuthPage {
     await this.page.waitForURL(url => !url.pathname.includes("/login"), { timeout: 10000 });
   }
 }
+```
+
+## Repository pattern
+
+### TypeScript
+```typescript
+// domain/repositories/thread-repository.ts — interface only, no infra imports
+export interface ThreadRepository {
+  findById(id: string): Promise<Thread | null>;
+  findByUserId(userId: string): Promise<Thread[]>;
+  save(thread: Thread): Promise<void>;
+  delete(id: string): Promise<void>;
+}
+
+// infra/supabase/supabase-thread-repository.ts — concrete implementation
+export class SupabaseThreadRepository implements ThreadRepository {
+  constructor(private readonly client: SupabaseClient) {}
+
+  async findById(id: string): Promise<Thread | null> {
+    const { data } = await this.client.from("threads").select().eq("id", id).single();
+    return data ? Thread.reconstitute(data) : null;
+  }
+  // ...
+}
+```
+
+### Python
+```python
+# domain/repositories/thread_repository.py — interface only, no infra imports
+from typing import Protocol
+
+class ThreadRepository(Protocol):
+    async def find_by_id(self, thread_id: str) -> Thread | None: ...
+    async def find_by_user_id(self, user_id: str) -> list[Thread]: ...
+    async def save(self, thread: Thread) -> None: ...
+    async def delete(self, thread_id: str) -> None: ...
+
+# infra/supabase/supabase_thread_repository.py — concrete implementation
+class SupabaseThreadRepository:
+    def __init__(self, client: Client) -> None:
+        self._client = client
+
+    async def find_by_id(self, thread_id: str) -> Thread | None:
+        response = self._client.table("threads").select("*").eq("id", thread_id).single().execute()
+        return Thread.reconstitute(**response.data) if response.data else None
+    # ...
+```
+
+## Port/Adapter pattern
+
+### TypeScript
+```typescript
+// domain/ports/auth-port.ts — contract only
+export interface AuthPort {
+  signup(email: string, password: string): Promise<Result<User, AuthError>>;
+  login(email: string, password: string): Promise<Result<Session, AuthError>>;
+  verifyToken(token: string): Promise<Result<User, AuthError>>;
+}
+
+// infra/supabase/supabase-auth-adapter.ts — provider-specific implementation
+export class SupabaseAuthAdapter implements AuthPort {
+  constructor(private readonly client: SupabaseClient) {}
+
+  async signup(email: string, password: string): Promise<Result<User, AuthError>> {
+    const { data, error } = await this.client.auth.signUp({ email, password });
+    if (error) return err(new AuthError(error.message));
+    return ok(User.reconstitute(data.user));
+  }
+  // ...
+}
+```
+
+### Python
+```python
+# domain/ports/auth_port.py — contract only
+from typing import Protocol
+
+class AuthPort(Protocol):
+    async def signup(self, email: str, password: str) -> Result[User, AuthError]: ...
+    async def login(self, email: str, password: str) -> Result[Session, AuthError]: ...
+    async def verify_token(self, token: str) -> Result[User, AuthError]: ...
+
+# infra/supabase/supabase_auth_adapter.py — provider-specific implementation
+class SupabaseAuthAdapter:
+    def __init__(self, client: Client) -> None:
+        self._client = client
+
+    async def signup(self, email: str, password: str) -> Result[User, AuthError]:
+        try:
+            response = self._client.auth.sign_up({"email": email, "password": password})
+            if response.user is None:
+                return Err(AuthError("Signup failed"))
+            return Ok(User.reconstitute(**response.user.model_dump()))
+        except Exception as e:
+            return Err(AuthError(f"Signup error: {e}"))
+    # ...
+```
+
+## Directory structure with infrastructure layer
+
+### TypeScript
+```
+src/
+├── domain/
+│   ├── entities/            # Rich behavior, immutable
+│   ├── value-objects/       # Validated, single-responsibility
+│   ├── repositories/        # Interfaces only (no infra imports)
+│   └── ports/               # External service contracts
+├── infra/
+│   └── supabase/            # Provider-specific implementations
+│       ├── supabase-thread-repository.ts
+│       └── supabase-auth-adapter.ts
+├── services/                # Use cases — depend on interfaces, not infra
+├── routes/                  # HTTP handlers
+└── middleware/              # Cross-cutting concerns
+```
+
+### Python
+```
+app/
+├── domain/
+│   ├── entities/            # Rich behavior, immutable
+│   ├── value_objects/       # Validated, single-responsibility
+│   ├── repositories/        # Protocol interfaces only
+│   └── ports/               # External service contracts
+├── infra/
+│   └── supabase/            # Provider-specific implementations
+│       ├── supabase_thread_repository.py
+│       └── supabase_auth_adapter.py
+├── services/                # Use cases — depend on interfaces, not infra
+├── routes/                  # HTTP handlers
+└── middleware/              # Cross-cutting concerns
 ```
 
 ---
