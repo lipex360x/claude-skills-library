@@ -1,0 +1,23 @@
+{
+  "thresholds": {
+    "max_steps": 8,
+    "max_checkboxes_error": 8,
+    "max_checkboxes_warn": 6,
+    "max_checkbox_chars": 200
+  },
+  "levels": {
+    "tag_ordering": "warn",
+    "docs_recommended": "warn",
+    "e2e_without_red": "error",
+    "checkbox_length": "warn",
+    "checkbox_count_warn": "warn",
+    "green_writes_tests": "warn",
+    "pw_mentions_visual": "warn",
+    "human_mentions_user": "warn",
+    "audit_mentions_quality": "warn",
+    "docs_mentions_architecture": "warn",
+    "infra_writes_tests": "warn",
+    "wire_mentions_integration": "warn",
+    "last_audit_quality": "warn"
+  }
+}

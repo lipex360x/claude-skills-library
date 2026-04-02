@@ -6,6 +6,10 @@
 # and UI chain enforcement. This is the backbone of the issue-driven
 # development process — every issue must pass before work begins.
 #
+# Configuration: validate-issue.config.json (same directory)
+# - thresholds: max_steps, max_checkboxes_error, max_checkboxes_warn, max_checkbox_chars
+# - levels: per-rule severity (error, warn, off)
+#
 # Usage:
 #   validate-issue.sh <issue-number>            Validate and report
 #   validate-issue.sh <issue-number> --verbose  Show passing checks too
@@ -37,6 +41,34 @@ if [ -z "$ISSUE_NUMBER" ]; then
     exit 1
 fi
 
+# ─── Config ──────────────────────────────────────────────
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CONFIG_FILE="$SCRIPT_DIR/validate-issue.config.json"
+
+cfg_threshold() {
+    local key="$1" default="$2"
+    if [ -f "$CONFIG_FILE" ]; then
+        jq -r ".thresholds.$key // $default" "$CONFIG_FILE" 2>/dev/null || echo "$default"
+    else
+        echo "$default"
+    fi
+}
+
+cfg_level() {
+    local key="$1" default="$2"
+    if [ -f "$CONFIG_FILE" ]; then
+        jq -r ".levels.$key // \"$default\"" "$CONFIG_FILE" 2>/dev/null || echo "$default"
+    else
+        echo "$default"
+    fi
+}
+
+MAX_STEPS=$(cfg_threshold "max_steps" "8")
+MAX_CB_ERROR=$(cfg_threshold "max_checkboxes_error" "8")
+MAX_CB_WARN=$(cfg_threshold "max_checkboxes_warn" "6")
+MAX_CB_CHARS=$(cfg_threshold "max_checkbox_chars" "200")
+
 # ─── Output helpers ───────────────────────────────────────
 
 if [ -t 1 ]; then
@@ -51,10 +83,27 @@ warn() { printf "${_yellow}  ⚠${_reset} %s\n" "$1"; WARNINGS=$((WARNINGS + 1))
 fail() { printf "${_red}  ✗${_reset} %s\n" "$1"; ERRORS=$((ERRORS + 1)); }
 section() { printf "\n${_cyan}%s${_reset}\n" "$1"; }
 
+# emit — route a configurable rule to fail, warn, or skip
+emit() {
+    local rule="$1" msg="$2" default="${3:-warn}"
+    local level
+    level=$(cfg_level "$rule" "$default")
+    case "$level" in
+        error) fail "$msg" ;;
+        warn)  warn "$msg" ;;
+        off)   if $VERBOSE; then pass "$msg (suppressed)"; fi ;;
+    esac
+}
+
 # ─── Pre-flight ───────────────────────────────────────────
 
 if ! command -v gh >/dev/null 2>&1; then
     printf "${_red}[error]${_reset} gh CLI is required\n"
+    exit 1
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+    printf "${_red}[error]${_reset} jq is required (brew install jq)\n"
     exit 1
 fi
 
@@ -95,14 +144,14 @@ else
     pass "Acceptance criteria: $ac_count checkbox(es)"
 fi
 
-# Rule: Step count 2-8
+# Rule: Step count 2-max
 step_count=$(echo "$BODY" | grep -c '^## Step [0-9]' || true)
 if [ "$step_count" -lt 2 ]; then
     fail "Too few steps ($step_count) — minimum is 2"
-elif [ "$step_count" -gt 8 ]; then
-    fail "Too many steps ($step_count) — maximum is 8, split into multiple issues"
+elif [ "$step_count" -gt "$MAX_STEPS" ]; then
+    fail "Too many steps ($step_count) — maximum is $MAX_STEPS, split into multiple issues"
 else
-    pass "Step count: $step_count (within 2-8)"
+    pass "Step count: $step_count (within 2-$MAX_STEPS)"
 fi
 
 # Rule: Sequential step numbering (no gaps, no duplicates)
@@ -156,14 +205,14 @@ validate_step() {
         return
     fi
 
-    # Rule: >6 checkboxes = warning
-    if [ "$cb_count" -gt 6 ] && [ "$cb_count" -le 8 ]; then
-        warn "$cb_count checkboxes — recommended maximum is 6"
+    # Rule: >warn threshold checkboxes
+    if [ "$cb_count" -gt "$MAX_CB_WARN" ] && [ "$cb_count" -le "$MAX_CB_ERROR" ]; then
+        emit "checkbox_count_warn" "$cb_count checkboxes — recommended maximum is $MAX_CB_WARN"
     fi
 
-    # Rule: >8 checkboxes = error
-    if [ "$cb_count" -gt 8 ]; then
-        fail "$cb_count checkboxes — maximum is 8, split this step"
+    # Rule: >error threshold checkboxes
+    if [ "$cb_count" -gt "$MAX_CB_ERROR" ]; then
+        fail "$cb_count checkboxes — maximum is $MAX_CB_ERROR, split this step"
     fi
 
     # ── Layer 3: Tag chain rules ──────────────────────────
@@ -195,7 +244,7 @@ validate_step() {
 
     # Rule 6: DOCS recommended with GREEN/WIRE
     if (echo "$tags" | grep -q "GREEN" || echo "$tags" | grep -q "WIRE") && ! echo "$tags" | grep -q "DOCS"; then
-        warn "No [DOCS] — consider updating ARCHITECTURE.md after implementation"
+        emit "docs_recommended" "No [DOCS] — consider updating ARCHITECTURE.md after implementation"
     fi
 
     # Rule 7: AUDIT must be last tag
@@ -215,7 +264,7 @@ validate_step() {
             i=$((i + 1))
         done
         if [ "$pos" -gt 0 ] && [ "$pos" -lt "$prev_pos" ]; then
-            warn "Tag order: [$tag] out of sequence — expected: RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT"
+            emit "tag_ordering" "Tag order: [$tag] out of sequence — expected: RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT"
         fi
         if [ "$pos" -gt 0 ]; then prev_pos=$pos; fi
     done
@@ -235,7 +284,7 @@ validate_step() {
 
     # Rule: E2E without RED
     if echo "$tags" | grep -q "E2E" && ! echo "$tags" | grep -q "RED"; then
-        warn "[E2E] without [RED] — E2E tests without unit tests is fragile coverage"
+        emit "e2e_without_red" "[E2E] without [RED] — E2E tests without unit tests is fragile coverage"
     fi
 
     # Rule: Last AUDIT should be quality.md audit
@@ -245,7 +294,7 @@ validate_step() {
         local last_audit
         last_audit=$(echo "$audit_lines" | tail -1 | tr '[:upper:]' '[:lower:]')
         if ! echo "$last_audit" | grep -qE 'quality\.md'; then
-            warn "Last [AUDIT] doesn't mention quality.md — the final audit should be the quality.md review"
+            emit "last_audit_quality" "Last [AUDIT] doesn't mention quality.md — the final audit should be the quality.md review"
         fi
     fi
 
@@ -296,10 +345,10 @@ $line"
 
     # ── Layer 2: Checkbox-level checks ────────────────────
 
-    # Rule: Checkbox text length > 200 chars
+    # Rule: Checkbox text length > threshold
     cb_text=$(echo "$line" | sed 's/^- \[.\] `\[[A-Z]*\]` //')
-    if [ "${#cb_text}" -gt 200 ]; then
-        warn "Checkbox > 200 chars — consider splitting: $(echo "$cb_text" | cut -c1-60)..."
+    if [ "${#cb_text}" -gt "$MAX_CB_CHARS" ]; then
+        emit "checkbox_length" "Checkbox > $MAX_CB_CHARS chars — consider splitting: $(echo "$cb_text" | cut -c1-60)..."
     fi
 
     # Rule: Empty checkbox text
@@ -328,7 +377,7 @@ $line"
             fi
             # Rule: GREEN should not mention writing tests
             if echo "$lower_line" | grep -qE '\bwrite\b.*\btest\b|\bcreate\b.*\btest\b'; then
-                warn "[GREEN] mentions writing tests — should this be [RED]?"
+                emit "green_writes_tests" "[GREEN] mentions writing tests — should this be [RED]?"
             fi
             # Detect frontend UI work
             if echo "$lower_line" | grep -qE 'component|page|layout|frontend|sidebar|chat.*interface|ui'; then
@@ -345,37 +394,37 @@ $line"
         PW)
             # Rule: PW must mention verification
             if ! echo "$lower_line" | grep -qE 'screenshot|run.*test|verify|visual'; then
-                warn "[PW] doesn't mention screenshots or visual verification"
+                emit "pw_mentions_visual" "[PW] doesn't mention screenshots or visual verification"
             fi
             ;;
         HUMAN)
             # Rule: HUMAN must mention user validation
             if ! echo "$lower_line" | grep -qE 'screenshot|approval|user|present|wait'; then
-                warn "[HUMAN] doesn't mention presenting to user or waiting for approval"
+                emit "human_mentions_user" "[HUMAN] doesn't mention presenting to user or waiting for approval"
             fi
             ;;
         AUDIT)
             # Rule: AUDIT must mention quality.md or audit
             if ! echo "$lower_line" | grep -qE 'quality\.md|audit|review.*rule'; then
-                warn "[AUDIT] doesn't mention quality.md or audit"
+                emit "audit_mentions_quality" "[AUDIT] doesn't mention quality.md or audit"
             fi
             ;;
         DOCS)
             # Rule: DOCS should mention ARCHITECTURE.md
             if ! echo "$lower_line" | grep -qE 'architecture\.md|architecture'; then
-                warn "[DOCS] doesn't mention ARCHITECTURE.md — DOCS convention is to update it"
+                emit "docs_mentions_architecture" "[DOCS] doesn't mention ARCHITECTURE.md — DOCS convention is to update it"
             fi
             ;;
         INFRA)
             # Rule: INFRA should not mention writing tests
             if echo "$lower_line" | grep -qE '\bwrite\b.*\btest\b|\bcreate\b.*\btest\b'; then
-                warn "[INFRA] mentions writing tests — should this be [RED] or [E2E]?"
+                emit "infra_writes_tests" "[INFRA] mentions writing tests — should this be [RED] or [E2E]?"
             fi
             ;;
         WIRE)
             # Rule: WIRE must mention integration
             if ! echo "$lower_line" | grep -qE 'connect|integrat|endpoint|frontend.*backend|backend.*frontend'; then
-                warn "[WIRE] doesn't mention integration/connection between layers"
+                emit "wire_mentions_integration" "[WIRE] doesn't mention integration/connection between layers"
             fi
             # Detect frontend UI work
             if echo "$lower_line" | grep -qE 'frontend|component|streaming.*display|message.*display'; then
@@ -395,6 +444,10 @@ validate_step "$STEP_NUM" "$STEP_TITLE" "$STEP_TAGS" "$CHECKBOX_COUNT"
 section "Summary"
 printf "  Errors:   ${_red}%d${_reset}\n" "$ERRORS"
 printf "  Warnings: ${_yellow}%d${_reset}\n" "$WARNINGS"
+
+if [ -f "$CONFIG_FILE" ]; then
+    printf "  Config:   ${_cyan}%s${_reset}\n" "$CONFIG_FILE"
+fi
 
 if [ "$ERRORS" -gt 0 ]; then
     printf "\n${_red}Validation failed with %d error(s).${_reset}\n" "$ERRORS"
