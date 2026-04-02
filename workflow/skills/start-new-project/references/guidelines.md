@@ -75,6 +75,18 @@ For every web application project, include Chrome DevTools Protocol setup as a s
 
 Include a checkbox in Phase 1 to generate `ARCHITECTURE.md` at the project root using `templates/architecture.md`. This file captures stack, layers, patterns, schema, auth model, and routes. Every subsequent Step that introduces a new pattern, route, table, or dependency must include a checkbox to update it — naming exactly what changed.
 
+## Issue body backup (mandatory)
+
+Every project must include issue body protection from day 1. A single malformed `sed` or bad `gh issue edit` can silently wipe an entire issue body with no recovery. Include a Phase 1 checkbox to scaffold the backup infrastructure:
+
+1. **Copy `templates/issue-backup.sh` → `.claude/scripts/issue-backup.sh`** — SQLite-based backup that snapshots issue bodies before write operations. Supports `snapshot`, `restore`, `list`, `cleanup` subcommands with retention of 10 snapshots per issue.
+2. **Copy `templates/pre-issue-edit-hook.sh` → `.claude/hooks/pre-issue-edit.sh`** — PreToolUse hook that automatically intercepts `gh issue edit` commands and snapshots the body before the edit is applied.
+3. **Register the hook in `.claude/settings.json`** — add `PreToolUse` entry with matcher `Bash` pointing to the hook script.
+4. **Add `.claude/issues.db` to `.gitignore`** — the SQLite database is local state, not committed.
+5. **Run `issue-backup.sh snapshot-all`** after creating the first issues — seeds the database with initial backups.
+
+This setup costs nothing at runtime (hook only fires on `gh issue edit`) and prevents catastrophic data loss. The backup script also supports `restore` for quick recovery.
+
 ## No workarounds
 
 Every step must solve problems at their root. If a step would require a workaround (hardcoded values, temporary flags, monkey-patches, `any` casts), the step is incomplete. Rewrite it.

@@ -193,7 +193,9 @@ Present the plan and use `AskUserQuestion` with options `["Approved", "I want to
 
 ### 4. Update the issue
 
-After approval, rewrite the issue body and assign:
+After approval, **snapshot the current body before overwriting** — if `.claude/scripts/issue-backup.sh` exists, run `bash .claude/scripts/issue-backup.sh snapshot <number>` first. This is a safety net: the hook should catch `gh issue edit` automatically, but an explicit snapshot before a full body rewrite provides defense in depth.
+
+Then rewrite the issue body and assign:
 
 ```bash
 gh issue edit <number> --body "<approved body>" --add-assignee @me
@@ -309,7 +311,7 @@ Before presenting the Report, verify:
 Before finalizing output, verify:
 
 1. **Checkboxes concrete?** — every checkbox has file paths or specific actions, no vague "implement X"
-2. **TDD order correct?** — test checkbox before implementation in every behavioral Step
+2. **TDD order correct?** — test checkbox before implementation in every behavioral Step, using `RED:` and `GREEN:` labels (see `templates/step-template.md` § Checkboxes)
 3. **Plan structure matches template?** — What/Why/Acceptance criteria/Steps format
 4. **Split rule respected?** — if 8+ steps, plan was split into multiple issues
 5. **quality.md compliance?** — if quality.md was loaded in pre-flight, scan every proposed checkbox against its DON'Ts. Flag any checkbox that would produce code violating a DON'T (e.g., a checkbox suggesting raw primitives instead of value objects, horizontal TDD, nested if/else, magic numbers, workarounds). The plan must not instruct what quality.md forbids.

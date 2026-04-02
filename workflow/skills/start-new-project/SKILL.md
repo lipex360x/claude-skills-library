@@ -64,6 +64,7 @@ Turn a project idea into a well-structured GitHub issue with phased checkboxes, 
 | TDD methodology | `references/tdd-methodology.md` | R | Markdown |
 | Architecture template | `templates/architecture.md` | R | Markdown |
 | CDP templates | `templates/start-chrome.sh`, `templates/project-settings.json`, `templates/cdp-run-all.ts`, `templates/cdp-test-example.ts` | R | Various |
+| Issue backup templates | `templates/issue-backup.sh`, `templates/pre-issue-edit-hook.sh` | R | Bash scripts |
 
 </external_state>
 
@@ -128,6 +129,8 @@ Sizing: 2-4 phases, 3-8 steps per phase, 2-6 checkboxes per step.
 **Mandatory split rule.** If plan has **more than 8 steps**, split into one issue per Phase. Each issue has 3-8 steps, is independently completable, with its own verification. The Overview is shared. Steps renumbered from 1 within each issue.
 
 If Agent Teams is enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`), add **Execution mode** section at the top of the issue body with teammate assignments. Rules: identify sequential prefix, group independent steps by layer, mark blocked teammates, 2-4 teammates max. Specify tool access per teammate.
+
+**Issue body backup (mandatory).** Every project plan MUST include a Phase 1 checkbox to scaffold issue body protection. Copy `templates/issue-backup.sh` to `.claude/scripts/`, `templates/pre-issue-edit-hook.sh` to `.claude/hooks/`, register the hook in `.claude/settings.json`, and add `.claude/issues.db` to `.gitignore`. Read `references/guidelines.md` § "Issue body backup" for the full checklist. After creating the issues in Step 6, run `issue-backup.sh snapshot-all` to seed the backup database.
 
 Before presenting, review critically: tighten vague checkboxes, remove redundancy, ensure TDD order, verify file paths.
 
