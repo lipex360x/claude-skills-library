@@ -1,0 +1,31 @@
+{
+  "name": "continue-issue",
+  "version": "1.0.0",
+  "skeletonVersion": 1,
+  "plugin": "workflow",
+  "userInvocable": true,
+  "model": null,
+  "sections": {
+    "inputContract": true,
+    "outputContract": true,
+    "externalState": true,
+    "preFlight": true,
+    "steps": true,
+    "postFlight": true,
+    "nextAction": true,
+    "selfAudit": true,
+    "contentAudit": false,
+    "errorHandling": true,
+    "antiPatterns": true,
+    "guidelines": true
+  },
+  "stepCount": 5,
+  "approvalGates": 0,
+  "references": [],
+  "templates": [],
+  "dependencies": {
+    "tools": ["Read", "Write", "Edit", "Bash", "Glob", "Grep", "Agent", "AskUserQuestion", "TaskCreate", "TaskUpdate", "EnterPlanMode", "ExitPlanMode"],
+    "skills": [],
+    "external": ["gh"]
+  }
+}

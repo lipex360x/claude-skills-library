@@ -1,6 +1,6 @@
 # Development Guidelines (Extended)
 
-Guidelines extracted from SKILL.md for reference. Read this file when applying test isolation, CDP verification, or DDD principles in the plan.
+Guidelines extracted from SKILL.md for reference. Read this file when applying test isolation, Playwright visual verification, or DDD principles in the plan.
 
 ## 1. Test isolation via docker-compose
 
@@ -12,27 +12,44 @@ Tests must never touch production data. When the issue involves database changes
 - **Full teardown.** Include a `global-teardown.ts` (or equivalent) that stops all test containers and processes when the suite finishes — success or failure. Use `docker compose down` to remove containers, networks, and volumes. Orphaned containers cause port conflicts on the next run.
 - **Husky git hooks.** Configure Husky as part of the test environment setup. `pre-commit` runs lint + type-check (via `lint-staged` to scope to changed files only). `pre-push` runs the full test suite + build. This catches CI-breaking code before it reaches the remote. Setup: `npx husky init`, then create `.husky/pre-commit` and `.husky/pre-push` with the appropriate commands. If the project uses a monorepo, scope hooks to the relevant workspace.
 
-## 2. Visual verification via CDP (mandatory for web projects)
+## 2. Visual verification via Playwright (mandatory for web projects)
 
-When the issue touches UI — new pages, component changes, layout fixes, styling — verification checkboxes must use CDP to confirm the result visually, not just functionally. The pattern: "Navigate to [page] via CDP and take screenshot to verify [expected state]". This catches layout breaks, missing elements, and visual regressions that unit tests and functional tests miss entirely.
+When the issue touches UI — new pages, component changes, layout fixes, styling — verification checkboxes must use Playwright to confirm the result visually, not just functionally. This catches layout breaks, missing elements, and visual regressions that unit tests and functional tests miss entirely.
 
-**Setup (when CDP is not yet configured and the project is a web app with frontend):** the first Step in the plan must set it up:
-- `.claude/start-chrome.sh` + `.claude/project-settings.json` + `e2e/cdp/run-all.ts` runner + `test:cdp` and `test:cdp:server` scripts in `package.json`
+**"Rodar o PW" is a feedback loop, not just a test run.** Every UI step must include a verification cycle:
 
-**When CDP is already configured:** read the `pages` map from `project-settings.json` to reference routes by name in checkboxes.
+1. **Run** — execute the Playwright E2E test for the page/component
+2. **Read screenshots** — visually analyze the captured screenshots (light/dark, desktop/mobile)
+3. **Fix** — correct any visual issues, broken layouts, missing elements found in screenshots
+4. **Re-run** — repeat until screenshots match expected state
+5. **Only then** mark the checkbox as done
 
-**For non-web projects or backend-only issues:** skip CDP entirely.
+This cycle is mandatory. Writing the test is not enough — the agent must run it, read the screenshot output, and confirm the UI is correct before presenting work as complete.
 
-Key CDP rules (see `references/cdp-best-practices.md` for the full set):
-- **Fresh context:** always `browser.newContext()` — never `browser.contexts()[0]`. Always `context.close()` in a `finally` block.
-- **Dedicated test port:** hit the test server (declared as `testPort` in `project-settings.json`), never the dev server. Test/seed users only exist locally.
-- **Test server needs env vars:** start via `test:cdp:server` (loads `.env.test` with service URLs, API keys). Without env vars, CDP scripts timeout on auth — the server starts but can't authenticate.
-- **No `run_in_background`:** run CDP scripts inline with Bash tool `timeout: 30000`. Background execution orphans processes.
-- **Server is user's responsibility:** pre-flight check before running. Never auto-start with `nohup`.
+**Checkbox pattern for UI steps:**
+```
+- [ ] E2E: Write Playwright test for [page] in `tests/e2e/[page].spec.ts` — verify [expected state], screenshot light/dark + desktop/mobile
+- [ ] PW verify: Run `npm run test:e2e -- [page].spec.ts`, read screenshots, fix visual issues until all pass
+```
+
+The first checkbox writes the test. The second checkbox is the verification cycle — it's a separate action because the agent must actively read and analyze screenshots, not just check exit code 0.
+
+**Setup (when Playwright is not yet configured):** include a dedicated Step early in the plan. See `references/playwright-practices.md` for the full setup (config, page objects, test helpers, global setup/teardown).
+
+**When Playwright is already configured:** reference existing config for E2E verification checkboxes. If new routes are added, include both the test-writing checkbox and the PW verify checkbox.
+
+**For non-web projects or backend-only issues:** skip Playwright entirely.
+
+Key Playwright rules (see `references/playwright-practices.md` for details):
+- **Headless by default.** No window stealing; consistent rendering.
+- **`webServer` config** for automatic server lifecycle — no manual `nohup` or orphan processes.
+- **`.env.test`** for test environment — single source of truth.
+- **Page objects** for reusable interactions (`tests/e2e/pages/`).
+- **Test data isolation** by prefix (`e2e-*`) — parallel tests don't collide.
+- **Screenshots for visual validation** — light/dark mode, desktop/mobile viewports.
+- **`trace: 'on-first-retry'`** — post-mortem debugging without overhead.
 - **Generic login redirect:** `waitForURL(url => !url.pathname.includes("/login"))` — never hardcode destination.
-- **Cleanup after CDP sessions:** `TaskStop` the server task (never `lsof kill` — user may have own servers), remove framework lock files.
-- **CDP is not E2E:** when instructing teammates (Agent Teams), be explicit — "do NOT run Playwright E2E tests" but "DO create CDP verification scripts in `e2e/cdp/`". Teammates conflate the two.
-- **Persistent CDP test scripts:** every visual verification must be saved in `e2e/cdp/verify-<page>.ts` (match project language — `.ts` for TypeScript, `.mjs` for plain JS). Screenshots go to `test-results/cdp/screenshots/` (gitignored). Before writing a new script, check `e2e/cdp/` for an existing one — run it first, only create new if needed. When a Step modifies existing UI, update the corresponding script. Include checkboxes: "Save CDP test script to `e2e/cdp/verify-[page].ts`".
+- **Persistent E2E tests:** every visual verification saved in `tests/e2e/[page].spec.ts`. Screenshots go to `test-results/` (gitignored). Before writing a new test, check for an existing one — update it if the Step modifies existing UI.
 
 ## 3. Domain-Driven Design by default
 

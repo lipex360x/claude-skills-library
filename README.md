@@ -103,6 +103,7 @@ Skills are organized into **8 plugin groups** by domain. Each plugin is a direct
 | [add-backlog](./workflow/skills/add-backlog/) | Create a GitHub issue and add it to the project board's Backlog column. |
 | [cancel-issue](./workflow/skills/cancel-issue/) | Cancel an issue — close with reason, move to Cancelled, unblock dependents, clean up branches/PRs. |
 | [close-pr](./workflow/skills/close-pr/) | Merge the current branch's PR, write implementation summary, notify unblocked issues, and move card to Done. |
+| [continue-issue](./workflow/skills/continue-issue/) | Resume work on an in-progress issue — rebuild task board from checkboxes and start the next step. |
 | [grill-me](./workflow/skills/grill-me/) | Deep structured interview about a plan, feature, or project — extracts decisions, constraints, and context. |
 | [list-backlog](./workflow/skills/list-backlog/) | List backlog issues with size, priority, and dependency status in a table. |
 | [list-issues](./workflow/skills/list-issues/) | List all open issues grouped by board column with priority sorting and next-issue suggestion. |

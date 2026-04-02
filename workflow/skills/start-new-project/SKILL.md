@@ -63,6 +63,7 @@ Turn a project idea into a well-structured GitHub issue with phased checkboxes, 
 | Playwright practices | `references/playwright-practices.md` | R | Markdown |
 | TDD methodology | `references/tdd-methodology.md` | R | Markdown |
 | Architecture template | `templates/architecture.md` | R | Markdown |
+| Quality standards template | `templates/quality-standards.md` | R | Markdown |
 | Issue backup templates | `templates/issue-backup.sh`, `templates/pre-issue-edit-hook.sh` | R | Bash scripts |
 
 </external_state>
@@ -128,6 +129,8 @@ Sizing: 2-4 phases, 3-8 steps per phase, 2-6 checkboxes per step.
 **Mandatory split rule.** If plan has **more than 8 steps**, split into one issue per Phase. Each issue has 3-8 steps, is independently completable, with its own verification. The Overview is shared. Steps renumbered from 1 within each issue.
 
 If Agent Teams is enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`), add **Execution mode** section at the top of the issue body with teammate assignments. Rules: identify sequential prefix, group independent steps by layer, mark blocked teammates, 2-4 teammates max. Specify tool access per teammate.
+
+**Quality standards (mandatory).** Every project plan MUST include a Phase 1 checkbox to create `quality.md` at the project root. This file defines non-negotiable code quality rules adapted to the project's specific stack. Read `templates/quality-standards.md` for the structure. The file must include: Shared DON'Ts/DOs (fail-first, vertical TDD, named constants, no workarounds), Backend DON'Ts/DOs (rich entities, value objects, no anemic models — adapted to the project's backend language), Frontend DON'Ts/DOs (if applicable — adapted to the project's frontend framework), and Patterns section with concrete code examples in the project's languages. The `/start-issue` skill reads this file in pre-flight and validates every checkbox against its DON'Ts — so completeness matters.
 
 **Issue body backup (mandatory).** Every project plan MUST include a Phase 1 checkbox to scaffold issue body protection. Copy `templates/issue-backup.sh` to `.claude/scripts/`, `templates/pre-issue-edit-hook.sh` to `.claude/hooks/`, register the hook in `.claude/settings.json`, and add `.claude/issues.db` to `.gitignore`. Read `references/guidelines.md` § "Issue body backup" for the full checklist. After creating the issues in Step 6, run `issue-backup.sh snapshot-all` to seed the backup database.
 

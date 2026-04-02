@@ -83,7 +83,7 @@ After completing Step [N] (last sequential step):
 - Number Steps sequentially across the entire issue (Step 1, 2, 3... not per-section)
 - Include a verification checkbox as the last item when the Step has observable output
 - For changes involving databases or file I/O, include test environment setup early — create or verify `docker-compose.test.yml` (or `test` profile) to orchestrate the test stack. Configure `.env.test` pointing at local containers. Configure Husky with `pre-commit` (lint + type-check via lint-staged) and `pre-push` (tests + build). This must exist before any test checkbox can run
-- For web projects with UI changes, include Playwright setup as an early Step if `playwright.config.ts` doesn't exist yet. If it does, add E2E tests with screenshots for new pages: "Write Playwright E2E test for [page] — verify [expected state], screenshot light/dark + desktop/mobile"
+- For web projects with UI changes, include Playwright setup as an early Step if `playwright.config.ts` doesn't exist yet. If it does, add E2E tests with screenshots for new pages — and always include both the test-writing and the verification cycle checkboxes (see Playwright verification below)
 
 ### Checkboxes
 - One action per checkbox — avoid "X and Y" (split into two)
@@ -110,6 +110,12 @@ After completing Step [N] (last sequential step):
   - [ ] Create `Account` entity type, AccountRepository interface
   ```
 - For config tasks: `Configure Y in config-file.ext`
+- **Playwright visual verification cycle** — for every Step that creates or modifies UI, include two checkboxes:
+  ```
+  - [ ] E2E: Write Playwright test for [page] in `tests/e2e/[page].spec.ts` — verify [expected state], screenshot light/dark + desktop/mobile
+  - [ ] PW verify: Run `npm run test:e2e -- [page].spec.ts`, read screenshots, fix visual issues until all pass
+  ```
+  The first checkbox writes the test. The second is the feedback loop: **run → read screenshots → analyze visually → fix → re-run** until the UI matches expectations. Writing the test alone is NOT sufficient — the agent must actively view and analyze the screenshots before marking as done. See `references/development-guidelines.md` § 2 for the full cycle.
 
 ### Parallelizable Steps (Agent Teams)
 When a Step will be assigned to a teammate, make it self-contained:

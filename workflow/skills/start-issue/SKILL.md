@@ -16,6 +16,8 @@ allowed-tools:
   - Grep
   - Agent
   - AskUserQuestion
+  - EnterPlanMode
+  - ExitPlanMode
   - TaskCreate
   - TaskUpdate
   - TeamCreate
@@ -176,20 +178,18 @@ Transform acceptance criteria into Steps with checkboxes. Each criterion typical
 - **`has_database` is true but test setup exists**: verify the existing setup covers new changes. Include a checkbox to update if needed.
 - **No database signals**: skip test isolation entirely.
 
-Present the full proposed issue body in a fenced code block with: **What**, **Why**, **Acceptance criteria** (original), **Steps** (new detailed breakdown).
-
 Sizing: 2-8 Steps total, 2-6 checkboxes per Step. Each checkbox = one focused action.
 
 **Mandatory split rule.** If plan has **more than 8 steps**, split into multiple smaller issues — all added to Backlog. Each issue independently completable with 3-8 steps.
 
 If Agent Teams is enabled, add an **Execution strategy** section at the top of the issue body (before What/Why) based on the strategy chosen in Step 2b. Read `references/execution-strategy.md` for the strategy templates (Agent, Teammate, Sequential). Also add inline reminders in parallelizable steps. Read `references/guidelines.md` § "Verification is part of the plan" and § "Checkbox ownership with Agent Teams" for the verification matrix and ownership rules.
 
-**Include a task preview** after the fenced code block listing Step titles as bullet points.
+**Present the plan via Plan mode.** Use `EnterPlanMode` and compose the full proposed issue body as the plan content — with **What**, **Why**, **Acceptance criteria** (original), **Steps** (new detailed breakdown). Include a task preview listing Step titles as bullet points at the end. Plan mode keeps the plan out of the main context window and provides a structured approval UI.
 
-Present the plan and use `AskUserQuestion` with options `["Approved", "I want to adjust"]`. This is the **single and only** approval gate.
+Use `ExitPlanMode` to submit the plan for user approval. This is the **single and only** approval gate.
 
-- **"Approved"** — proceed immediately to Step 4. No additional confirmation.
-- **"I want to adjust"** — apply changes, re-present, repeat until approved.
+- **User approves** — proceed immediately to Step 4. No additional confirmation.
+- **User requests changes** — apply adjustments, re-enter Plan mode, re-present, repeat until approved.
 
 ### 4. Update the issue
 
