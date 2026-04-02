@@ -62,6 +62,7 @@ Resume work on an in-progress issue by reconstructing session state from the Git
 | ARCHITECTURE.md | project root | R | Markdown |
 | quality.md | project root | R | Markdown |
 | CLAUDE.md | project root | R | Markdown |
+| Issue validator | `.claude/scripts/validate-issue.sh` | R (optional) | Bash script |
 
 </external_state>
 
@@ -135,6 +136,18 @@ Present a status table:
 | 4    | Configure Playwright   | 0/5      | pending     |
 | ...  | ...                    | ...      | ...         |
 ```
+
+### 2b. Validate the next step
+
+After identifying the next step (first `pending` or `in_progress`), validate its structure before starting work. If `.claude/scripts/validate-issue.sh` exists in the project, run:
+
+```bash
+bash .claude/scripts/validate-issue.sh <number> --step <next-step-number>
+```
+
+- **Errors** → fix the issue body (add missing tags, split oversized steps) and re-validate until it passes. Do NOT start work on a step with validation errors.
+- **Warnings** → report to user in the status table, but proceed. Warnings are advisory.
+- **Script not found** → skip validation silently (not all projects have the validator).
 
 ### 3. Recreate the task board
 
@@ -212,8 +225,9 @@ Before presenting the Report, verify:
 1. **Pre-flight passed?** — gh authenticated, repo valid
 2. **Issue found?** — issue number resolved (from args, branch, or board)
 3. **Steps parsed correctly?** — step count matches issue body
-4. **Task board reconstructed?** — tasks created with correct statuses
-5. **Context loaded?** — ARCHITECTURE.md, quality.md, recent comments, git log
+4. **Next step validated?** — `validate-issue.sh --step N` passed (no errors)
+5. **Task board reconstructed?** — tasks created with correct statuses
+6. **Context loaded?** — ARCHITECTURE.md, quality.md, recent comments, git log
 
 </self_audit>
 
