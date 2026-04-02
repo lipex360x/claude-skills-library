@@ -52,9 +52,9 @@ Unlike project issues created by `start-new-project` (which use "Phase 1: Theme"
 
 Issue content is public and portable. Never reference local paths like `~/.brain/`, `~/.claude/`, or absolute user paths. Use paths relative to the project root (e.g., `create-skill/SKILL.md`, not `~/.brain/skills/skill-creator/SKILL.md`). This applies to checkboxes, descriptions, and any text written to the issue body.
 
-## Visual verification via CDP (mandatory for web projects)
+## Visual verification via Playwright (mandatory for web projects)
 
-When the issue touches UI, verification checkboxes must use CDP: "Navigate to [page] via CDP and take screenshot to verify [expected state]". Read `references/development-guidelines.md` § 2 for setup steps, key CDP rules, and persistent test script requirements. Also see `references/cdp-best-practices.md` for the full rule set.
+When the issue touches UI, verification checkboxes must include Playwright E2E tests with screenshots: "Write Playwright test for [page] — verify [expected state], screenshot light/dark mode". Read `references/playwright-practices.md` for setup (config, page objects, test helpers, global setup/teardown). Every step that completes UI work must include a visual validation checkpoint: run all tests + Playwright with screenshots, review before presenting as done.
 
 ## ARCHITECTURE.md maintenance
 

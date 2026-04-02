@@ -19,7 +19,7 @@ When E2E tests need to change application state (toggle a feature, update a sett
 
 ## "Full test" means unit + lint + E2E
 
-When generating verification checkboxes that say "run full test suite", always expand to all three layers: unit tests + lint + E2E (with server and database). Unit tests with mocks can pass while the database schema is broken. CDP screenshots catch UI issues but don't verify data persistence. Only E2E tests with real database writes confirm the entire stack works. Verification checkboxes should list the actual commands, not just "run tests".
+When generating verification checkboxes that say "run full test suite", always expand to all three layers: unit tests + lint + E2E (with server and database). Unit tests with mocks can pass while the database schema is broken. Playwright screenshots catch UI issues but don't verify data persistence. Only E2E tests with real database writes confirm the entire stack works. Verification checkboxes should list the actual commands, not just "run tests".
 
 ## Seed data quick-reference file
 
@@ -61,15 +61,15 @@ Milestones serve as version/release/sprint groupings — not as status indicator
 
 Always remind the user to include `closes #N` in PR descriptions. This auto-closes the linked issue on merge and updates milestone progress automatically.
 
-## Visual verification via CDP (mandatory for web projects)
+## Visual verification via Playwright (mandatory for web projects)
 
-For every web application project, include Chrome DevTools Protocol setup as a step in Phase 1 — before any frontend implementation. CDP enables Claude to connect to the user's browser, navigate as a user, and take screenshots. The setup consists of two files from skill templates:
-- `.claude/start-chrome.sh` — launches Chrome with `--remote-debugging-port=9222`. Use `templates/start-chrome.sh`.
-- `.claude/project-settings.json` — declarative project configuration. Use `templates/project-settings.json`. Contains `pr-merge-to`, CDP settings under `chrome` (`baseUrl`, `testPort`, `tabs`, `pages`).
-- **CDP runner and `test:cdp` script.** Create `e2e/cdp/run-all.ts` from `templates/cdp-run-all.ts`, add npm scripts.
-- **CDP is not E2E.** Be explicit with teammates: "do NOT run Playwright E2E tests" but "DO create CDP verification scripts in `e2e/cdp/`".
-- **Persistent CDP test scripts.** Every visual verification saved as `e2e/cdp/verify-<page>.ts`.
-- Read `references/cdp-best-practices.md` for all CDP rules (fresh context, dedicated test port, no `run_in_background`, generic login redirect, cleanup).
+For every web application project, include Playwright setup as a step in Phase 1 — before any frontend implementation. Playwright provides headless browser testing, screenshots, and E2E verification with zero custom infrastructure. The setup consists of:
+- `playwright.config.ts` — test directory, web server config, browser projects (chromium + mobile)
+- `tests/e2e/pages/` — page objects for reusable interactions (`AuthPage.login()`, etc.)
+- `tests/e2e/helpers/` — test user factories, env validation, API signup helpers
+- `tests/e2e/global-setup.ts` — seed DB, create manual test user with known credentials
+- `tests/e2e/global-teardown.ts` — cleanup e2e users, kill servers, free ports
+- Read `references/playwright-practices.md` for the full setup, rules, and framework-agnostic design.
 
 ## ARCHITECTURE.md — codebase knowledge cache
 

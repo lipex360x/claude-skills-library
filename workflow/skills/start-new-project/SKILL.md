@@ -60,10 +60,9 @@ Turn a project idea into a well-structured GitHub issue with phased checkboxes, 
 | Issue template | `templates/issue-template.md` | R | Markdown |
 | Phase planning guide | `references/phase-planning-guide.md` | R | Markdown |
 | Board setup | `references/project-board-setup.md` | R | Markdown |
-| CDP practices | `references/cdp-best-practices.md` | R | Markdown |
+| Playwright practices | `references/playwright-practices.md` | R | Markdown |
 | TDD methodology | `references/tdd-methodology.md` | R | Markdown |
 | Architecture template | `templates/architecture.md` | R | Markdown |
-| CDP templates | `templates/start-chrome.sh`, `templates/project-settings.json`, `templates/cdp-run-all.ts`, `templates/cdp-test-example.ts` | R | Various |
 | Issue backup templates | `templates/issue-backup.sh`, `templates/pre-issue-edit-hook.sh` | R | Bash scripts |
 
 </external_state>

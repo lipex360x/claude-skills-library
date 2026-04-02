@@ -65,7 +65,7 @@ Turn an issue with high-level acceptance criteria into a detailed implementation
 | Step template | `templates/step-template.md` | R | Markdown |
 | Board operations | `references/project-board-operations.md` | R | Markdown |
 | Board setup | `references/project-board-setup.md` | R | Markdown |
-| CDP practices | `references/cdp-best-practices.md` | R | Markdown |
+| Playwright practices | `references/playwright-practices.md` | R | Markdown |
 | Dev guidelines | `references/development-guidelines.md` | R | Markdown |
 | TDD methodology | `references/tdd-methodology.md` | R | Markdown |
 | Execution strategy | `references/execution-strategy.md` | R | Markdown |
@@ -134,8 +134,8 @@ Scan comments for: file paths, scope transfers from `/open-pr` or `/close-pr`, p
 
 If ARCHITECTURE.md exists and covers the issue scope: **zero exploration needed**. Read specific files mentioned in comments or ARCHITECTURE.md directly with the Read tool. An Explore agent costs ~50k tokens — never spawn one when a few targeted reads suffice.
 
-**CDP detection (for web projects).** Check:
-1. **CDP already configured?** Look for `.claude/project-settings.json` with `chrome.cdp` field. Store the `pages` map for verification checkboxes.
+**Playwright detection (for web projects).** Check:
+1. **Playwright already configured?** Look for `playwright.config.ts` at the project root. If found, store the project names and baseURL for verification checkboxes.
 2. **Web project with frontend?** Check for frontend framework signals (react, vue, svelte, next, etc.). Store the result for Step 3.
 
 ### 2b. Determine execution strategy
@@ -166,10 +166,10 @@ Read `templates/step-template.md` for the expected format.
 
 Transform acceptance criteria into Steps with checkboxes. Each criterion typically expands into 1-3 Steps with 2-6 concrete checkboxes.
 
-**Apply CDP detection result from Step 2:**
-- **CDP already configured**: use `pages` map for verification checkboxes. If new routes, include checkbox to update `pages`.
-- **Web project without CDP**: include Step 1 — Configure CDP. Read `references/cdp-best-practices.md`.
-- **Not a web project**: skip CDP entirely.
+**Apply Playwright detection result from Step 2:**
+- **Playwright already configured**: reference existing config for E2E verification checkboxes. If new routes, include checkbox to add E2E tests with screenshots.
+- **Web project without Playwright**: include an early Step — Configure Playwright. Read `references/playwright-practices.md` for setup (config, page objects, test helpers, global setup/teardown).
+- **Not a web project**: skip Playwright entirely.
 
 **Apply test isolation detection from Step 2c:**
 - **`has_database` is true and no test setup exists**: include an early Step — "Configure test environment" with checkboxes for: (1) create `docker-compose.test.yml` with isolated DB on high port, (2) create `.env.test` with local container URLs, (3) add runtime safety guard in global test setup, (4) configure test runner to load `.env.test`, (5) add `beforeAll`/`afterAll` for migrate/teardown, (6) configure Husky with `pre-commit` hook running lint + type-check and `pre-push` hook running tests + build — ensures CI-breaking code never reaches remote.
