@@ -66,6 +66,7 @@ Turn a project idea into a well-structured GitHub issue with phased checkboxes, 
 | Quality standards template | `templates/quality-standards.md` | R | Markdown |
 | Dev scripts template | `templates/dev-scripts.md` | R | Markdown |
 | Issue backup templates | `templates/issue-backup.sh`, `templates/pre-issue-edit-hook.sh` | R | Bash scripts |
+| Issue validator | `templates/validate-issue.sh` | R | Bash script |
 
 </external_state>
 
@@ -140,6 +141,8 @@ If Agent Teams is enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`), add **Exec
 **Infrastructure abstraction (mandatory for projects with external dependencies).** When the project uses databases, external APIs, auth providers, or any service that could be swapped in the future, the plan MUST include a Phase 1 step to establish Repository interfaces (`Protocol`/`interface`) in the domain layer and Port/Adapter pattern for external services. Repository interfaces define data access contracts (`ThreadRepository`, `UserRepository`). Ports define external service contracts (`AuthPort`, `StoragePort`). Concrete implementations live in an `infra/<provider>/` layer (e.g., `infra/supabase/`, `infra/aws/`). Services depend on interfaces, never on implementations — this enables swapping infrastructure (Supabase → AWS, local auth → Cognito) by changing only the adapter with zero changes to domain or service code. Include this in the quality.md Backend DOs and add concrete interface examples in the Patterns section. Read `templates/quality-standards.md` § "Repository pattern" and § "Port/Adapter pattern" for the code templates.
 
 **Linter ignore audit (mandatory).** Every phase's final verification step MUST include: `- [ ] Audit linter ignore rules — review knip.json ignores, eslint-disable, noqa; remove if no longer needed, add justification comment if still required`. Suppression rules added during development tend to accumulate and become permanent workarounds. This checkpoint forces a cleanup pass before each phase is tagged as complete.
+
+**Issue validator (mandatory).** Every project plan MUST include a Phase 1 checkbox to scaffold the issue structure validator. Copy `templates/validate-issue.sh` to `.claude/scripts/validate-issue.sh` and make it executable. This script validates issue bodies against structural rules: tag presence/ordering (RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT), checkbox sizing (max 8 per step, recommended ≤6), checkbox text length (max 200 chars — break into multiple checkboxes, never shorten), tag chain enforcement (GREEN requires RED, E2E requires PW, PW requires HUMAN, AUDIT mandatory and last), and step count (2-8 per issue). The `/start-issue` skill runs this validator after rewriting the issue body. Add `validate-issue.sh` to the `## Scripts` section of ARCHITECTURE.md.
 
 Before presenting, review critically: tighten vague checkboxes, remove redundancy, ensure TDD order, verify file paths.
 

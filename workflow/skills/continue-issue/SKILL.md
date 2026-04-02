@@ -171,7 +171,21 @@ Present concisely:
 - **Recent commits** — last 3 commits on branch (if any)
 - **Context loaded** — ARCHITECTURE.md, quality.md, last comments
 
-Then **immediately begin working on the next pending step**. Read the step's checkboxes from the issue body and execute them in order, following TDD (RED/GREEN) and PW verify cycles as specified.
+Then **immediately begin working on the next pending step**. Read the step's checkboxes from the issue body and execute them in order. Each checkbox has a tag that determines execution behavior:
+
+| Tag | Execution behavior |
+|-----|--------------------|
+| `[RED]` | Write a failing test — run it, confirm it fails |
+| `[GREEN]` | Implement code to make the RED test pass — run it, confirm green |
+| `[INFRA]` | Infrastructure/config/tooling — no test cycle needed |
+| `[WIRE]` | Connect layers (frontend↔backend) — integration work |
+| `[E2E]` | Write Playwright E2E test with screenshots |
+| `[PW]` | Run E2E tests, read screenshots, fix visual issues until all pass |
+| `[HUMAN]` | Present screenshots to user via AskUserQuestion — wait for approval before proceeding |
+| `[DOCS]` | Update ARCHITECTURE.md with new directories, files, patterns from this step |
+| `[AUDIT]` | Audit all code written in this step against every rule in quality.md — fix violations |
+
+Follow the tags in order. The RED→GREEN cycle is vertical TDD (one test, one implementation). The E2E→PW→HUMAN chain is the visual verification gate. AUDIT is always last — no `/push` until the audit passes.
 
 ## Post-flight
 

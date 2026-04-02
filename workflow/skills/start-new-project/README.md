@@ -41,6 +41,77 @@ Also triggered by natural language:
 
 [↑ Back to top](#start-new-project)
 
+## Issue validator rules
+
+The `validate-issue.sh` template is copied to `.claude/scripts/` during Phase 1 scaffolding. It validates issue bodies written by `/start-issue` against structural, sizing, and semantic rules. The `/start-issue` skill runs it automatically after rewriting the issue body.
+
+### Structure (errors)
+
+| Rule | Validation |
+|------|------------|
+| `## What` section | Required |
+| `## Why` section | Required |
+| `## Acceptance criteria` | Required, ≥1 checkbox |
+| Step count | 2-8 per issue |
+| Step numbering | Sequential, no gaps or duplicates |
+| Step title format | Must use em dash (`—`), not hyphen |
+
+### Sizing
+
+| Rule | Level | Validation |
+|------|-------|------------|
+| Checkboxes per step | error | Max 8 (hard limit) |
+| Checkboxes per step | warning | Recommended ≤6 |
+| Checkbox text length | warning | Max 200 chars — break into multiple, never shorten |
+| Empty step | error | Must have ≥1 checkbox |
+
+### Checkbox tags
+
+Every checkbox must have a tag: `` `[TAG]` ``. Valid tags and ordering:
+
+```
+RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
+```
+
+| Rule | Level | Validation |
+|------|-------|------------|
+| `[GREEN]` requires `[RED]` | error | No GREEN without RED in same step |
+| `[E2E]` requires `[PW]` | error | E2E tests need visual verification |
+| `[PW]` requires `[HUMAN]` | error | Visual verification needs human approval |
+| `[HUMAN]` requires `[PW]` | error | Human approval needs visual verification |
+| `[AUDIT]` mandatory | error | Every step must end with AUDIT |
+| `[AUDIT]` must be last | error | No tags after AUDIT |
+| Frontend UI → full chain | error | UI work requires E2E + PW + HUMAN |
+| Tag ordering | warning | Must follow the sequence above |
+| `[DOCS]` recommended | warning | Suggested when step has GREEN or WIRE |
+| `[E2E]` without `[RED]` | warning | E2E without unit tests is fragile |
+
+### Semantic rules per tag
+
+| Tag | Level | Validation |
+|-----|-------|------------|
+| `[RED]` | error | Must mention "test" or "spec" |
+| `[RED]` after `[RED]` | error | No consecutive RED without GREEN (horizontal TDD) |
+| `[GREEN]` before `[RED]` | error | GREEN can't appear before RED |
+| `[GREEN]` writes tests | warning | Shouldn't mention writing tests |
+| `[E2E]` | error | Must mention test/spec/playwright |
+| `[PW]` | warning | Should mention screenshots/verification |
+| `[HUMAN]` | warning | Should mention presenting to user/approval |
+| `[AUDIT]` | warning | Should mention quality.md |
+| `[DOCS]` | warning | Should mention ARCHITECTURE.md |
+| `[INFRA]` writes tests | warning | Shouldn't mention writing tests |
+| `[WIRE]` | warning | Should mention integration/connection |
+
+### Other
+
+| Rule | Level | Validation |
+|------|-------|------------|
+| Duplicate checkboxes | error | No duplicate text in same step |
+| Empty checkbox text | error | Must have description after tag |
+| Last AUDIT mentions quality.md | warning | Final audit should reference quality.md |
+
+[↑ Back to top](#start-new-project)
+
 ## Directory structure
 
 ```text
@@ -61,7 +132,8 @@ start-new-project/
     ├── cdp-test-example.ts       # CDP test example with page navigation
     ├── issue-template.md         # Issue body template with Phases/Steps structure
     ├── project-settings.json     # .claude/project-settings.json template with CDP config
-    └── start-chrome.sh           # Chrome launcher script for CDP testing
+    ├── start-chrome.sh           # Chrome launcher script for CDP testing
+    └── validate-issue.sh         # Issue structure validator (copied to .claude/scripts/)
 ```
 
 [↑ Back to top](#start-new-project)

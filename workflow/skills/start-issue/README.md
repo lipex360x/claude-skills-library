@@ -39,6 +39,77 @@ Turns an issue with high-level acceptance criteria into a detailed implementatio
 
 [↑ Back to top](#start-issue)
 
+## Issue validator rules
+
+The `validate-issue.sh` script (created by `/start-new-project`, run automatically by `/start-issue` after rewriting) enforces these rules:
+
+### Structure (errors)
+
+| Rule | Validation |
+|------|------------|
+| `## What` section | Required |
+| `## Why` section | Required |
+| `## Acceptance criteria` | Required, ≥1 checkbox |
+| Step count | 2-8 per issue |
+| Step numbering | Sequential, no gaps or duplicates |
+| Step title format | Must use em dash (`—`), not hyphen |
+
+### Sizing
+
+| Rule | Level | Validation |
+|------|-------|------------|
+| Checkboxes per step | error | Max 8 (hard limit) |
+| Checkboxes per step | warning | Recommended ≤6 |
+| Checkbox text length | warning | Max 200 chars — break into multiple, never shorten |
+| Empty step | error | Must have ≥1 checkbox |
+
+### Checkbox tags
+
+Every checkbox must have a tag: `` `[TAG]` ``. Valid tags and ordering:
+
+```
+RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
+```
+
+| Rule | Level | Validation |
+|------|-------|------------|
+| `[GREEN]` requires `[RED]` | error | No GREEN without RED in same step |
+| `[E2E]` requires `[PW]` | error | E2E tests need visual verification |
+| `[PW]` requires `[HUMAN]` | error | Visual verification needs human approval |
+| `[HUMAN]` requires `[PW]` | error | Human approval needs visual verification |
+| `[AUDIT]` mandatory | error | Every step must end with AUDIT |
+| `[AUDIT]` must be last | error | No tags after AUDIT |
+| Frontend UI → full chain | error | UI work requires E2E + PW + HUMAN |
+| Tag ordering | warning | Must follow the sequence above |
+| `[DOCS]` recommended | warning | Suggested when step has GREEN or WIRE |
+| `[E2E]` without `[RED]` | warning | E2E without unit tests is fragile |
+
+### Semantic rules per tag
+
+| Tag | Level | Validation |
+|-----|-------|------------|
+| `[RED]` | error | Must mention "test" or "spec" |
+| `[RED]` after `[RED]` | error | No consecutive RED without GREEN (horizontal TDD) |
+| `[GREEN]` before `[RED]` | error | GREEN can't appear before RED |
+| `[GREEN]` writes tests | warning | Shouldn't mention writing tests |
+| `[E2E]` | error | Must mention test/spec/playwright |
+| `[PW]` | warning | Should mention screenshots/verification |
+| `[HUMAN]` | warning | Should mention presenting to user/approval |
+| `[AUDIT]` | warning | Should mention quality.md |
+| `[DOCS]` | warning | Should mention ARCHITECTURE.md |
+| `[INFRA]` writes tests | warning | Shouldn't mention writing tests |
+| `[WIRE]` | warning | Should mention integration/connection |
+
+### Other
+
+| Rule | Level | Validation |
+|------|-------|------------|
+| Duplicate checkboxes | error | No duplicate text in same step |
+| Empty checkbox text | error | Must have description after tag |
+| Last AUDIT mentions quality.md | warning | Final audit should reference quality.md |
+
+[↑ Back to top](#start-issue)
+
 ## Directory structure
 
 ```text

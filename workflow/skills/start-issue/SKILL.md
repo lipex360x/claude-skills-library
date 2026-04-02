@@ -180,7 +180,25 @@ Transform acceptance criteria into Steps with checkboxes. Each criterion typical
 - **`has_database` is true but test setup exists**: verify the existing setup covers new changes. Include a checkbox to update if needed.
 - **No database signals**: skip test isolation entirely.
 
-Sizing: 2-8 Steps total, 2-6 checkboxes per Step. Each checkbox = one focused action.
+**Sizing and validator rules.** 2-8 Steps total. 2-6 checkboxes per Step (recommended), max 8 (hard limit). Each checkbox = one focused action, max 200 chars — if longer, break into multiple checkboxes (never shorten to lose context).
+
+**Checkbox tags (mandatory).** Every checkbox MUST have a tag prefix in backtick format: `` `[TAG]` ``. Valid tags and their rules:
+
+| Tag | Purpose | Semantic rule |
+|-----|---------|---------------|
+| `[RED]` | Write a failing test | Must mention "test" or "spec". No consecutive RED without GREEN between them |
+| `[GREEN]` | Implement to pass the test | Requires RED earlier in the step. Must not mention writing tests |
+| `[INFRA]` | Infrastructure/config/tooling | Must not mention writing tests |
+| `[WIRE]` | Connect layers (frontend↔backend) | Must mention integration/connection |
+| `[E2E]` | Write Playwright E2E test | Must mention test/spec. Requires PW in same step |
+| `[PW]` | Run E2E + visual verification | Must mention screenshots/verification. Requires HUMAN in same step |
+| `[HUMAN]` | Present screenshots for user approval | Must mention presenting to user. Requires PW in same step |
+| `[DOCS]` | Update ARCHITECTURE.md | Recommended when step has GREEN or WIRE |
+| `[AUDIT]` | Audit against quality.md | Mandatory in every step, must be the last checkbox |
+
+**Tag ordering:** RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT. Tags must appear in this sequence within each step.
+
+**UI chain:** Any step with frontend UI work (components, layouts, pages) MUST include the full chain: E2E → PW → HUMAN.
 
 **ARCHITECTURE.md maintenance.** The last checkbox of each Step should update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure introduced in that Step. This keeps the architecture doc current as the project grows and prevents future sessions from wasting tokens on codebase exploration.
 

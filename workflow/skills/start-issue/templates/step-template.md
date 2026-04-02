@@ -49,20 +49,24 @@ After completing Step [N] (last sequential step):
 
 ## Step 1 — [Concise title]
 
-- [ ] [Concrete task — include file path, e.g., `Create src/templates/readme.md with standard sections`]
-- [ ] [Another task — specific and verifiable]
-- [ ] [Verification: how to confirm this step works]
+- [ ] `[INFRA]` [Concrete task — include file path, e.g., `Create src/templates/readme.md with standard sections`]
+- [ ] `[INFRA]` [Another task — specific and verifiable]
+- [ ] `[AUDIT]` Audit all Step 1 code against `quality.md` — review every file against every DON'T/DO rule
 
 ## Step 2 — [Concise title]
 
-- [ ] [Task with file path]
-- [ ] [Task with file path]
+- [ ] `[RED]` [Write failing test with file path and expected behavior]
+- [ ] `[GREEN]` [Implement to make test pass with file path]
+- [ ] `[AUDIT]` Audit all Step 2 code against `quality.md` — review every file against every DON'T/DO rule
 
 ## Step 3 — [Concise title]
 
-- [ ] [Task]
-- [ ] [Task]
-- [ ] [Verification]
+- [ ] `[RED]` [Test]
+- [ ] `[GREEN]` [Implementation]
+- [ ] `[E2E]` [Playwright test with file path]
+- [ ] `[PW]` [Run tests, read screenshots, fix visual issues]
+- [ ] `[HUMAN]` Present screenshots to user and wait for visual approval
+- [ ] `[AUDIT]` Audit all Step 3 code against `quality.md` — review every file against every DON'T/DO rule
 
 ```
 
@@ -85,15 +89,36 @@ After completing Step [N] (last sequential step):
 - For changes involving databases or file I/O, include test environment setup early — create or verify `docker-compose.test.yml` (or `test` profile) to orchestrate the test stack. Configure `.env.test` pointing at local containers. Configure Husky with `pre-commit` (lint + type-check via lint-staged) and `pre-push` (tests + build). This must exist before any test checkbox can run
 - For web projects with UI changes, include Playwright setup as an early Step if `playwright.config.ts` doesn't exist yet. If it does, add E2E tests with screenshots for new pages — and always include both the test-writing and the verification cycle checkboxes (see Playwright verification below)
 
+### Checkbox tags
+
+Every checkbox MUST have a tag prefix: `` `[TAG]` ``. Tags classify the work and enable automated validation via `validate-issue.sh`.
+
+**Valid tags:** `[RED]`, `[GREEN]`, `[INFRA]`, `[WIRE]`, `[E2E]`, `[PW]`, `[HUMAN]`, `[DOCS]`, `[AUDIT]`
+
+**Tag ordering within each step:** RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
+
+**Tag chain rules:**
+- `[GREEN]` requires `[RED]` earlier in the step (otherwise use `[INFRA]`)
+- `[E2E]` requires `[PW]` in the same step
+- `[PW]` requires `[HUMAN]` in the same step (visual approval gate)
+- `[AUDIT]` is mandatory in every step and must be the last checkbox
+- `[DOCS]` is recommended when the step has `[GREEN]` or `[WIRE]`
+- Frontend UI work (components, layouts, pages) requires the full chain: `[E2E]` → `[PW]` → `[HUMAN]`
+
+**Format:** `- [ ] \`[TAG]\` Description of the task`
+
+**Max length:** 200 characters per checkbox text (after the tag). If longer, break into multiple checkboxes with the same tag — never shorten to lose context.
+
 ### Checkboxes
 - One action per checkbox — avoid "X and Y" (split into two)
 - Include file paths: `Create src/templates/readme.md` not just `Create readme template`
-- **Vertical TDD slices** — pair each test with its implementation, one by one. Never group all tests together then all implementations. Use RED/GREEN labels:
+- **Vertical TDD slices** — pair each test with its implementation, one by one. Never group all tests together then all implementations:
   ```
-  - [ ] RED: Write test "transfer reduces sender balance" in `account.test.ts`
-  - [ ] GREEN: Implement `Account.transfer(amount, target)` for the debit side
-  - [ ] RED: Write test "transfer rejects insufficient funds"
-  - [ ] GREEN: Add balance guard to `Account.transfer()`
+  - [ ] `[RED]` Write test "transfer reduces sender balance" in `account.test.ts`
+  - [ ] `[GREEN]` Implement `Account.transfer(amount, target)` for the debit side
+  - [ ] `[RED]` Write test "transfer rejects insufficient funds"
+  - [ ] `[GREEN]` Add balance guard to `Account.transfer()`
+  - [ ] `[AUDIT]` Audit all code against `quality.md`
   ```
   NOT this (horizontal TDD — forbidden):
   ```
@@ -102,18 +127,19 @@ After completing Step [N] (last sequential step):
   ```
 - **Rich domain entities, not anemic models** — when the issue involves domain logic, checkboxes must specify entity behavior, not just types/interfaces:
   ```
-  - [ ] Create `Account` entity class in `domain/account.ts` — constructor enforces invariants (balance >= 0), `transfer(amount, target)` method with overdraft guard
-  - [ ] Create `Money` value object — immutable, currency-aware, `add()`/`subtract()` methods, factory from number with validation
+  - [ ] `[GREEN]` Create `Account` entity in `domain/account.ts` — invariants (balance >= 0), `transfer()` with overdraft guard
+  - [ ] `[GREEN]` Create `Money` value object — immutable, currency-aware, `add()`/`subtract()`, factory with validation
   ```
   NOT this (anemic model):
   ```
   - [ ] Create `Account` entity type, AccountRepository interface
   ```
 - For config tasks: `Configure Y in config-file.ext`
-- **Playwright visual verification cycle** — for every Step that creates or modifies UI, include two checkboxes:
+- **Playwright visual verification cycle** — for every Step that creates or modifies UI, include three checkboxes:
   ```
-  - [ ] E2E: Write Playwright test for [page] in `tests/e2e/[page].spec.ts` — verify [expected state], screenshot light/dark + desktop/mobile
-  - [ ] PW verify: Run `npm run test:e2e -- [page].spec.ts`, read screenshots, fix visual issues until all pass
+  - [ ] `[E2E]` Write Playwright test for [page] in `tests/e2e/[page].spec.ts` — verify [expected state], screenshots
+  - [ ] `[PW]` Run `npm run test:e2e -- [page].spec.ts`, read screenshots, fix visual issues until all pass
+  - [ ] `[HUMAN]` Present screenshots to user and wait for visual approval before proceeding
   ```
   The first checkbox writes the test. The second is the feedback loop: **run → read screenshots → analyze visually → fix → re-run** until the UI matches expectations. Writing the test alone is NOT sufficient — the agent must actively view and analyze the screenshots before marking as done. See `references/development-guidelines.md` § 2 for the full cycle.
 
@@ -162,5 +188,7 @@ Example:
 
 ### Sizing
 - 2-8 Steps per issue (simple issues: 2-3, complex: 5-8)
-- 2-6 checkboxes per Step
-- If you need 9+ Steps, the issue might need to be split into multiple issues
+- 2-6 checkboxes per Step (recommended), max 8 (hard limit — validator errors above this)
+- Max 200 chars per checkbox text — if longer, break into multiple checkboxes (never shorten)
+- If you need 9+ Steps, the issue MUST be split into multiple issues
+- `validate-issue.sh` enforces all sizing and structural rules — run it after editing
