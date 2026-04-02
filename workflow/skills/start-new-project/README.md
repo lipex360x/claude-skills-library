@@ -43,7 +43,7 @@ Also triggered by natural language:
 
 ## Issue validator rules
 
-The `validate-issue.sh` template is copied to `.claude/scripts/` during Phase 1 scaffolding. It validates issue bodies written by `/start-issue` against structural, sizing, and semantic rules. The `/start-issue` skill runs it automatically after rewriting the issue body.
+Three files are copied to `.claude/scripts/` during Phase 1 scaffolding: `validate-issue.sh` (shell wrapper), `validate-issue.py` (engine), and `validate-issue.config.json` (rules). The `/start-issue` skill runs the validator automatically after rewriting the issue body. All rules live in the JSON — change levels, thresholds, or add rules without touching the Python script.
 
 ### Structure (errors)
 
@@ -110,6 +110,37 @@ RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
 | Empty checkbox text | error | Must have description after tag |
 | Last AUDIT mentions quality.md | warning | Final audit should reference quality.md |
 
+### Extending the validator
+
+All rules live in `validate-issue.config.json`. To add a new rule, append to the appropriate section with an existing `type`. Available rule types:
+
+| Type | Scope | Description |
+|------|-------|-------------|
+| `body_match` | issue | Regex match on full issue body |
+| `section_has_checkboxes` | issue | Named section must contain ≥1 checkbox |
+| `step_count` | issue | Step count within min/max thresholds |
+| `step_numbering` | issue | Sequential numbering without gaps |
+| `step_title_format` | issue | Step title must contain em dash |
+| `step_not_empty` | step | Step must have ≥1 checkbox |
+| `checkbox_count_max` | step | Hard checkbox limit per step |
+| `checkbox_count_recommended` | step | Soft checkbox limit per step |
+| `checkbox_text_length` | step | Max chars per checkbox text |
+| `checkbox_text_not_empty` | step | Checkbox must have text after tag |
+| `tag_requires` | step | Tag A requires tag B in same step |
+| `tag_required` | step | Tag must exist in every step |
+| `tag_must_be_last` | step | Tag must be the last in the step |
+| `tag_ordering` | step | Tags must follow defined order |
+| `tag_recommended_with` | step | Tag recommended when other tags present |
+| `ui_chain` | step | Frontend UI work requires specific tags |
+| `tag_content_match` | checkbox | Checkbox with tag must match pattern |
+| `tag_content_reject` | checkbox | Checkbox with tag must NOT match pattern |
+| `tag_no_consecutive` | checkbox | No consecutive same-tag without separator |
+| `tag_requires_before` | checkbox | Tag can't appear before required tag |
+| `last_tag_content_match` | checkbox | Last occurrence of tag must match pattern |
+| `no_duplicates` | step | No duplicate checkbox text |
+
+To add a completely new rule type: add a handler in `validate-issue.py` + the JSON entry.
+
 [↑ Back to top](#start-new-project)
 
 ## Directory structure
@@ -133,7 +164,9 @@ start-new-project/
     ├── issue-template.md         # Issue body template with Phases/Steps structure
     ├── project-settings.json     # .claude/project-settings.json template with CDP config
     ├── start-chrome.sh           # Chrome launcher script for CDP testing
-    └── validate-issue.sh         # Issue structure validator (copied to .claude/scripts/)
+    ├── validate-issue.sh         # Shell wrapper (delegates to Python validator)
+    ├── validate-issue.py         # Data-driven issue validator engine
+    └── validate-issue.config.json # Validator rules, levels, thresholds (the brain)
 ```
 
 [↑ Back to top](#start-new-project)
