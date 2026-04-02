@@ -181,11 +181,11 @@ Then **immediately begin working on the next pending step**. Read the step's che
 | `[WIRE]` | Connect layers (frontend↔backend) — integration work |
 | `[E2E]` | Write Playwright E2E test with screenshots |
 | `[PW]` | Run E2E tests, read screenshots, fix visual issues until all pass |
-| `[HUMAN]` | Present screenshots to user via AskUserQuestion — wait for approval before proceeding |
+| `[HUMAN]` | Present screenshots to user via AskUserQuestion — **iteration loop**: if user requests changes, fix → re-screenshot (PW) → re-present → repeat until explicitly approved |
 | `[DOCS]` | Update ARCHITECTURE.md with new directories, files, patterns from this step |
 | `[AUDIT]` | Audit all code written in this step against every rule in quality.md — fix violations |
 
-Follow the tags in order. The RED→GREEN cycle is vertical TDD (one test, one implementation). The E2E→PW→HUMAN chain is the visual verification gate. AUDIT is always last — no `/push` until the audit passes.
+Follow the tags in order. The RED→GREEN cycle is vertical TDD (one test, one implementation). The E2E→PW→HUMAN chain is the visual verification gate — where PW is the agent's own validation loop (run → screenshot → fix → re-run) and HUMAN is the user feedback loop (present → wait → if changes: fix → re-screenshot → re-present → repeat until approved). AUDIT is always last — no `/push` until the audit passes.
 
 ## Post-flight
 

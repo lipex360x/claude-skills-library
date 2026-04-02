@@ -65,7 +65,7 @@ After completing Step [N] (last sequential step):
 - [ ] `[GREEN]` [Implementation]
 - [ ] `[E2E]` [Playwright test with file path]
 - [ ] `[PW]` [Run tests, read screenshots, fix visual issues]
-- [ ] `[HUMAN]` Present screenshots to user and wait for visual approval
+- [ ] `[HUMAN]` Present screenshots and iterate on user feedback until approved
 - [ ] `[AUDIT]` Audit all Step 3 code against `quality.md` — review every file against every DON'T/DO rule
 
 ```
@@ -139,9 +139,9 @@ Every checkbox MUST have a tag prefix: `` `[TAG]` ``. Tags classify the work and
   ```
   - [ ] `[E2E]` Write Playwright test for [page] in `tests/e2e/[page].spec.ts` — verify [expected state], screenshots
   - [ ] `[PW]` Run `npm run test:e2e -- [page].spec.ts`, read screenshots, fix visual issues until all pass
-  - [ ] `[HUMAN]` Present screenshots to user and wait for visual approval before proceeding
+  - [ ] `[HUMAN]` Present screenshots and iterate on user feedback until approved before proceeding
   ```
-  The first checkbox writes the test. The second is the feedback loop: **run → read screenshots → analyze visually → fix → re-run** until the UI matches expectations. Writing the test alone is NOT sufficient — the agent must actively view and analyze the screenshots before marking as done. See `references/development-guidelines.md` § 2 for the full cycle.
+  The first checkbox writes the test. The second is the agent's feedback loop: **run → read screenshots → analyze visually → fix → re-run** until the UI matches expectations. Writing the test alone is NOT sufficient — the agent must actively view and analyze the screenshots before marking as done. The third is the human feedback loop: **present screenshots → wait for user response → if changes requested: fix → re-screenshot → re-present → repeat** until the user explicitly approves. This step is NOT a one-shot presentation — it's an iteration cycle that only ends with user approval. See `references/development-guidelines.md` § 2 for the full cycle.
 
 ### Parallelizable Steps (Agent Teams)
 When a Step will be assigned to a teammate, make it self-contained:
