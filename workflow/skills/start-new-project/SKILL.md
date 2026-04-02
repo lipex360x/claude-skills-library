@@ -64,6 +64,7 @@ Turn a project idea into a well-structured GitHub issue with phased checkboxes, 
 | TDD methodology | `references/tdd-methodology.md` | R | Markdown |
 | Architecture template | `templates/architecture.md` | R | Markdown |
 | Quality standards template | `templates/quality-standards.md` | R | Markdown |
+| Dev scripts template | `templates/dev-scripts.md` | R | Markdown |
 | Issue backup templates | `templates/issue-backup.sh`, `templates/pre-issue-edit-hook.sh` | R | Bash scripts |
 
 </external_state>
@@ -131,6 +132,8 @@ Sizing: 2-4 phases, 3-8 steps per phase, 2-6 checkboxes per step.
 If Agent Teams is enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`), add **Execution mode** section at the top of the issue body with teammate assignments. Rules: identify sequential prefix, group independent steps by layer, mark blocked teammates, 2-4 teammates max. Specify tool access per teammate.
 
 **Quality standards (mandatory).** Every project plan MUST include a Phase 1 checkbox to create `quality.md` at the project root. This file defines non-negotiable code quality rules adapted to the project's specific stack. Read `templates/quality-standards.md` for the structure. The file must include: Shared DON'Ts/DOs (fail-first, vertical TDD, named constants, no workarounds), Backend DON'Ts/DOs (rich entities, value objects, no anemic models — adapted to the project's backend language), Frontend DON'Ts/DOs (if applicable — adapted to the project's frontend framework), and Patterns section with concrete code examples in the project's languages. The `/start-issue` skill reads this file in pre-flight and validates every checkbox against its DON'Ts — so completeness matters.
+
+**Dev startup/teardown scripts (mandatory for multi-service projects).** When the project has backend services, databases, or any infrastructure that needs orchestration, the plan MUST include a Phase 1 step to create `scripts/dev-start.sh` and `scripts/dev-stop.sh`. Read `templates/dev-scripts.md` for the full pattern. The startup script brings up the entire local environment in order (infra → migrations → seed → test user → services → health check). The teardown script kills everything cleanly. Both scripts must be referenced in the `## Scripts` section of ARCHITECTURE.md. These scripts are stack-agnostic — adapt to the project's actual infrastructure (Docker, Supabase CLI, local processes, etc.).
 
 **Issue body backup (mandatory).** Every project plan MUST include a Phase 1 checkbox to scaffold issue body protection. Copy `templates/issue-backup.sh` to `.claude/scripts/`, `templates/pre-issue-edit-hook.sh` to `.claude/hooks/`, register the hook in `.claude/settings.json`, and add `.claude/issues.db` to `.gitignore`. Read `references/guidelines.md` § "Issue body backup" for the full checklist. After creating the issues in Step 6, run `issue-backup.sh snapshot-all` to seed the backup database.
 
