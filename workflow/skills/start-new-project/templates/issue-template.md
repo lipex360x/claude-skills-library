@@ -78,8 +78,9 @@ _Remove this section entirely if Agent Teams is not enabled._
 - Start with a verb: "Create", "Add", "Configure", "Implement", "Set up"
 - Include a verification checkbox as the last item when the step has observable output
 - For projects with databases or file I/O, include a test environment setup step early (Phase 1). Create a `docker-compose.test.yml` (or `test` profile) to orchestrate the test stack — database, cloud service emulators, and any other dependencies. Configure `.env.test` pointing at local containers. Configure Husky with `pre-commit` (lint + type-check via lint-staged) and `pre-push` (tests + build). This must exist before any test checkbox can run
-- For web projects, include a CDP setup step early (Phase 1) — create `.claude/start-chrome.sh` and `.claude/project-settings.json` from skill templates. Configure `baseUrl`, `testPort`, `tabs` (what opens on launch), and `pages` (route map for navigation). This must exist before any visual verification checkbox can run
+- For web projects, include a Playwright setup step early (Phase 1) — `playwright.config.ts` with `webServer`, page objects, test user helpers, global setup/teardown. Read `references/playwright-practices.md` for full setup. This must exist before any E2E verification checkbox can run
 - When a step creates seed data with test credentials (users, API keys), include a checkbox to create/update a gitignored `TEST_USERS.md` at the project root with all credentials in a readable table. This is a living document — update it whenever seed data changes
+- Include a checkbox in the last Step of Phase 1 to create `CLAUDE.md` (agent context) and `ARCHITECTURE.md` (codebase knowledge cache) at the project root. See `references/guidelines.md` for content requirements of each
 
 ### Checkboxes
 - One action per checkbox — avoid "X and Y" (split into two)
@@ -97,7 +98,7 @@ _Remove this section entirely if Agent Teams is not enabled._
 ### Verification
 - Describe how to confirm the entire phase works, not individual steps
 - Include the actual commands or actions: "Run `bun test` — all pass", "Open http://localhost:3000 — dashboard loads"
-- For web projects, include CDP-based visual verification: "Navigate to [page] via CDP and take screenshot — verify [expected state]". This catches layout issues, missing elements, and visual regressions that unit tests miss
+- For web projects, include Playwright E2E verification: "Run `npm run test:e2e` — all passing". This catches layout issues, auth flows, and integration bugs that unit tests miss
 - Cover the happy path first, then edge cases
 
 ### Execution mode

@@ -87,6 +87,17 @@ Every project must include issue body protection from day 1. A single malformed 
 
 This setup costs nothing at runtime (hook only fires on `gh issue edit`) and prevents catastrophic data loss. The backup script also supports `restore` for quick recovery.
 
+## CLAUDE.md — agent context for new sessions
+
+Include a checkbox in Phase 1 (same Step as ARCHITECTURE.md) to create `CLAUDE.md` at the project root. This file gives Claude Code immediate context when starting a new session — without it, every new conversation starts cold and wastes tokens re-discovering the project. Contents:
+
+- **Quick start** — commands to run services, tests, linting (copy-paste ready)
+- **Key files** — pointers to ARCHITECTURE.md, any mapping/guide docs, test credentials
+- **Conventions** — error handling pattern (Result/Either if used), project structure for each layer, testing strategy, LLM usage, linting tools
+- **Current state** — which issue/phase is in progress (update as work advances)
+
+Keep it under 80 lines. It's a bootstrap document, not documentation — point to files, don't duplicate content. Update the "Current state" section whenever a phase completes.
+
 ## No workarounds
 
 Every step must solve problems at their root. If a step would require a workaround (hardcoded values, temporary flags, monkey-patches, `any` casts), the step is incomplete. Rewrite it.
