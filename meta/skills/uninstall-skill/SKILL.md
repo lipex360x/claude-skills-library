@@ -1,6 +1,5 @@
 ---
 name: uninstall-skill
-model: sonnet
 description: >-
   Uninstall a skill by name, local or global. Use this skill when the user says
   "uninstall skill", "remove skill", "delete skill", "skill uninstall", "get rid

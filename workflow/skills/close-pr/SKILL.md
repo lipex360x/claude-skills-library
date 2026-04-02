@@ -1,6 +1,5 @@
 ---
 name: close-pr
-model: sonnet
 description: >-
   Merge the open pull request for the current branch, write a detailed
   implementation summary on the issue, and move the card to Done. Use this

@@ -1,6 +1,5 @@
 ---
 name: list-backlog
-model: sonnet
 description: >-
   List open backlog issues with table summary and size sorting. Use this skill
   when the user says "list backlog", "show backlog", "backlog list", "what's in

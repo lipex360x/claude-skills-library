@@ -1,6 +1,5 @@
 ---
 name: sync-claude
-model: sonnet
 description: >-
   Synchronize the Claude Code environment (skills-library + .brain) across
   machines. Pulls latest from both repos, rebuilds symlinks via setup.sh, and

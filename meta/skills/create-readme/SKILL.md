@@ -1,6 +1,5 @@
 ---
 name: create-readme
-model: sonnet
 user-invocable: true
 description: Create or review a README.md for the project. Use when the user says "create a readme", "generate readme", "review the readme", "improve the readme", "update the readme", or wants documentation for a repository — even if they don't explicitly say "readme." Detects whether a README already exists and switches between creation and review mode automatically.
 allowed-tools:

@@ -1,6 +1,5 @@
 ---
 name: install-skill
-model: sonnet
 description: >-
   Install a skill from an npx skills link, with local or global selection. Use
   this skill when the user says "install skill", "add skill", "skill install",

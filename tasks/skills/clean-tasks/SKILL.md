@@ -1,6 +1,5 @@
 ---
 name: clean-tasks
-model: sonnet
 description: >-
   Remove completed tasks from the task visibility board, keeping pending and
   in-progress items. Use this skill when the user says "clean tasks", "remove

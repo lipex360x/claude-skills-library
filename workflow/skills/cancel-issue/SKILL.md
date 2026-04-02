@@ -1,6 +1,5 @@
 ---
 name: cancel-issue
-model: sonnet
 description: >-
   Cancel an issue — closes it on GitHub with a reason, moves the card to
   "Cancelled" on the project board, unblocks dependent issues, and cleans up

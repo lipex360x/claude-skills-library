@@ -1,6 +1,5 @@
 ---
 name: open-tasks
-model: sonnet
 description: >-
   Reopen the task visibility board and resume task tracking. Use this skill
   when the user says "open tasks", "show tasks", "tv open", "start tracking",

@@ -1,6 +1,5 @@
 ---
 name: create-hook
-model: sonnet
 description: >-
   Guide the user through creating or improving Claude Code hooks — from choosing
   the right event to writing the script and registering in settings.json. Use

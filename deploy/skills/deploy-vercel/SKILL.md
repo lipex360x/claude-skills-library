@@ -1,6 +1,5 @@
 ---
 name: deploy-vercel
-model: sonnet
 description: >-
   Deploy, manage, and develop projects on Vercel from the command line. Use when
   deploying to Vercel, configuring domains, setting up environment variables,

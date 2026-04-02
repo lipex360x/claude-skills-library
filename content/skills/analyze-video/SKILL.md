@@ -10,7 +10,6 @@ description: >-
   pull structured information from a video — even if they don't explicitly
   say "analyze."
 user-invocable: true
-model: sonnet
 allowed-tools:
   - Read
   - Write

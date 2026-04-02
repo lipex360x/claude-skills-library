@@ -1,6 +1,5 @@
 ---
 name: create-excalidraw
-model: sonnet
 description: >-
   Generate Excalidraw diagrams from natural language descriptions. Use when asked
   to "create a diagram", "make a flowchart", "visualize a process", "draw a system
