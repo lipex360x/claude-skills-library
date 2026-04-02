@@ -94,6 +94,7 @@ Include a checkbox in Phase 1 (same Step as ARCHITECTURE.md) to create `CLAUDE.m
 - **Quick start** — commands to run services, tests, linting (copy-paste ready)
 - **Key files** — pointers to ARCHITECTURE.md, any mapping/guide docs, test credentials
 - **Conventions** — error handling pattern (Result/Either if used), project structure for each layer, testing strategy, LLM usage, linting tools
+- **Non-negotiable rules** — if the project has a `quality.md`, include this rule verbatim: **`quality.md` is LAW.** Every rule in `quality.md` is mandatory and must be actively enforced in every line of code. Reading it once is not enough — self-review every file against `quality.md` before presenting. Violations are unacceptable, even when they pass linters and tests.
 - **Current state** — which issue/phase is in progress (update as work advances)
 
 Keep it under 80 lines. It's a bootstrap document, not documentation — point to files, don't duplicate content. Update the "Current state" section whenever a phase completes.
