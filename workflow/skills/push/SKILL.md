@@ -243,3 +243,5 @@ Before presenting the Report, verify:
 - **Graceful degradation.** If `gh` is not available, skip the issue update step. If the branch has no issue, skip it. If the issue body can't be parsed, skip it — because the core job (commit + push) should always complete even when optional steps fail.
 
 - **ARCHITECTURE.md drift detection.** Before committing, check if staged changes introduce patterns that should be reflected in `ARCHITECTURE.md` (if the file exists): new route (`page.tsx`/`route.ts` in a new directory), new dependency in `package.json`/`Cargo.toml`/`go.mod`, new migration file, new file in undocumented location. If drift is detected, append a note to the **commit message body** (not the title) — because this is informational only, never auto-edit or block.
+
+- **quality.md audit reminder.** Before staging, if `quality.md` exists in the project root and the changes are substantial (new files, new patterns), check whether a `quality.md` audit was mentioned in the conversation. If not, flag it in the report as a reminder. This is informational — do not block the push.
