@@ -187,7 +187,7 @@ After presenting the Report, verify:
 
 ## Next action
 
-Continue working through the current step's checkboxes. When all checkboxes in a step are done, use `/push` to commit, push, and update the issue checkboxes.
+Continue working through the current step's checkboxes. When all checkboxes in a step are done, update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure added during that step — then use `/push` to commit, push, and update the issue checkboxes.
 
 ## Self-audit
 

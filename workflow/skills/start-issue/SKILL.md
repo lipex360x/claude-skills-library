@@ -182,6 +182,8 @@ Transform acceptance criteria into Steps with checkboxes. Each criterion typical
 
 Sizing: 2-8 Steps total, 2-6 checkboxes per Step. Each checkbox = one focused action.
 
+**ARCHITECTURE.md maintenance.** The last checkbox of each Step should update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure introduced in that Step. This keeps the architecture doc current as the project grows and prevents future sessions from wasting tokens on codebase exploration.
+
 **Mandatory split rule.** If plan has **more than 8 steps**, split into multiple smaller issues — all added to Backlog. Each issue independently completable with 3-8 steps.
 
 If Agent Teams is enabled, add an **Execution strategy** section at the top of the issue body (before What/Why) based on the strategy chosen in Step 2b. Read `references/execution-strategy.md` for the strategy templates (Agent, Teammate, Sequential). Also add inline reminders in parallelizable steps. Read `references/guidelines.md` § "Verification is part of the plan" and § "Checkbox ownership with Agent Teams" for the verification matrix and ownership rules.
