@@ -22,10 +22,25 @@ The script brings the full local environment up in the correct order. Adapt to t
 | **Test user** | Create a manual login user | API signup call or direct DB insert |
 | **Services** | Start backend + frontend | API on one port, frontend on another |
 | **Health check** | Verify everything is running | `curl` retry loops on `/health` and frontend URL |
+| **Validation** | Verify everything is actually working | Health check, port test, seed verification, login test |
 | **Summary** | Print URLs and credentials | Ports, login email/password, stop command |
+
+Every phase that starts something must validate it succeeded before proceeding. The validation phase at the end runs a comprehensive audit:
+
+| Check | How | Fail action |
+|-------|-----|-------------|
+| **Ports open** | `curl -s -o /dev/null -w "%{http_code}" http://localhost:PORT` | Error with which service failed |
+| **Health endpoint** | `curl -s http://localhost:PORT/health` returns 200 | Error: "API not healthy" |
+| **DB reachable** | Test connection (psql, supabase status, prisma db execute) | Error: "DB not reachable on port X" |
+| **Seed data exists** | Query a known table for minimum row count | Warning: "Seed data missing — run without --skip-seed" |
+| **Test user works** | Attempt login via API with test credentials | Warning: "Test user signup may have failed" |
+| **Frontend serves** | `curl -s http://localhost:PORT` returns HTML | Error: "Frontend not responding" |
+
+The script must exit with a non-zero code if any critical check (ports, health, DB) fails. Warnings (seed, test user) are logged but don't block.
 
 **Flags:**
 - `--skip-seed` — skip seed step when DB already has data (faster restart)
+- `--check` — run only the validation phase (no startup, just audit current state)
 - `--help` — print usage
 
 ### `scripts/dev-stop.sh` — Teardown
@@ -60,9 +75,11 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 
 # --- Flag parsing ---
 SKIP_SEED=false
+CHECK_ONLY=false
 for arg in "$@"; do
   case "$arg" in
     --skip-seed) SKIP_SEED=true ;;
+    --check) CHECK_ONLY=true ;;
     --help|-h)
       sed -n '/^# Usage:/,/^set/{ /^set/d; s/^# \{0,1\}//; p; }' "$0"
       exit 0
@@ -109,7 +126,70 @@ fi
 # Create manual test user via API or direct insert
 
 # --- Start services ---
-# Start backend and frontend with health check loops
+# Start backend and frontend with retry loops for readiness
+
+# --- Validation (runs always, including --check mode) ---
+validate() {
+  local failures=0
+
+  # Port checks
+  for port in 3000 8000; do
+    if curl -s -o /dev/null -w "" "http://localhost:$port" 2>/dev/null; then
+      ok "Port $port responding"
+    else
+      error "Port $port not responding"
+      failures=$((failures + 1))
+    fi
+  done
+
+  # Health endpoint (adapt URL to project)
+  if curl -s http://localhost:8000/health 2>/dev/null | grep -q "ok"; then
+    ok "Backend health check passed"
+  else
+    error "Backend health check failed"
+    failures=$((failures + 1))
+  fi
+
+  # DB reachable (adapt to project — psql, supabase status, etc.)
+  # if supabase status 2>/dev/null | grep -q "running"; then
+  #   ok "Database running"
+  # else
+  #   error "Database not reachable"
+  #   failures=$((failures + 1))
+  # fi
+
+  # Seed data (adapt query to project — check a known table)
+  # ROW_COUNT=$(psql "$DATABASE_URL" -t -c "SELECT count(*) FROM some_table" 2>/dev/null || echo "0")
+  # if [ "$ROW_COUNT" -gt 0 ]; then
+  #   ok "Seed data present ($ROW_COUNT rows)"
+  # else
+  #   info "Warning: seed data missing — run without --skip-seed"
+  # fi
+
+  # Test user login (adapt to project's auth endpoint)
+  # LOGIN_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8000/api/auth/login \
+  #   -H "Content-Type: application/json" \
+  #   -d '{"email":"test@project.dev","password":"Test1234"}')
+  # if [ "$LOGIN_CODE" = "200" ]; then
+  #   ok "Test user login works"
+  # else
+  #   info "Warning: test user login returned $LOGIN_CODE"
+  # fi
+
+  return $failures
+}
+
+if $CHECK_ONLY; then
+  info "Running validation only (--check)..."
+  validate
+  exit $?
+fi
+
+# Run validation after startup
+validate || {
+  error "Some checks failed — review output above"
+  exit 1
+}
 
 echo ""
 printf "\033[0;32m✓ All services running.\033[0m\n"
@@ -118,6 +198,7 @@ echo "  Frontend: http://localhost:3000"
 echo "  Login:    test@project.dev / Test1234"
 echo ""
 echo "  Stop with: scripts/dev-stop.sh"
+echo "  Check:     scripts/dev-start.sh --check"
 ```
 
 ## ARCHITECTURE.md reference
