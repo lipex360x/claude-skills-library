@@ -71,7 +71,7 @@ Three files are copied to `.claude/scripts/` during Phase 1 scaffolding: `valida
 Every checkbox must have a tag: `` `[TAG]` ``. Valid tags and ordering:
 
 ```
-RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
+RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → LOG → AUDIT
 ```
 
 | Rule | Level | Validation |
@@ -87,6 +87,8 @@ RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
 | `[DOCS]` required | error | Mandatory when step has GREEN or WIRE |
 | `[E2E]` without `[RED]` | warning | E2E without unit tests is fragile |
 
+Process gates (PW, HUMAN, DOCS, LOG, AUDIT) are non-countable — they don't count toward the checkbox limit.
+
 ### Semantic rules per tag
 
 | Tag | Level | Validation |
@@ -100,6 +102,7 @@ RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
 | `[HUMAN]` | warning | Should mention iterate/feedback (user tests the app, not screenshot review) |
 | `[AUDIT]` | warning | Should mention quality.md |
 | `[DOCS]` | warning | Should mention ARCHITECTURE.md |
+| `[LOG]` | warning | Should mention logging or error coverage |
 | `[INFRA]` writes tests | warning | Shouldn't mention writing tests |
 | `[WIRE]` | warning | Should mention integration/connection |
 
@@ -152,23 +155,28 @@ start-new-project/
 ├── README.md             # This file
 ├── skill-meta.json       # Skill metadata and skeleton compliance
 ├── references/
-│   ├── anti-patterns.md          # 9 common mistakes to avoid during planning
+│   ├── anti-patterns.md          # Common mistakes to avoid during planning
 │   ├── cdp-best-practices.md     # Chrome DevTools Protocol setup and verification
-│   ├── guidelines.md             # 19 skill-specific guidelines and constraints
+│   ├── guidelines.md             # Skill-specific guidelines and constraints
 │   ├── phase-planning-guide.md   # Phase decomposition heuristics and sizing rules
+│   ├── playwright-practices.md   # Playwright setup, page objects, console capture, rules
 │   ├── project-board-setup.md    # Board column definitions (7 columns) and custom fields
 │   └── tdd-methodology.md        # Test-driven development methodology and examples
 └── templates/
-    ├── architecture.md           # ARCHITECTURE.md starter template for new projects
+    ├── architecture.md           # ARCHITECTURE.md template (includes Observability section)
     ├── cdp-run-all.ts            # CDP test runner script template
     ├── cdp-test-example.ts       # CDP test example with page navigation
+    ├── dev-scripts.md            # Dev startup/teardown script reference
+    ├── issue-backup.sh           # SQLite issue backup (snapshot/restore/compact/cleanup)
     ├── issue-template.md         # Issue body template with Phases/Steps structure
+    ├── post-merge-compact-hook.sh # PostToolUse hook — compact backup DB after PR merge
+    ├── pre-issue-edit-hook.sh    # PreToolUse hook — snapshot before gh issue edit
     ├── project-settings.json     # .claude/project-settings.json template with CDP config
-    ├── project-setup.json         # .claude/project-setup.json template (Playwright flags)
+    ├── quality-standards.md      # quality.md template (DDD, Result, TDD patterns)
     ├── start-chrome.sh           # Chrome launcher script for CDP testing
     ├── validate-issue.sh         # Shell wrapper (delegates to Python validator)
     ├── validate-issue.py         # Data-driven issue validator engine
-    └── validate-issue.config.json # Validator rules, levels, thresholds (the brain)
+    └── validate-issue.config.json # Validator rules, levels, thresholds (includes LOG tag)
 ```
 
 [↑ Back to top](#start-new-project)

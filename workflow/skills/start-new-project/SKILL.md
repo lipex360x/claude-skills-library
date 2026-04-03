@@ -65,7 +65,7 @@ Turn a project idea into a well-structured GitHub issue with phased checkboxes, 
 | Architecture template | `templates/architecture.md` | R | Markdown |
 | Quality standards template | `templates/quality-standards.md` | R | Markdown |
 | Dev scripts template | `templates/dev-scripts.md` | R | Markdown |
-| Issue backup templates | `templates/issue-backup.sh`, `templates/pre-issue-edit-hook.sh` | R | Bash scripts |
+| Issue backup templates | `templates/issue-backup.sh`, `templates/pre-issue-edit-hook.sh`, `templates/post-merge-compact-hook.sh` | R | Bash scripts |
 | Issue validator | `templates/validate-issue.sh` | R | Bash script |
 
 </external_state>
