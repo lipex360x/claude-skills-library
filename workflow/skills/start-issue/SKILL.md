@@ -136,6 +136,13 @@ gh issue view <number> --json comments --jq '.comments[] | {author: .author.logi
 
 Scan comments for: file paths, scope transfers from `/open-pr` or `/close-pr`, partial completion notes, blocker resolutions, implementation hints. Store as **comment insights** to narrow exploration scope.
 
+**Surface actionable items from comments.** After reading all comments, classify each into:
+- **Bug reports** — issues found during previous phases (e.g., hydration errors, broken layouts)
+- **Feature requests** — new functionality suggested for this phase (e.g., UX improvements, new tools)
+- **Infrastructure asks** — logging, monitoring, tooling requests
+
+If actionable items exist, present them as an `AskUserQuestion` checklist: "These items were mentioned in the issue comments. Which ones should be included in the plan?" with options listing each item and a "None — only the original acceptance criteria" option. Only items the user selects get added to the plan. This prevents both silently ignoring comments and silently adding scope.
+
 **Codebase context — ARCHITECTURE.md is the gate.** Pre-flight already loaded ARCHITECTURE.md. Use it as the primary source. Do NOT spawn an Explore agent unless:
 - ARCHITECTURE.md was missing (create it after exploring)
 - The issue touches areas not described in ARCHITECTURE.md (explore only those areas, not the full codebase)
