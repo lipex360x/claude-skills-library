@@ -184,13 +184,17 @@ Create `.claude/project-setup.json` with agent behavior settings for this projec
     "project": "chromium",
     "workers": 1
   },
-  "show-flight-tables": true
+  "show-flight-tables": true,
+  "dismiss": {
+    "tags": true
+  }
 }
 ```
 
 Fields:
 - `playwright` — Playwright runner config (headed mode, browser project, worker count)
 - `show-flight-tables` — Show pre/post-flight check results as a markdown table (default: `true`)
+- `dismiss.tags` — Skip the "add tags?" AUQ in `/start-issue` (tags are always applied when rewriting issues)
 
 - **`playwright.headed`** — `true` runs E2E with `--headed` (user watches execution), `false` runs headless. Default `true` for new projects.
 - **`playwright.project`** — Playwright project name to use by default (e.g. `chromium`, `firefox`). Maps to `--project=<value>`.
