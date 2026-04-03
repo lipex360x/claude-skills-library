@@ -193,20 +193,53 @@ Then **immediately begin working on the next pending step**. Read the step's che
 
 | Tag | Execution behavior |
 |-----|--------------------|
+| `[SPAWN]` | Delegate mechanical checkboxes to a sub-agent. Read `project-setup.json` for `delegate-mechanical` flag. When true and step has `[SPAWN]`: build briefing (see Briefing Template below), spawn sub-agent in background, notify user, then execute `[REVIEW]` when agent completes. SPAWN text contains scope + non-derivable hints (max 400 chars) |
 | `[RED]` | Write a failing test — run it, confirm it fails |
 | `[GREEN]` | Implement code to make the RED test pass — run it, confirm green |
 | `[INFRA]` | Infrastructure/config/tooling — no test cycle needed |
 | `[WIRE]` | Connect layers (frontend↔backend) — integration work |
 | `[E2E]` | Write Playwright E2E test with screenshots |
+| `[REVIEW]` | Manager reviews sub-agent output — validates code quality, fixes issues, updates issue checkboxes for completed mechanical work. Non-countable process gate |
 | `[PW]` | Run E2E tests **as the user would** (full flow via UI, no programmatic shortcuts). Read `.claude/project-setup.json` for Playwright flags: `headed` (true=`--headed`), `project` (`--project=<value>`), `workers` (`--workers=<value>`). **Also capture browser console** — listen for `console.error` and `page.on('pageerror')` during test runs. Report any browser-only errors (hydration mismatches, runtime exceptions, unhandled rejections). Fix before proceeding |
 | `[HUMAN]` | User validates the running app visually. Agent provides a step-by-step testing guide (URLs, credentials, exact actions) and waits for feedback. If changes requested: fix → PW re-verify → HUMAN again until approved |
 | `[DOCS]` | Update ARCHITECTURE.md with new directories, files, patterns from this step. **Mandatory** in steps with GREEN or WIRE — non-countable process gate |
 | `[LOG]` | Verify error logging coverage — check that error paths in code written this step emit structured logs (backend: logger calls in catch/Err branches; frontend: error boundaries, API error handlers). If `has_logging` is false (no Observability section in ARCHITECTURE.md), flag as a gap. Non-countable process gate |
 | `[AUDIT]` | Audit all code written in this step against every rule in quality.md — fix violations |
 
-Process gates (PW, HUMAN, DOCS, LOG, AUDIT) are non-countable — they don't count toward the step's checkbox limit.
+Process gates (SPAWN, REVIEW, PW, HUMAN, DOCS, LOG, AUDIT) are non-countable — they don't count toward the step's checkbox limit.
 
-Follow the tags in order. The RED→GREEN cycle is vertical TDD (one test, one implementation). The E2E→PW→HUMAN chain is the visual verification gate — where PW is the agent's own validation loop (run → screenshot → fix → re-run) and HUMAN is the user's own validation (agent provides a testing guide with URLs, credentials, and exact steps; user runs the app and reports feedback). After HUMAN approval, DOCS updates ARCHITECTURE.md with any new directories, files, or patterns. AUDIT is always last — no `/push` until the audit passes.
+Follow the tags in order. When the step starts with `[SPAWN]` and `delegate-mechanical` is true in `project-setup.json`, the manager builds a briefing (see below), spawns a sub-agent in background, and resumes at `[REVIEW]` when the agent completes. The RED→GREEN cycle is vertical TDD (one test, one implementation). After mechanical work, REVIEW is the manager's quality gate. The E2E→PW→HUMAN chain is the visual verification gate — where PW is the agent's own validation loop (run → screenshot → fix → re-run) and HUMAN is the user's own validation (agent provides a testing guide with URLs, credentials, and exact steps; user runs the app and reports feedback). After HUMAN approval, DOCS updates ARCHITECTURE.md with any new directories, files, or patterns. AUDIT is always last — no `/push` until the audit passes.
+
+### Briefing template (for [SPAWN])
+
+When spawning a sub-agent, the manager MUST include in the prompt:
+
+1. **Stack summary** — extracted from ARCHITECTURE.md Stack table (inline, not file reference)
+2. **Relevant patterns inline** — copy the Entity, VO, Port/Adapter, or Service pattern sections from ARCHITECTURE.md that apply to this step's work
+3. **Error hierarchy** — read and inline `app/core/result.py` content
+4. **Files to modify** — read and include contents of existing files the sub-agent will touch (not just paths)
+5. **quality.md DON'Ts** — inline the backend or frontend DON'Ts section relevant to the work
+6. **Exact checkboxes** — the mechanical checkboxes to execute, in order, with full text
+7. **Test infrastructure** — venv path, test command (`cd <path> && .venv/bin/python -m pytest tests/<file> -x -v`)
+8. **SPAWN hints** — the text from the `[SPAWN]` checkbox
+9. **Formatter instruction** — "Run `ruff format` (backend) or `prettier` (frontend) on all files before finishing"
+10. **Report instruction** — "Report: files created/modified, test results (pass count), decisions made, issues encountered"
+
+**Token discipline:** inline relevant excerpts, don't tell the sub-agent to "read ARCHITECTURE.md" — it will explore the whole codebase instead of working with the provided context.
+
+### [REVIEW] gate (optimized)
+
+When executing `[REVIEW]` after a sub-agent completes:
+
+1. **Read the sub-agent report** — files list, test results, decisions
+2. **Read production files** created/modified (skip test files that passed — spot-check 1-2 for pattern compliance)
+3. **Run all tests** — `pytest -x -v` (backend), `npm test` (frontend) — not just the new ones
+4. **Spot-check quality.md** — scan production files for: magic numbers, bare except, `# type: ignore`, missing Result pattern, wrong imports
+5. **Fix issues** found — formatting, pattern violations, naming
+6. **Report** — table of files reviewed × status (pass/fix applied)
+7. **Update issue checkboxes** — mark completed mechanical checkboxes
+
+The full per-rule audit happens at `[AUDIT]`. REVIEW is the fast quality gate — catch structural problems, not cosmetic ones.
 
 ## Post-flight
 
@@ -223,7 +256,11 @@ After presenting the Report, verify:
 
 ## Next action
 
-Continue working through the current step's checkboxes. After completing a PW verify step (Playwright visual verification), provide the user a step-by-step testing guide (URLs, test credentials from `TEST_USERS.md` or seed data, exact click paths) and wait for their feedback. The user runs the app themselves — the agent does not present screenshots. If the user requests changes: fix → PW re-verify → provide updated guide → repeat until approved. Only after user approval, execute `[DOCS]` — update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure added during this step. Then proceed to `[LOG]` — verify that error paths in this step's code emit structured logs. Then `[AUDIT]` — audit all code written in the step against `quality.md`, check every file against every DON'T and DO rule, fix violations before committing. The process gate chain is: HUMAN → DOCS → LOG → AUDIT → `/push`. This sequence is mandatory and cannot be skipped. Then use `/push` to commit, push, and update the issue checkboxes.
+If the step has `[SPAWN]` and `delegate-mechanical` is true: build briefing using the Briefing Template, spawn sub-agent in background (`run_in_background: true`), tell the user the agent is working and offer to help with other things while waiting. When notified of completion, execute `[REVIEW]` using the optimized gate checklist. Then continue with the remaining gates.
+
+For steps without `[SPAWN]`: execute mechanical checkboxes directly, then proceed to gates.
+
+After completing a PW verify step (Playwright visual verification), provide the user a step-by-step testing guide (URLs, test credentials from `TEST_USERS.md` or seed data, exact click paths) and wait for their feedback. The user runs the app themselves — the agent does not present screenshots. If the user requests changes: fix → PW re-verify → provide updated guide → repeat until approved. Only after user approval, execute `[DOCS]` — update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure added during this step. Then proceed to `[LOG]` — verify that error paths in this step's code emit structured logs. Then `[AUDIT]` — audit all code written in the step against `quality.md`, check every file against every DON'T and DO rule, fix violations before committing. The process gate chain is: SPAWN → (mechanical) → REVIEW → PW → HUMAN → DOCS → LOG → AUDIT → `/push`. This sequence is mandatory and cannot be skipped. Then use `/push` to commit, push, and update the issue checkboxes.
 
 ## Self-audit
 

@@ -200,20 +200,24 @@ Transform acceptance criteria into Steps with checkboxes. Each criterion typical
 
 | Tag | Purpose | Semantic rule |
 |-----|---------|---------------|
+| `[SPAWN]` | Delegate mechanical work to sub-agent — scope description + non-derivable hints (max 400 chars) | Non-countable. Must be first tag in step. Requires REVIEW in same step. Only add when step has 2+ RED/GREEN cycles or 3+ mechanical checkboxes |
 | `[RED]` | Write a failing test | Must mention "test" or "spec". No consecutive RED without GREEN between them |
 | `[GREEN]` | Implement to pass the test | Requires RED earlier in the step. Must not mention writing tests |
 | `[INFRA]` | Infrastructure/config/tooling | Must not mention writing tests |
 | `[WIRE]` | Connect layers (frontend↔backend) | Must mention integration/connection |
 | `[E2E]` | Write Playwright E2E test | Must mention test/spec. Requires PW in same step |
+| `[REVIEW]` | Manager reviews sub-agent output — validates code quality, fixes issues, updates issue checkboxes for completed mechanical work | Non-countable process gate. Recommended when step has GREEN or WIRE. Position: after mechanical work, before PW |
 | `[PW]` | Run E2E **as the user would** (full flow via UI, no programmatic auth shortcuts). Read `.claude/project-setup.json` for flags: `headed`, `project`. **Also capture browser console** — listen for `console.error` and `page.on('pageerror')` during test runs. Report any browser-only errors (hydration mismatches, runtime exceptions, unhandled rejections) that don't appear in application logs. Fix before proceeding | Must mention screenshots/verification. Requires HUMAN in same step |
 | `[HUMAN]` | User validates the running app visually — agent provides testing guide and waits | Must mention iterate/feedback. Requires PW in same step. Agent gives step-by-step guide (URLs, credentials, actions); user runs the app and reports feedback. If changes: fix → PW re-verify → HUMAN again until approved |
 | `[DOCS]` | Update ARCHITECTURE.md | **Mandatory** when step has GREEN or WIRE. Non-countable process gate |
 | `[LOG]` | Verify error logging coverage — check that error paths in code written this step emit structured logs (backend: logger calls in catch/Err branches; frontend: error boundaries, API error handlers). If `has_logging` is false (no Observability section in ARCHITECTURE.md), flag as a gap and recommend adding logging infrastructure | Non-countable process gate. Position: after DOCS, before AUDIT |
 | `[AUDIT]` | Audit against quality.md | Mandatory in every step, must be the last checkbox |
 
-Process gates (PW, HUMAN, DOCS, LOG, AUDIT) are non-countable — they don't count toward the step's checkbox limit.
+Process gates (SPAWN, REVIEW, PW, HUMAN, DOCS, LOG, AUDIT) are non-countable — they don't count toward the step's checkbox limit.
 
-**Tag ordering:** RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → LOG → AUDIT. Tags must appear in this sequence within each step. RED and GREEN may alternate (vertical TDD: RED→GREEN→RED→GREEN is valid).
+**Tag ordering:** SPAWN → RED → GREEN → INFRA → WIRE → E2E → REVIEW → PW → HUMAN → DOCS → LOG → AUDIT. Tags must appear in this sequence within each step. RED and GREEN may alternate (vertical TDD: RED→GREEN→RED→GREEN is valid).
+
+**Delegation via [SPAWN].** Check `.claude/project-setup.json` for `delegate-mechanical`. When `true`, add `[SPAWN]` to steps that qualify: 2+ RED/GREEN cycles or 3+ mechanical checkboxes. SPAWN text (max 400 chars) describes what to delegate and includes hints the manager can't derive from ARCHITECTURE.md or quality.md (e.g., "mock HTTP — TEI not running in tests", "use httpx async client"). Steps without SPAWN are executed directly by the manager. Every SPAWN requires a matching REVIEW gate.
 
 **UI chain:** Any step with frontend UI work (components, layouts, pages) MUST include the full chain: E2E → PW → HUMAN.
 
