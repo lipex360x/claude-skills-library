@@ -212,6 +212,26 @@ Process gates (PW, HUMAN, DOCS, AUDIT) are non-countable — they don't count to
 
 If Agent Teams is enabled, add an **Execution strategy** section at the top of the issue body (before What/Why) based on the strategy chosen in Step 2b. Read `references/execution-strategy.md` for the strategy templates (Agent, Teammate, Sequential). Also add inline reminders in parallelizable steps. Read `references/guidelines.md` § "Verification is part of the plan" and § "Checkbox ownership with Agent Teams" for the verification matrix and ownership rules.
 
+### 3b. Dependency ordering audit
+
+Before presenting the plan, review the step ordering for **inverted dependencies** — cases where Step N requires something only produced by Step M (M > N). This is an LLM reasoning step, not a static check.
+
+**For each Step, answer:** "Can this Step be fully implemented AND tested end-to-end without workarounds, using only what previous Steps produced?"
+
+**Red flags that signal inverted dependencies:**
+- A Step has an auth guard or redirect to a page that hasn't been created yet
+- A Step connects frontend to a backend endpoint (`[WIRE]`) that's defined in a later Step
+- A Step writes E2E tests (`[E2E]`) that navigate to routes built in a later Step
+- A Step references components, hooks, or utilities created in a later Step
+- **The workaround test:** if testing a Step would require injecting state programmatically (mock auth, seed data for entities not yet created, stub API responses for endpoints not yet built), the dependency is inverted. Real users go through the UI — tests should follow the same path
+
+**If violations are found:**
+1. Reorder the steps to resolve the dependency (move the producer before the consumer)
+2. If reordering breaks other dependencies, flag the conflict and present options to the user
+3. Never paper over a dependency with a workaround (programmatic auth injection, mock stubs for real pages) — fix the ordering instead
+
+**Example:** If Step 7 builds a chat page with an auth guard that redirects to `/login`, but Step 6 creates the login page — this works. If the order were reversed (chat before login), E2E tests for chat would need programmatic auth injection — that's the red flag. Reorder so login comes first.
+
 **Present the plan via Plan mode.** Use `EnterPlanMode` and compose the full proposed issue body as the plan content — with **What**, **Why**, **Acceptance criteria** (original), **Steps** (new detailed breakdown). Include a task preview listing Step titles as bullet points at the end. Plan mode keeps the plan out of the main context window and provides a structured approval UI.
 
 Use `ExitPlanMode` to submit the plan for user approval. This is the **single and only** approval gate.
@@ -346,6 +366,7 @@ Before finalizing output, verify:
 4. **Split rule respected?** — if 8+ steps, plan was split into multiple issues
 5. **quality.md compliance?** — if quality.md was loaded in pre-flight, scan every proposed checkbox against its DON'Ts. Flag any checkbox that would produce code violating a DON'T (e.g., a checkbox suggesting raw primitives instead of value objects, horizontal TDD, nested if/else, magic numbers, workarounds). The plan must not instruct what quality.md forbids.
 6. **Linter ignore audit present?** — the final verification Step includes a checkbox to audit linter suppression rules (knip ignores, eslint-disable, noqa). If missing, add it before presenting the plan.
+7. **Dependency ordering valid?** — every Step is testable end-to-end using only what previous Steps produced. No Step requires workarounds (mock auth, stub APIs) to compensate for pages/routes/endpoints created in later Steps. If a Step needs programmatic state injection to be testable, the dependency is inverted — reorder before presenting.
 
 </content_audit>
 
