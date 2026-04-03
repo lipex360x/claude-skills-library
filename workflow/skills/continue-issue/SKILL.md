@@ -75,6 +75,7 @@ Resume work on an in-progress issue by reconstructing session state from the Git
 3. Current directory is a git repo → if not: "Must run inside a git repo." — stop.
 4. **Read ARCHITECTURE.md** → if exists, read and store. Primary codebase context.
 5. **Read quality.md** → if exists, read and store. Code quality standards for this project.
+6. **Check logging configuration** → scan ARCHITECTURE.md for an `## Observability` section that describes structured logging. Store as `has_logging` flag. If absent, flag it in the status report — logging is mandatory infrastructure.
 
 </pre_flight>
 
@@ -193,12 +194,13 @@ Then **immediately begin working on the next pending step**. Read the step's che
 | `[INFRA]` | Infrastructure/config/tooling — no test cycle needed |
 | `[WIRE]` | Connect layers (frontend↔backend) — integration work |
 | `[E2E]` | Write Playwright E2E test with screenshots |
-| `[PW]` | Run E2E tests **as the user would** (full flow via UI, no programmatic shortcuts). Read `.claude/project-setup.json` for Playwright flags: `headed` (true=`--headed`), `project` (`--project=<value>`), `workers` (`--workers=<value>`). Read screenshots, fix visual issues, re-run until all pass |
+| `[PW]` | Run E2E tests **as the user would** (full flow via UI, no programmatic shortcuts). Read `.claude/project-setup.json` for Playwright flags: `headed` (true=`--headed`), `project` (`--project=<value>`), `workers` (`--workers=<value>`). **Also capture browser console** — listen for `console.error` and `page.on('pageerror')` during test runs. Report any browser-only errors (hydration mismatches, runtime exceptions, unhandled rejections). Fix before proceeding |
 | `[HUMAN]` | User validates the running app visually. Agent provides a step-by-step testing guide (URLs, credentials, exact actions) and waits for feedback. If changes requested: fix → PW re-verify → HUMAN again until approved |
 | `[DOCS]` | Update ARCHITECTURE.md with new directories, files, patterns from this step. **Mandatory** in steps with GREEN or WIRE — non-countable process gate |
+| `[LOG]` | Verify error logging coverage — check that error paths in code written this step emit structured logs (backend: logger calls in catch/Err branches; frontend: error boundaries, API error handlers). If `has_logging` is false (no Observability section in ARCHITECTURE.md), flag as a gap. Non-countable process gate |
 | `[AUDIT]` | Audit all code written in this step against every rule in quality.md — fix violations |
 
-Process gates (PW, HUMAN, DOCS, AUDIT) are non-countable — they don't count toward the step's checkbox limit.
+Process gates (PW, HUMAN, DOCS, LOG, AUDIT) are non-countable — they don't count toward the step's checkbox limit.
 
 Follow the tags in order. The RED→GREEN cycle is vertical TDD (one test, one implementation). The E2E→PW→HUMAN chain is the visual verification gate — where PW is the agent's own validation loop (run → screenshot → fix → re-run) and HUMAN is the user's own validation (agent provides a testing guide with URLs, credentials, and exact steps; user runs the app and reports feedback). After HUMAN approval, DOCS updates ARCHITECTURE.md with any new directories, files, or patterns. AUDIT is always last — no `/push` until the audit passes.
 
@@ -216,7 +218,7 @@ After presenting the Report, verify:
 
 ## Next action
 
-Continue working through the current step's checkboxes. After completing a PW verify step (Playwright visual verification), provide the user a step-by-step testing guide (URLs, test credentials from `TEST_USERS.md` or seed data, exact click paths) and wait for their feedback. The user runs the app themselves — the agent does not present screenshots. If the user requests changes: fix → PW re-verify → provide updated guide → repeat until approved. Only after user approval, execute `[DOCS]` — update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure added during this step. Then proceed to `[AUDIT]` — audit all code written in the step against `quality.md`, check every file against every DON'T and DO rule, fix violations before committing. The process gate chain is: HUMAN → DOCS → AUDIT → `/push`. This sequence is mandatory and cannot be skipped. Then use `/push` to commit, push, and update the issue checkboxes.
+Continue working through the current step's checkboxes. After completing a PW verify step (Playwright visual verification), provide the user a step-by-step testing guide (URLs, test credentials from `TEST_USERS.md` or seed data, exact click paths) and wait for their feedback. The user runs the app themselves — the agent does not present screenshots. If the user requests changes: fix → PW re-verify → provide updated guide → repeat until approved. Only after user approval, execute `[DOCS]` — update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure added during this step. Then proceed to `[LOG]` — verify that error paths in this step's code emit structured logs. Then `[AUDIT]` — audit all code written in the step against `quality.md`, check every file against every DON'T and DO rule, fix violations before committing. The process gate chain is: HUMAN → DOCS → LOG → AUDIT → `/push`. This sequence is mandatory and cannot be skipped. Then use `/push` to commit, push, and update the issue checkboxes.
 
 ## Self-audit
 

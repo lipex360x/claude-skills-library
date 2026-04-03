@@ -88,6 +88,27 @@ Every project must include issue body protection from day 1. A single malformed 
 
 This setup costs nothing at runtime (hooks only fire on `gh issue edit` and `gh pr merge`) and prevents catastrophic data loss. The backup script also supports `restore` for quick recovery and `compact` for post-merge cleanup.
 
+## Structured logging (mandatory)
+
+Every project must include structured logging from Phase 1. Without it, errors surface only in browser DevTools or are silently swallowed — bugs that would be caught immediately with proper logging get shipped to the next phase. Include a Phase 1 checkbox to configure logging for both backend and frontend:
+
+**Backend logging:** Analyze the backend stack and select the appropriate library:
+- Python → `structlog` or `loguru` (structured JSON logging)
+- Node.js/Bun → `pino` + `pino-pretty` (JSON in prod, pretty in dev)
+- Go → `slog` (stdlib structured logging)
+- Other → choose the idiomatic structured logger for the stack
+
+Setup must include: (1) a logger singleton/factory with dynamic log levels per environment (silent for test, debug for dev, info for prod), (2) request logging middleware that logs method, path, status code, and duration for every HTTP request, (3) error logging in service/use-case layer with context (operation name, input params, error details).
+
+**Frontend logging:** Analyze the frontend framework and configure:
+- React/Next.js → lightweight logger (e.g., `loglevel`, custom wrapper around `console`) with environment-aware levels
+- Error boundary logging — capture and log React error boundaries with component stack
+- API error logging — log failed fetch/API calls with URL, status, and response body
+
+**ARCHITECTURE.md integration:** After configuring logging, add an `## Observability` section to ARCHITECTURE.md listing the logging libraries, log levels per environment, and where request/error logging is configured. This section is what `/start-issue` and `/continue-issue` check to verify logging exists.
+
+The logging infrastructure must be in place before any feature code is written — because feature code without logging produces silent failures that compound across phases.
+
 ## CLAUDE.md — agent context for new sessions
 
 Include a checkbox in Phase 1 (same Step as ARCHITECTURE.md) to create `CLAUDE.md` at the project root. This file gives Claude Code immediate context when starting a new session — without it, every new conversation starts cold and wastes tokens re-discovering the project. Contents:

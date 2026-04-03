@@ -84,6 +84,7 @@ Turn an issue with high-level acceptance criteria into a detailed implementation
 4. Working tree is clean → if dirty: warn user about uncommitted changes, suggest stashing.
 5. **Read ARCHITECTURE.md** → if `./ARCHITECTURE.md` exists, read it NOW and store the content. This is the primary codebase context (~2k tokens). Do NOT spawn an Explore agent or scan the codebase if ARCHITECTURE.md provides sufficient context. Only explore when: (a) ARCHITECTURE.md doesn't exist (create it), or (b) the issue touches areas not covered by it. This check saves ~50k tokens per invocation.
 6. **Read quality.md** → if `./quality.md` exists, read it NOW and store the content. This file contains non-negotiable code quality standards (DOs, DON'Ts, DDD patterns, branching rules). Every checkbox in the plan must comply with these standards. If quality.md doesn't exist, skip — but if it does, it is mandatory context for planning.
+7. **Check logging configuration** → scan ARCHITECTURE.md for an `## Observability` section that describes structured logging (libraries, log levels, request/error logging). Store the result as `has_logging` flag. If absent, flag it — logging is mandatory infrastructure. The `[LOG]` process gate in every step will verify error logging coverage.
 
 </pre_flight>
 
@@ -191,14 +192,15 @@ Transform acceptance criteria into Steps with checkboxes. Each criterion typical
 | `[INFRA]` | Infrastructure/config/tooling | Must not mention writing tests |
 | `[WIRE]` | Connect layers (frontend↔backend) | Must mention integration/connection |
 | `[E2E]` | Write Playwright E2E test | Must mention test/spec. Requires PW in same step |
-| `[PW]` | Run E2E **as the user would** (full flow via UI, no programmatic auth shortcuts). Read `.claude/project-setup.json` for flags: `headed`, `project` | Must mention screenshots/verification. Requires HUMAN in same step |
+| `[PW]` | Run E2E **as the user would** (full flow via UI, no programmatic auth shortcuts). Read `.claude/project-setup.json` for flags: `headed`, `project`. **Also capture browser console** — listen for `console.error` and `page.on('pageerror')` during test runs. Report any browser-only errors (hydration mismatches, runtime exceptions, unhandled rejections) that don't appear in application logs. Fix before proceeding | Must mention screenshots/verification. Requires HUMAN in same step |
 | `[HUMAN]` | User validates the running app visually — agent provides testing guide and waits | Must mention iterate/feedback. Requires PW in same step. Agent gives step-by-step guide (URLs, credentials, actions); user runs the app and reports feedback. If changes: fix → PW re-verify → HUMAN again until approved |
 | `[DOCS]` | Update ARCHITECTURE.md | **Mandatory** when step has GREEN or WIRE. Non-countable process gate |
+| `[LOG]` | Verify error logging coverage — check that error paths in code written this step emit structured logs (backend: logger calls in catch/Err branches; frontend: error boundaries, API error handlers). If `has_logging` is false (no Observability section in ARCHITECTURE.md), flag as a gap and recommend adding logging infrastructure | Non-countable process gate. Position: after DOCS, before AUDIT |
 | `[AUDIT]` | Audit against quality.md | Mandatory in every step, must be the last checkbox |
 
-Process gates (PW, HUMAN, DOCS, AUDIT) are non-countable — they don't count toward the step's checkbox limit.
+Process gates (PW, HUMAN, DOCS, LOG, AUDIT) are non-countable — they don't count toward the step's checkbox limit.
 
-**Tag ordering:** RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT. Tags must appear in this sequence within each step. RED and GREEN may alternate (vertical TDD: RED→GREEN→RED→GREEN is valid).
+**Tag ordering:** RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → LOG → AUDIT. Tags must appear in this sequence within each step. RED and GREEN may alternate (vertical TDD: RED→GREEN→RED→GREEN is valid).
 
 **UI chain:** Any step with frontend UI work (components, layouts, pages) MUST include the full chain: E2E → PW → HUMAN.
 
