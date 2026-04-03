@@ -180,13 +180,15 @@ Create `.claude/project-setup.json` with agent behavior settings for this projec
 {
   "playwright": {
     "headed": true,
-    "project": "chromium"
+    "project": "chromium",
+    "workers": 1
   }
 }
 ```
 
 - **`playwright.headed`** — `true` runs E2E with `--headed` (user watches execution), `false` runs headless. Default `true` for new projects.
 - **`playwright.project`** — Playwright project name to use by default (e.g. `chromium`, `firefox`). Maps to `--project=<value>`.
+- **`playwright.workers`** — number of parallel workers. Positive number maps to `--workers=<value>`. `-1` means max parallelism (omit the flag entirely). Use `1` for headed mode to avoid multiple browser windows.
 
 Only include the `playwright` key when the project has a frontend with Playwright configured. For backend-only projects, omit the file entirely.
 
