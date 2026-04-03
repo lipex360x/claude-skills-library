@@ -57,6 +57,18 @@ Codebase knowledge cache — avoids expensive exploration on every new conversat
 
 [How auth works: roles, permission checks, client vs server patterns]
 
+## Observability
+
+[Structured logging setup — libraries, log levels per environment, where request/error logging is configured]
+
+| Concern | Tool | Config |
+|---------|------|--------|
+| Backend logging | [library — e.g., structlog, pino, slog] | [log level env var, middleware location] |
+| Frontend logging | [library — e.g., loglevel, custom wrapper] | [error boundary, API error handler locations] |
+| Tracing (optional) | [tool — e.g., LangSmith, OpenTelemetry] | [env vars, decorator/middleware location] |
+
+Log levels: `silent` (test), `debug` (dev), `info` (prod). Debug/trace logs must never expose stack traces, SQL queries, or request bodies in production.
+
 ## Routes
 
 [List of routes with purpose and access level — living document, update when routes change]

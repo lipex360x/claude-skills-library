@@ -159,6 +159,7 @@ Check if `ARCHITECTURE.md` exists at the project root. If it does, analyze the d
 - **New dependencies** — add to Stack & dependencies
 - **New layers or modules** — update the Layers section
 - **Auth changes** — update the Auth model section
+- **Logging or tracing changes** — update the Observability section (new logger, new middleware, tracing decorator)
 
 Read the current `ARCHITECTURE.md`, then update it with the relevant additions. Be surgical — only add what this branch introduced, don't rewrite existing content. Each addition should name the specific change (e.g., "add `/billing` route", "add `recharts` to dependencies").
 
@@ -169,6 +170,7 @@ If `ARCHITECTURE.md` doesn't exist and the project has sufficient complexity (3+
 - **Patterns** — conventions used (naming, error handling, state management)
 - **Schema** — database tables/models summary
 - **Auth** — authentication/authorization model
+- **Observability** — logging libraries, log levels, request/error logging, tracing
 - **Routes** — URL routes or API endpoints
 
 **Commit the ARCHITECTURE.md update** as part of the merge preparation — it should be on the branch before merging so the base branch receives the updated file:
