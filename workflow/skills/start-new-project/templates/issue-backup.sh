@@ -11,6 +11,7 @@
 #   issue-backup snapshot-all          Snapshot all open issues
 #   issue-backup restore <number>      Restore issue #N from latest snapshot
 #   issue-backup list [number]         List snapshots (all or for issue #N)
+#   issue-backup compact <number>      Keep only latest snapshot for issue #N
 #   issue-backup cleanup <number>      Delete all snapshots for issue #N
 #   issue-backup --check               Report DB status without changes
 #   issue-backup --verbose             Show detailed output
@@ -40,7 +41,7 @@ for arg in "$@"; do
       sed -n '/^# Usage:/,/^# ===/{ /^# ===/d; s/^# \{0,1\}//; p; }' "$0"
       exit 0
       ;;
-    snapshot|snapshot-all|restore|list|cleanup)
+    snapshot|snapshot-all|restore|list|compact|cleanup)
       SUBCOMMAND="$arg"
       ;;
     *)
@@ -331,6 +332,51 @@ do_restore() {
   cnt_changed=$((cnt_changed + 1))
 }
 
+do_compact() {
+  local issue="$1"
+
+  local count
+  count=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM snapshots WHERE issue_number = $issue;" 2>/dev/null) || {
+    error "Database not initialized"
+    exit 1
+  }
+
+  if [ "$count" -le 1 ]; then
+    dim "Issue #${issue} has ${count} snapshot(s) — nothing to compact"
+    cnt_ok=$((cnt_ok + 1))
+    return
+  fi
+
+  if $CHECK_MODE; then
+    warn "Would compact issue #${issue}: keep latest, delete $((count - 1)) old snapshot(s)"
+    cnt_drift=$((cnt_drift + 1))
+    return
+  fi
+
+  sqlite3 "$DB_PATH" "
+    DELETE FROM snapshots
+    WHERE issue_number = $issue
+      AND id NOT IN (
+        SELECT id FROM snapshots
+        WHERE issue_number = $issue
+        ORDER BY created_at DESC
+        LIMIT 1
+      );
+  "
+
+  local remaining
+  remaining=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM snapshots WHERE issue_number = $issue;")
+  if [ "$remaining" -ne 1 ]; then
+    error "Compact validation failed: expected 1 snapshot, got ${remaining}"
+    cnt_warned=$((cnt_warned + 1))
+    return
+  fi
+
+  local deleted=$((count - 1))
+  ok "Compacted issue #${issue}: kept latest, deleted ${deleted} old snapshot(s)"
+  cnt_changed=$((cnt_changed + 1))
+}
+
 do_cleanup() {
   local issue="$1"
 
@@ -395,6 +441,13 @@ case "$SUBCOMMAND" in
     ;;
   list)
     do_list
+    ;;
+  compact)
+    if [ -z "$ISSUE_NUMBER" ]; then
+      error "Usage: issue-backup compact <number>"
+      exit 1
+    fi
+    do_compact "$ISSUE_NUMBER"
     ;;
   cleanup)
     if [ -z "$ISSUE_NUMBER" ]; then

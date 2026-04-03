@@ -79,13 +79,14 @@ Include a checkbox in Phase 1 to generate `ARCHITECTURE.md` at the project root 
 
 Every project must include issue body protection from day 1. A single malformed `sed` or bad `gh issue edit` can silently wipe an entire issue body with no recovery. Include a Phase 1 checkbox to scaffold the backup infrastructure:
 
-1. **Copy `templates/issue-backup.sh` → `.claude/scripts/issue-backup.sh`** — SQLite-based backup that snapshots issue bodies before write operations. Supports `snapshot`, `restore`, `list`, `cleanup` subcommands with retention of 10 snapshots per issue.
+1. **Copy `templates/issue-backup.sh` → `.claude/scripts/issue-backup.sh`** — SQLite-based backup that snapshots issue bodies before write operations. Supports `snapshot`, `restore`, `list`, `compact`, `cleanup` subcommands with retention of 10 snapshots per issue.
 2. **Copy `templates/pre-issue-edit-hook.sh` → `.claude/hooks/pre-issue-edit.sh`** — PreToolUse hook that automatically intercepts `gh issue edit` commands and snapshots the body before the edit is applied.
-3. **Register the hook in `.claude/settings.json`** — add `PreToolUse` entry with matcher `Bash` pointing to the hook script.
-4. **Add `.claude/issues.db` to `.gitignore`** — the SQLite database is local state, not committed.
-5. **Run `issue-backup.sh snapshot-all`** after creating the first issues — seeds the database with initial backups.
+3. **Copy `templates/post-merge-compact-hook.sh` → `.claude/hooks/post-merge-compact.sh`** — PostToolUse hook that fires after `gh pr merge`, extracts the linked issue number from the PR body (`Closes #N`), and runs `issue-backup.sh compact` to keep only the latest snapshot. Ensures the DB stays clean after each merge.
+4. **Register both hooks in `.claude/settings.json`** — add `PreToolUse` entry (matcher `Bash`) for the pre-edit hook, and `PostToolUse` entry (matcher `Bash`) for the post-merge hook.
+5. **Add `.claude/issues.db` to `.gitignore`** — the SQLite database is local state, not committed.
+6. **Run `issue-backup.sh snapshot-all`** after creating the first issues — seeds the database with initial backups.
 
-This setup costs nothing at runtime (hook only fires on `gh issue edit`) and prevents catastrophic data loss. The backup script also supports `restore` for quick recovery.
+This setup costs nothing at runtime (hooks only fire on `gh issue edit` and `gh pr merge`) and prevents catastrophic data loss. The backup script also supports `restore` for quick recovery and `compact` for post-merge cleanup.
 
 ## CLAUDE.md — agent context for new sessions
 
