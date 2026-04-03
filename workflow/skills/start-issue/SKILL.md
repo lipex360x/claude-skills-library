@@ -193,14 +193,16 @@ Transform acceptance criteria into Steps with checkboxes. Each criterion typical
 | `[E2E]` | Write Playwright E2E test | Must mention test/spec. Requires PW in same step |
 | `[PW]` | Run E2E + visual verification | Must mention screenshots/verification. Requires HUMAN in same step |
 | `[HUMAN]` | Present screenshots and iterate on user feedback until approved | Must mention iterate/feedback. Requires PW in same step. This is a **loop**, not a one-shot: present → wait → if changes requested: fix → re-screenshot → re-present → repeat until approved |
-| `[DOCS]` | Update ARCHITECTURE.md | Recommended when step has GREEN or WIRE |
+| `[DOCS]` | Update ARCHITECTURE.md | **Mandatory** when step has GREEN or WIRE. Non-countable process gate |
 | `[AUDIT]` | Audit against quality.md | Mandatory in every step, must be the last checkbox |
 
-**Tag ordering:** RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT. Tags must appear in this sequence within each step.
+Process gates (PW, HUMAN, DOCS, AUDIT) are non-countable — they don't count toward the step's checkbox limit.
+
+**Tag ordering:** RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT. Tags must appear in this sequence within each step. RED and GREEN may alternate (vertical TDD: RED→GREEN→RED→GREEN is valid).
 
 **UI chain:** Any step with frontend UI work (components, layouts, pages) MUST include the full chain: E2E → PW → HUMAN.
 
-**ARCHITECTURE.md maintenance.** The last checkbox of each Step should update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure introduced in that Step. This keeps the architecture doc current as the project grows and prevents future sessions from wasting tokens on codebase exploration.
+**ARCHITECTURE.md maintenance via [DOCS].** Steps with GREEN or WIRE must include a `[DOCS]` checkbox to update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure introduced in that Step. Position it after HUMAN (if present) and before AUDIT. This keeps the architecture doc current as the project grows and prevents future sessions from wasting tokens on codebase exploration.
 
 **Human visual validation.** For any Step that includes a PW verify checkbox (Playwright visual verification), add a subsequent checkbox: `- [ ] Human validation — present screenshots to user and wait for approval before proceeding`. This ensures the user can verify visual quality before the step is considered complete.
 
