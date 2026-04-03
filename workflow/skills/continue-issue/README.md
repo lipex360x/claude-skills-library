@@ -4,7 +4,7 @@ Resume work on an in-progress issue from where it left off.
 
 ## What it does
 
-Reads the GitHub issue body, identifies completed steps via checkboxes, recreates the task board matching issue state (completed steps get green ticks, current step shows spinner, pending steps stay empty), and immediately starts working on the next pending step.
+Reads the GitHub issue body, identifies completed steps via checkboxes, recreates the task board matching issue state (completed steps get green ticks, current step shows spinner, pending steps stay empty), and immediately starts working on the next pending step. Supports sub-agent delegation via `[SPAWN]` — mechanical work (RED/GREEN/INFRA/WIRE/E2E) runs in a background sub-agent while the manager handles quality gates (REVIEW/PW/HUMAN/DOCS/LOG/AUDIT).
 
 ## When to use
 
@@ -33,7 +33,9 @@ Reads the GitHub issue body, identifies completed steps via checkboxes, recreate
 
 The step validator (`validate-issue.sh`) enforces issue structure rules:
 
-- **Process gate exclusion** — tags `[PW]`, `[HUMAN]`, `[DOCS]`, and `[AUDIT]` are process gates, not work scope. They are excluded from checkbox counting when evaluating step size limits, so a step with 6 work checkboxes + 4 process gates is counted as 6, not 10.
+- **Process gate exclusion** — tags `[SPAWN]`, `[REVIEW]`, `[PW]`, `[HUMAN]`, `[DOCS]`, `[LOG]`, and `[AUDIT]` are process gates, not work scope. They are excluded from checkbox counting when evaluating step size limits.
+- **Delegation via SPAWN** — when `delegate-mechanical` is `true` in `project-setup.json` and the step has `[SPAWN]`, the manager spawns a sub-agent for mechanical checkboxes (RED/GREEN/INFRA/WIRE/E2E). The `[SPAWN]` text (max 400 chars) carries non-derivable hints. The manager builds a briefing using a 10-point template (stack, patterns, error hierarchy, relevant files, quality.md rules, checkboxes, test infra, hints, formatter, report format).
+- **REVIEW gate** — after the sub-agent completes, the manager reads production files (spot-checks tests), runs all tests, checks for quality.md violations, fixes issues, and updates issue checkboxes. Full per-rule audit happens at `[AUDIT]`; REVIEW is the fast structural gate.
 - **Vertical TDD enforcement** — the `green_no_consecutive` rule flags consecutive `[GREEN]` checkboxes without an intervening `[RED]`. RED/GREEN may alternate freely (vertical TDD: RED→GREEN→RED→GREEN is valid via `repeatable_groups`).
 - **DOCS mandatory** — `[DOCS]` is required (error) in steps with `[GREEN]` or `[WIRE]`. Positioned after HUMAN and before AUDIT.
 - **PW runs as user would** — E2E tests simulate the full user flow via UI (no programmatic auth shortcuts). Reads `.claude/project-setup.json` for `headed`, `project`, and `workers` flags.

@@ -63,18 +63,20 @@ The issue validator (created by `/start-new-project`, run automatically by `/sta
 | Checkbox text length | warning | Max 200 chars — break into multiple, never shorten |
 | Empty step | error | Must have ≥1 checkbox |
 
-> Process gates (`[PW]`, `[HUMAN]`, `[DOCS]`, `[AUDIT]`) are excluded from checkbox counting via `count_excluded_tags` in `validate-issue.config.json`. This means a step can have 8 work checkboxes plus process gates without triggering the limit.
+> Process gates (`[SPAWN]`, `[REVIEW]`, `[PW]`, `[HUMAN]`, `[DOCS]`, `[LOG]`, `[AUDIT]`) are excluded from checkbox counting via `count_excluded_tags` in `validate-issue.config.json`. This means a step can have 8 work checkboxes plus process gates without triggering the limit. `[SPAWN]` has a special 400-char limit (vs 200 for other tags), configured via `tag_char_overrides` in the config.
 
 ### Checkbox tags
 
 Every checkbox must have a tag: `` `[TAG]` ``. Valid tags and ordering:
 
 ```
-RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
+SPAWN → RED → GREEN → INFRA → WIRE → E2E → REVIEW → PW → HUMAN → DOCS → LOG → AUDIT
 ```
 
 | Rule | Level | Validation |
 |------|-------|------------|
+| `[SPAWN]` must be first | error | No tags before SPAWN |
+| `[SPAWN]` requires `[REVIEW]` | error | Delegated work must be reviewed |
 | `[GREEN]` requires `[RED]` | error | No GREEN without RED in same step |
 | `[E2E]` requires `[PW]` | error | E2E tests need visual verification |
 | `[PW]` requires `[HUMAN]` | error | Visual verification needs human approval |
@@ -83,6 +85,7 @@ RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
 | `[AUDIT]` must be last | error | No tags after AUDIT |
 | Frontend UI → full chain | error | UI work requires E2E + PW + HUMAN |
 | Tag ordering | warning | Must follow the sequence above (RED/GREEN may alternate) |
+| `[REVIEW]` recommended | warning | Recommended when step has GREEN or WIRE |
 | `[DOCS]` required | error | Mandatory when step has GREEN or WIRE |
 | `[E2E]` without `[RED]` | warning | E2E without unit tests is fragile |
 
@@ -103,6 +106,8 @@ RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
 | `[DOCS]` | warning | Should mention ARCHITECTURE.md |
 | `[INFRA]` writes tests | warning | Shouldn't mention writing tests |
 | `[WIRE]` | warning | Should mention integration/connection |
+| `[SPAWN]` | warning | Should mention delegate/sub-agent/spawn/mechanical |
+| `[REVIEW]` | warning | Should mention review/validate/quality/fix/verify |
 
 ### Other
 
@@ -131,6 +136,7 @@ All rules live in `validate-issue.config.json`. To add a new rule, append to the
 | `tag_requires` | step | Tag A requires tag B in same step |
 | `tag_required` | step | Tag must exist in every step |
 | `tag_must_be_last` | step | Tag must be the last in the step |
+| `tag_must_be_first` | step | Tag must be the first in the step |
 | `tag_ordering` | step | Tags must follow defined order |
 | `tag_recommended_with` | step | Tag recommended when other tags present |
 | `ui_chain` | step | Frontend UI work requires specific tags |
