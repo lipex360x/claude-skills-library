@@ -192,7 +192,7 @@ Transform acceptance criteria into Steps with checkboxes. Each criterion typical
 | `[WIRE]` | Connect layers (frontend↔backend) | Must mention integration/connection |
 | `[E2E]` | Write Playwright E2E test | Must mention test/spec. Requires PW in same step |
 | `[PW]` | Run E2E + visual verification | Must mention screenshots/verification. Requires HUMAN in same step |
-| `[HUMAN]` | Present screenshots and iterate on user feedback until approved | Must mention iterate/feedback. Requires PW in same step. This is a **loop**, not a one-shot: present → wait → if changes requested: fix → re-screenshot → re-present → repeat until approved |
+| `[HUMAN]` | User validates the running app visually — agent provides testing guide and waits | Must mention iterate/feedback. Requires PW in same step. Agent gives step-by-step guide (URLs, credentials, actions); user runs the app and reports feedback. If changes: fix → PW re-verify → HUMAN again until approved |
 | `[DOCS]` | Update ARCHITECTURE.md | **Mandatory** when step has GREEN or WIRE. Non-countable process gate |
 | `[AUDIT]` | Audit against quality.md | Mandatory in every step, must be the last checkbox |
 

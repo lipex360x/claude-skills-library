@@ -194,13 +194,13 @@ Then **immediately begin working on the next pending step**. Read the step's che
 | `[WIRE]` | Connect layers (frontend↔backend) — integration work |
 | `[E2E]` | Write Playwright E2E test with screenshots |
 | `[PW]` | Run E2E tests, read screenshots, fix visual issues until all pass |
-| `[HUMAN]` | Present screenshots to user via AskUserQuestion — **iteration loop**: if user requests changes, fix → re-screenshot (PW) → re-present → repeat until explicitly approved |
+| `[HUMAN]` | User validates the running app visually. Agent provides a step-by-step testing guide (URLs, credentials, exact actions) and waits for feedback. If changes requested: fix → PW re-verify → HUMAN again until approved |
 | `[DOCS]` | Update ARCHITECTURE.md with new directories, files, patterns from this step. **Mandatory** in steps with GREEN or WIRE — non-countable process gate |
 | `[AUDIT]` | Audit all code written in this step against every rule in quality.md — fix violations |
 
 Process gates (PW, HUMAN, DOCS, AUDIT) are non-countable — they don't count toward the step's checkbox limit.
 
-Follow the tags in order. The RED→GREEN cycle is vertical TDD (one test, one implementation). The E2E→PW→HUMAN chain is the visual verification gate — where PW is the agent's own validation loop (run → screenshot → fix → re-run) and HUMAN is the user feedback loop (present → wait → if changes: fix → re-screenshot → re-present → repeat until approved). After HUMAN approval, DOCS updates ARCHITECTURE.md with any new directories, files, or patterns. AUDIT is always last — no `/push` until the audit passes.
+Follow the tags in order. The RED→GREEN cycle is vertical TDD (one test, one implementation). The E2E→PW→HUMAN chain is the visual verification gate — where PW is the agent's own validation loop (run → screenshot → fix → re-run) and HUMAN is the user's own validation (agent provides a testing guide with URLs, credentials, and exact steps; user runs the app and reports feedback). After HUMAN approval, DOCS updates ARCHITECTURE.md with any new directories, files, or patterns. AUDIT is always last — no `/push` until the audit passes.
 
 ## Post-flight
 
@@ -216,7 +216,7 @@ After presenting the Report, verify:
 
 ## Next action
 
-Continue working through the current step's checkboxes. After completing a PW verify step (Playwright visual verification), present all screenshots to the user via `AskUserQuestion` and wait for their visual approval before proceeding. The user's validation is mandatory for any step involving visual/UI changes. Only after user approval, execute `[DOCS]` — update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure added during this step. Then proceed to `[AUDIT]` — audit all code written in the step against `quality.md`, check every file against every DON'T and DO rule, fix violations before committing. The process gate chain is: HUMAN → DOCS → AUDIT → `/push`. This sequence is mandatory and cannot be skipped. Then use `/push` to commit, push, and update the issue checkboxes.
+Continue working through the current step's checkboxes. After completing a PW verify step (Playwright visual verification), provide the user a step-by-step testing guide (URLs, test credentials from `TEST_USERS.md` or seed data, exact click paths) and wait for their feedback. The user runs the app themselves — the agent does not present screenshots. If the user requests changes: fix → PW re-verify → provide updated guide → repeat until approved. Only after user approval, execute `[DOCS]` — update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure added during this step. Then proceed to `[AUDIT]` — audit all code written in the step against `quality.md`, check every file against every DON'T and DO rule, fix violations before committing. The process gate chain is: HUMAN → DOCS → AUDIT → `/push`. This sequence is mandatory and cannot be skipped. Then use `/push` to commit, push, and update the issue checkboxes.
 
 ## Self-audit
 
