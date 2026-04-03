@@ -4,10 +4,11 @@
     "max_steps": 8,
     "max_checkboxes": 8,
     "recommended_checkboxes": 6,
-    "max_checkbox_chars": 200
+    "max_checkbox_chars": 200,
+    "count_excluded_tags": ["PW", "HUMAN", "DOCS", "LOG", "AUDIT"]
   },
 
-  "tag_order": ["RED", "GREEN", "INFRA", "WIRE", "E2E", "PW", "HUMAN", "DOCS", "AUDIT"],
+  "tag_order": ["RED", "GREEN", "INFRA", "WIRE", "E2E", "PW", "HUMAN", "DOCS", "LOG", "AUDIT"],
 
   "sections": {
     "structure": {
@@ -277,6 +278,15 @@
           "type": "tag_content_match",
           "tag": "DOCS",
           "pattern": "architecture\\.md|architecture"
+        },
+        {
+          "key": "log_mentions_logging",
+          "description": "[LOG] should mention logging/error coverage",
+          "errorMessage": "[LOG] doesn't mention logging or error coverage verification",
+          "level": "warn",
+          "type": "tag_content_match",
+          "tag": "LOG",
+          "pattern": "log|error.*coverage|error.*path|structured"
         },
         {
           "key": "infra_writes_tests",
