@@ -47,6 +47,8 @@ Surgical edits to existing skills — instant context via `skill-meta.json`, sco
 | Modified SKILL.md | `<plugin>/skills/<name>/SKILL.md` | yes | Markdown with YAML frontmatter |
 | Updated skill-meta.json | `<plugin>/skills/<name>/skill-meta.json` | yes | JSON per spec |
 | Modified references | `<plugin>/skills/<name>/references/*.md` | yes | Markdown |
+| Updated README.md | `<plugin>/skills/<name>/README.md` | yes (if ripple detected) | Markdown |
+| Updated templates | `<plugin>/skills/<name>/templates/*` | yes (if ripple detected) | Various |
 | Report | stdout | no | Markdown summary |
 
 </output_contract>
@@ -60,6 +62,8 @@ Surgical edits to existing skills — instant context via `skill-meta.json`, sco
 | Target skill-meta.json | `<plugin>/skills/<name>/skill-meta.json` | R/W | JSON |
 | Target SKILL.md | `<plugin>/skills/<name>/SKILL.md` | R/W | Markdown |
 | Target references | `<plugin>/skills/<name>/references/` | R/W | Markdown files |
+| Target README.md | `<plugin>/skills/<name>/README.md` | R/W | Markdown |
+| Target templates | `<plugin>/skills/<name>/templates/` | R/W | Various |
 | STRUCTURE.md | `skills-library/STRUCTURE.md` | R | Markdown |
 | Skeleton template | `references/skeleton-template.md` | R | Markdown |
 | Review checklist | `references/review-checklist.md` | R | Markdown |
@@ -152,7 +156,26 @@ Present results as the standard markdown table:
 
 If any item is FAIL, fix it before proceeding. WARN items are reported but do not block.
 
-### 8. Update skill-meta.json
+### 8. Detect ripple effects
+
+Check whether the SKILL.md change introduces content that is mirrored or referenced in other files within the skill directory. Ripple effects are common when changes touch tags, ordering rules, process gates, or behavioral descriptions.
+
+**Files to check:**
+
+1. **README.md** — if it exists, grep for content related to the change (tag names, ordering sequences, process gate lists, sizing rules). If the README mentions a tag list, ordering, or behavior that the SKILL.md change modifies → flag as stale and update.
+
+2. **templates/** — if the directory exists, scan all files for references to changed content (tag names in validator configs, tag ordering in step templates, char limits, excluded tags). Template files are copied into new projects by `/start-new-project` — stale templates propagate outdated rules indefinitely.
+
+3. **Sibling skills** — grep the parent plugin directory for references to changed conventions (tag names, flag names, shared patterns). Example: adding `[SPAWN]` to `continue-issue` should flag `start-issue` if it references the same tag table. Present findings but do NOT auto-edit sibling skills — report them for the user to address.
+
+**Execution:**
+- For each detected ripple, present: **File** | **What's stale** | **Action** (update / flag for user)
+- README.md and templates within the same skill → update directly
+- Sibling skills → report only, suggest running `/update-skill <sibling>` separately
+
+If no ripple effects are detected, report "No ripple effects — change is self-contained."
+
+### 9. Update skill-meta.json
 
 If `skill-meta.json` exists, update the affected fields:
 - `lastModified` → today's date
@@ -162,7 +185,7 @@ If `skill-meta.json` exists, update the affected fields:
 
 If `skill-meta.json` does not exist, generate it from scratch following `references/skill-meta-spec.md`. Read the full SKILL.md to populate all fields accurately.
 
-### 9. Report
+### 10. Report
 
 <report>
 
@@ -170,6 +193,7 @@ Present concisely:
 - **Change applied:** what was modified (sections, references, line count delta)
 - **Before → After:** key metrics (line count, anti-pattern count, section states)
 - **Scoped review:** summary of checklist results (pass/warn/fail counts)
+- **Ripple effects:** files updated (README, templates) + sibling skills flagged (or "none")
 - **skill-meta.json:** updated or generated
 - **Errors:** issues encountered and how they were handled (or "none")
 
@@ -190,6 +214,7 @@ Before presenting the Report, verify:
 3. **skill-meta.json reflects changes?** — `lastModified`, `lineCount`, and `skeleton` fields are current
 4. **Under 500 lines?** — SKILL.md line count is within limit
 5. **No untouched sections rewritten?** — compare before-state to confirm scope was respected
+6. **Ripple effects addressed?** — README.md and templates updated if stale, sibling skills flagged if affected
 
 If any check fails, note it in the Report.
 
@@ -227,6 +252,7 @@ Scoped to modified sections only — full skill audit is `/audit-skill`'s job.
 - **Forgetting skill-meta.json.** Always update or generate `skill-meta.json` at the end of every session — because stale metadata defeats the purpose of instant context loading for future edits.
 - **Using /create-skill for edits.** `/create-skill` regenerates the full skeleton — because applying it to an existing skill risks overwriting carefully tuned content that took multiple iterations to get right.
 - **Editing a non-compliant skill without warning.** Always run the skeleton baseline check in pre-flight — because scoped edits on a non-compliant skill produce inconsistent results (you fix one section while 5 others are missing or misnamed).
+- **Ignoring ripple effects.** Always check README.md, templates/, and sibling skills after modifying tags, ordering, or behavioral conventions — because stale README docs mislead users, stale templates propagate outdated rules into new projects, and inconsistent sibling skills produce conflicting behavior.
 
 ## Guidelines
 

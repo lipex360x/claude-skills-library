@@ -4,8 +4,8 @@
   "name": "update-skill",
   "plugin": "meta",
   "created": "2026-03-24",
-  "lastModified": "2026-03-24",
-  "lineCount": 236,
+  "lastModified": "2026-04-03",
+  "lineCount": 265,
   "skeleton": {
     "inputContract": true,
     "outputContract": true,
@@ -17,7 +17,7 @@
     "antiPatterns": true,
     "guidelines": true
   },
-  "steps": 9,
+  "steps": 10,
   "approvalGates": 0,
   "references": [
     "review-checklist.md",
