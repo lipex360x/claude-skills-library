@@ -71,6 +71,7 @@ Turn an issue with high-level acceptance criteria into a detailed implementation
 | Dev guidelines | `references/development-guidelines.md` | R | Markdown |
 | TDD methodology | `references/tdd-methodology.md` | R | Markdown |
 | Execution strategy | `references/execution-strategy.md` | R | Markdown |
+| Project setup | `.claude/project-setup.json` | R/W | JSON — `dismiss` section for declined suggestions |
 
 </external_state>
 
@@ -84,7 +85,9 @@ Turn an issue with high-level acceptance criteria into a detailed implementation
 4. Working tree is clean → if dirty: warn user about uncommitted changes, suggest stashing.
 5. **Read ARCHITECTURE.md** → if `./ARCHITECTURE.md` exists, read it NOW and store the content. This is the primary codebase context (~2k tokens). Do NOT spawn an Explore agent or scan the codebase if ARCHITECTURE.md provides sufficient context. Only explore when: (a) ARCHITECTURE.md doesn't exist (create it), or (b) the issue touches areas not covered by it. This check saves ~50k tokens per invocation.
 6. **Read quality.md** → if `./quality.md` exists, read it NOW and store the content. This file contains non-negotiable code quality standards (DOs, DON'Ts, DDD patterns, branching rules). Every checkbox in the plan must comply with these standards. If quality.md doesn't exist, skip — but if it does, it is mandatory context for planning.
-7. **Check logging configuration** → scan ARCHITECTURE.md for an `## Observability` section that describes structured logging (libraries, log levels, request/error logging). Store the result as `has_logging` flag. If absent, flag it — logging is mandatory infrastructure. The `[LOG]` process gate in every step will verify error logging coverage.
+7. **Check logging and infrastructure gaps** → read `.claude/project-setup.json` for `dismiss` flags. For each gap detected below, skip if already dismissed:
+   - **Logging:** scan ARCHITECTURE.md for `## Observability` section. If absent and `dismiss.logging` is not true → `AskUserQuestion`: suggest adding structured logging (explain: silent failures, errors only visible in browser DevTools). If accepted → include logging setup Step in the plan. If declined → set `dismiss.logging: true` in `project-setup.json`.
+   - **Tags:** scan the issue body for checkbox tag format (`` `[RED]` ``, `` `[GREEN]` ``, etc.). If no tags found and `dismiss.tags` is not true → `AskUserQuestion`: suggest rewriting checkboxes with tags (explain: tags drive execution behavior — TDD, E2E, audit gates). If accepted → apply tags during Step 3 plan. If declined → set `dismiss.tags: true` in `project-setup.json`. The `[LOG]` process gate verifies error logging coverage in every step.
 
 </pre_flight>
 

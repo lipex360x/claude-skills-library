@@ -63,6 +63,7 @@ Resume work on an in-progress issue by reconstructing session state from the Git
 | quality.md | project root | R | Markdown |
 | CLAUDE.md | project root | R | Markdown |
 | Issue validator | `.claude/scripts/validate-issue.sh` | R (optional) | Bash script |
+| Project setup | `.claude/project-setup.json` | R/W | JSON — `dismiss` section for declined suggestions |
 
 </external_state>
 
@@ -75,7 +76,9 @@ Resume work on an in-progress issue by reconstructing session state from the Git
 3. Current directory is a git repo → if not: "Must run inside a git repo." — stop.
 4. **Read ARCHITECTURE.md** → if exists, read and store. Primary codebase context.
 5. **Read quality.md** → if exists, read and store. Code quality standards for this project.
-6. **Check logging configuration** → scan ARCHITECTURE.md for an `## Observability` section that describes structured logging. Store as `has_logging` flag. If absent, flag it in the status report — logging is mandatory infrastructure.
+6. **Check infrastructure gaps** → read `.claude/project-setup.json` for `dismiss` flags. For each gap, skip if already dismissed:
+   - **Logging:** scan ARCHITECTURE.md for `## Observability` section. If absent and `dismiss.logging` is not true → `AskUserQuestion`: suggest adding structured logging. If declined → set `dismiss.logging: true` in `project-setup.json`.
+   - **Tags:** scan the issue body for checkbox tag format (`` `[RED]` ``, `` `[GREEN]` ``, etc.). If no tags found and `dismiss.tags` is not true → `AskUserQuestion`: suggest updating the issue body with tags (explain: tags drive TDD, E2E, audit gates). If declined → set `dismiss.tags: true` in `project-setup.json`.
 
 </pre_flight>
 
