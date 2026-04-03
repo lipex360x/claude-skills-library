@@ -172,6 +172,24 @@ Topic sources (combine as applicable):
 
 Keep to 10-20 topics. Use lowercase, hyphenated. Match existing GitHub topic conventions (e.g., `tailwindcss` not `tailwind-css`).
 
+### 5b. Agent config (project-setup.json)
+
+Create `.claude/project-setup.json` with agent behavior settings for this project. This file is read by workflow skills (PW, push) to know how to operate.
+
+```json
+{
+  "playwright": {
+    "headed": true,
+    "project": "chromium"
+  }
+}
+```
+
+- **`playwright.headed`** — `true` runs E2E with `--headed` (user watches execution), `false` runs headless. Default `true` for new projects.
+- **`playwright.project`** — Playwright project name to use by default (e.g. `chromium`, `firefox`). Maps to `--project=<value>`.
+
+Only include the `playwright` key when the project has a frontend with Playwright configured. For backend-only projects, omit the file entirely.
+
 ### 6. Create the GitHub issues
 
 Create issues sequentially (first may reference later ones by number):

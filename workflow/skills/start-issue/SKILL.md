@@ -191,7 +191,7 @@ Transform acceptance criteria into Steps with checkboxes. Each criterion typical
 | `[INFRA]` | Infrastructure/config/tooling | Must not mention writing tests |
 | `[WIRE]` | Connect layers (frontend↔backend) | Must mention integration/connection |
 | `[E2E]` | Write Playwright E2E test | Must mention test/spec. Requires PW in same step |
-| `[PW]` | Run E2E + visual verification | Must mention screenshots/verification. Requires HUMAN in same step |
+| `[PW]` | Run E2E **as the user would** (full flow via UI, no programmatic auth shortcuts). Read `.claude/project-setup.json` for flags: `headed`, `project` | Must mention screenshots/verification. Requires HUMAN in same step |
 | `[HUMAN]` | User validates the running app visually — agent provides testing guide and waits | Must mention iterate/feedback. Requires PW in same step. Agent gives step-by-step guide (URLs, credentials, actions); user runs the app and reports feedback. If changes: fix → PW re-verify → HUMAN again until approved |
 | `[DOCS]` | Update ARCHITECTURE.md | **Mandatory** when step has GREEN or WIRE. Non-countable process gate |
 | `[AUDIT]` | Audit against quality.md | Mandatory in every step, must be the last checkbox |
@@ -204,7 +204,7 @@ Process gates (PW, HUMAN, DOCS, AUDIT) are non-countable — they don't count to
 
 **ARCHITECTURE.md maintenance via [DOCS].** Steps with GREEN or WIRE must include a `[DOCS]` checkbox to update ARCHITECTURE.md with any new directories, files, patterns, or infrastructure introduced in that Step. Position it after HUMAN (if present) and before AUDIT. This keeps the architecture doc current as the project grows and prevents future sessions from wasting tokens on codebase exploration.
 
-**Human visual validation.** For any Step that includes a PW verify checkbox (Playwright visual verification), add a subsequent checkbox: `- [ ] Human validation — present screenshots to user and wait for approval before proceeding`. This ensures the user can verify visual quality before the step is considered complete.
+**Human visual validation.** For any Step that includes a PW verify checkbox (Playwright visual verification), add a subsequent checkbox: `- [ ] Human validation — user tests the running app and provides feedback`. The agent provides a step-by-step testing guide (URLs, credentials, actions); the user validates by interacting with the live app.
 
 **Mandatory quality.md audit.** Every Step must include a `quality.md` audit as its final action before `/push`. The agent must review all code written in the step against every rule in `quality.md`, fix violations, then commit. This audit cannot be skipped.
 

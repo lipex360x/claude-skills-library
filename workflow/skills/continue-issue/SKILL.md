@@ -193,7 +193,7 @@ Then **immediately begin working on the next pending step**. Read the step's che
 | `[INFRA]` | Infrastructure/config/tooling — no test cycle needed |
 | `[WIRE]` | Connect layers (frontend↔backend) — integration work |
 | `[E2E]` | Write Playwright E2E test with screenshots |
-| `[PW]` | Run E2E tests, read screenshots, fix visual issues until all pass |
+| `[PW]` | Run E2E tests **as the user would** (full flow via UI, no programmatic shortcuts). Read `.claude/project-setup.json` for Playwright flags: `headed` (true=`--headed`, false=headless) and `project` (e.g. `--project=chromium`). Read screenshots, fix visual issues, re-run until all pass |
 | `[HUMAN]` | User validates the running app visually. Agent provides a step-by-step testing guide (URLs, credentials, exact actions) and waits for feedback. If changes requested: fix → PW re-verify → HUMAN again until approved |
 | `[DOCS]` | Update ARCHITECTURE.md with new directories, files, patterns from this step. **Mandatory** in steps with GREEN or WIRE — non-countable process gate |
 | `[AUDIT]` | Audit all code written in this step against every rule in quality.md — fix violations |
