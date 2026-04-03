@@ -104,7 +104,42 @@ async function globalTeardown() {
 
 Teardown killing servers ensures no port conflicts between test runs and manual testing.
 
-## 6. Screenshot-based visual validation
+## 6. Browser console error capture (mandatory)
+
+All E2E tests must fail on browser console errors. Errors that only appear in browser DevTools (hydration mismatches, runtime exceptions, unhandled rejections) are invisible to the agent and ship silently. Add a shared fixture or global setup that captures these:
+
+```ts
+// tests/e2e/helpers/console-errors.ts
+import { type Page } from '@playwright/test';
+
+export function captureConsoleErrors(page: Page): string[] {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(`[pageerror] ${error.message}`));
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') errors.push(`[console.error] ${msg.text()}`);
+  });
+  return errors;
+}
+```
+
+Usage in tests:
+
+```ts
+import { captureConsoleErrors } from './helpers/console-errors';
+
+test('page renders without errors', async ({ page }) => {
+  const errors = captureConsoleErrors(page);
+  await page.goto('/dashboard');
+  // ... test logic ...
+  expect(errors).toEqual([]);
+});
+```
+
+This catches: React hydration mismatches (`<button>` inside `<button>`), unhandled promise rejections, runtime type errors, missing resources, and any error that surfaces only in browser console. Without it, the `[PW]` step can pass visually while the console is full of errors.
+
+Include this helper in the Playwright scaffold step (same step as page objects and test user helpers). Every E2E test file should import and assert on it.
+
+## 7. Screenshot-based visual validation
 
 Take screenshots during tests for visual validation — light/dark mode, desktop/mobile:
 
@@ -119,7 +154,7 @@ test('dashboard renders correctly', async ({ page }) => {
 });
 ```
 
-## 7. Rules
+## 8. Rules
 
 | # | Rule | Why |
 |---|------|-----|
@@ -136,6 +171,7 @@ test('dashboard renders correctly', async ({ page }) => {
 | 11 | Teardown kills servers and frees ports | No port conflicts between test and manual runs |
 | 12 | Screenshots for visual validation (light/dark, desktop/mobile) | Agent validates visually before presenting as done |
 | 13 | "Full test" = unit + lint + E2E | Each layer catches different classes of bugs |
+| 14 | Browser console errors fail the test | Hydration mismatches, runtime exceptions only visible in DevTools |
 
 ## Framework-agnostic design
 
