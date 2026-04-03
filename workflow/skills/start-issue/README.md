@@ -58,10 +58,12 @@ The issue validator (created by `/start-new-project`, run automatically by `/sta
 
 | Rule | Level | Validation |
 |------|-------|------------|
-| Checkboxes per step | error | Max 8 (hard limit) |
-| Checkboxes per step | warning | Recommended ≤6 |
+| Checkboxes per step | error | Max 8 (hard limit) — **work checkboxes only** |
+| Checkboxes per step | warning | Recommended ≤6 — **work checkboxes only** |
 | Checkbox text length | warning | Max 200 chars — break into multiple, never shorten |
 | Empty step | error | Must have ≥1 checkbox |
+
+> Process gates (`[PW]`, `[HUMAN]`, `[AUDIT]`) are excluded from checkbox counting via `count_excluded_tags` in `validate-issue.config.json`. This means a step can have 8 work checkboxes plus PW/HUMAN/AUDIT without triggering the limit.
 
 ### Checkbox tags
 
@@ -90,6 +92,7 @@ RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
 |-----|-------|------------|
 | `[RED]` | error | Must mention "test" or "spec" |
 | `[RED]` after `[RED]` | error | No consecutive RED without GREEN (horizontal TDD) |
+| `[GREEN]` after `[GREEN]` | error | No consecutive GREEN without RED (vertical TDD) |
 | `[GREEN]` before `[RED]` | error | GREEN can't appear before RED |
 | `[GREEN]` writes tests | warning | Shouldn't mention writing tests |
 | `[E2E]` | error | Must mention test/spec/playwright |

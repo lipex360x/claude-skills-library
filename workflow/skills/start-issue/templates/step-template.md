@@ -99,6 +99,7 @@ Every checkbox MUST have a tag prefix: `` `[TAG]` ``. Tags classify the work and
 
 **Tag chain rules:**
 - `[GREEN]` requires `[RED]` earlier in the step (otherwise use `[INFRA]`)
+- No consecutive `[GREEN]` without `[RED]` between them — each implementation needs its own failing test first
 - `[E2E]` requires `[PW]` in the same step
 - `[PW]` requires `[HUMAN]` in the same step (visual approval gate)
 - `[AUDIT]` is mandatory in every step and must be the last checkbox
@@ -188,7 +189,7 @@ Example:
 
 ### Sizing
 - 2-8 Steps per issue (simple issues: 2-3, complex: 5-8)
-- 2-6 checkboxes per Step (recommended), max 8 (hard limit — validator errors above this)
+- Checkbox count limits apply to **work checkboxes only** — process gates (`[PW]`, `[HUMAN]`, `[AUDIT]`) are excluded from the count. Limits are configured in `validate-issue.config.json` (`recommended_checkboxes`, `max_checkboxes`, `count_excluded_tags`)
 - Max 200 chars per checkbox text — if longer, break into multiple checkboxes (never shorten)
 - If you need 9+ Steps, the issue MUST be split into multiple issues
 - `validate-issue.sh` enforces all sizing and structural rules — run it after editing

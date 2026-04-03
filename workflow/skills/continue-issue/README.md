@@ -24,9 +24,18 @@ Reads the GitHub issue body, identifies completed steps via checkboxes, recreate
 
 1. **Detect issue** — from argument, branch name (`feat/<N>-*`), or "In Progress" board items
 2. **Parse progress** — reads issue body, counts checked vs unchecked checkboxes per step
-3. **Rebuild task board** — creates tasks matching issue state (completed/in_progress/pending)
-4. **Load context** — reads ARCHITECTURE.md, quality.md, recent comments, git log
-5. **Resume work** — starts executing the next pending step immediately
+3. **Validate next step** — runs `validate-issue.sh --step N` (if the project has the validator) to catch structural problems before work begins. Errors must be fixed before proceeding; warnings are advisory.
+4. **Rebuild task board** — creates tasks matching issue state (completed/in_progress/pending)
+5. **Load context** — reads ARCHITECTURE.md, quality.md, recent comments, git log
+6. **Resume work** — starts executing the next pending step immediately
+
+### Validation details
+
+The step validator (`validate-issue.sh`) enforces issue structure rules:
+
+- **Process gate exclusion** — tags `[PW]`, `[HUMAN]`, and `[AUDIT]` are process gates, not work scope. They are excluded from checkbox counting when evaluating step size limits, so a step with 6 work checkboxes + 3 process gates is counted as 6, not 9.
+- **Vertical TDD enforcement** — the `green_no_consecutive` rule flags consecutive `[GREEN]` checkboxes without an intervening `[RED]`. This ensures strict red-green-refactor discipline (one failing test, one implementation, repeat).
+- Validation errors block work; warnings are reported but don't block.
 
 ## Install
 
