@@ -30,7 +30,7 @@ Turns an issue with high-level acceptance criteria into a detailed implementatio
 2. **Analyze the issue** — Fetch details, read comments for context, explore the codebase (ARCHITECTURE.md first, exploration agent only if needed), detect CDP configuration for web projects
 3. **Determine execution strategy** — If Agent Teams is enabled, classify steps as sequential or parallelizable, choose Agent/Teammate/Sequential strategy
 4. **Enforce development standards** — Verify TDD is present, reject workarounds, remove unnecessary code comments
-5. **Propose the detailed plan** — Expand acceptance criteria into Steps with checkboxes, file paths, and TDD order (2-8 steps, 2-6 checkboxes each; splits into multiple issues if 8+ steps)
+5. **Propose the detailed plan** — Expand acceptance criteria into Steps with checkboxes, file paths, and TDD order (limits from `validate-issue.config.json`; splits into multiple issues if step count exceeds max)
 6. **Update the issue** — Rewrite the issue body with the approved plan and assign
 7. **Create branch linked to issue** — Create `feat/<number>-<slug>` from main, move board card to "In Progress"
 8. **Create tasks** — One task per Step with dependency tracking
@@ -50,7 +50,7 @@ The issue validator (created by `/start-new-project`, run automatically by `/sta
 | `## What` section | Required |
 | `## Why` section | Required |
 | `## Acceptance criteria` | Required, ≥1 checkbox |
-| Step count | 2-8 per issue |
+| Step count | Within `min_steps`–`max_steps` from config |
 | Step numbering | Sequential, no gaps or duplicates |
 | Step title format | Must use em dash (`—`), not hyphen |
 
@@ -63,7 +63,7 @@ The issue validator (created by `/start-new-project`, run automatically by `/sta
 | Checkbox text length | warning | Max 200 chars — break into multiple, never shorten |
 | Empty step | error | Must have ≥1 checkbox |
 
-> Process gates (`[PW]`, `[HUMAN]`, `[AUDIT]`) are excluded from checkbox counting via `count_excluded_tags` in `validate-issue.config.json`. This means a step can have 8 work checkboxes plus PW/HUMAN/AUDIT without triggering the limit.
+> Process gates (`[PW]`, `[HUMAN]`, `[DOCS]`, `[AUDIT]`) are excluded from checkbox counting via `count_excluded_tags` in `validate-issue.config.json`. This means a step can have 8 work checkboxes plus process gates without triggering the limit.
 
 ### Checkbox tags
 
@@ -82,8 +82,8 @@ RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
 | `[AUDIT]` mandatory | error | Every step must end with AUDIT |
 | `[AUDIT]` must be last | error | No tags after AUDIT |
 | Frontend UI → full chain | error | UI work requires E2E + PW + HUMAN |
-| Tag ordering | warning | Must follow the sequence above |
-| `[DOCS]` recommended | warning | Suggested when step has GREEN or WIRE |
+| Tag ordering | warning | Must follow the sequence above (RED/GREEN may alternate) |
+| `[DOCS]` required | error | Mandatory when step has GREEN or WIRE |
 | `[E2E]` without `[RED]` | warning | E2E without unit tests is fragile |
 
 ### Semantic rules per tag
@@ -94,10 +94,11 @@ RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
 | `[RED]` after `[RED]` | error | No consecutive RED without GREEN (horizontal TDD) |
 | `[GREEN]` after `[GREEN]` | error | No consecutive GREEN without RED (vertical TDD) |
 | `[GREEN]` before `[RED]` | error | GREEN can't appear before RED |
+| Tag ordering with alternation | — | RED/GREEN may alternate freely (`repeatable_groups` in config) |
 | `[GREEN]` writes tests | warning | Shouldn't mention writing tests |
 | `[E2E]` | error | Must mention test/spec/playwright |
 | `[PW]` | warning | Should mention screenshots/verification |
-| `[HUMAN]` | warning | Should mention presenting to user/approval |
+| `[HUMAN]` | warning | Should mention iterate/feedback (user tests the app, not screenshot review) |
 | `[AUDIT]` | warning | Should mention quality.md |
 | `[DOCS]` | warning | Should mention ARCHITECTURE.md |
 | `[INFRA]` writes tests | warning | Shouldn't mention writing tests |

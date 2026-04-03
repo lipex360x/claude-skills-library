@@ -2,7 +2,7 @@
 
 > Plan and scaffold a new project from a prompt.
 
-Nine-step project scaffolding that turns an idea into a fully tracked GitHub project: asks 3-5 targeted clarifying questions, decomposes work into Phases and Steps with concrete checkboxes (2-4 phases, 3-8 steps each), creates issues with labels and milestone, sets up a project board with 7 status columns and Priority/Size custom fields, and creates the feature branch. Optionally consumes `/grill-me` output to skip clarifying questions. Two approval gates keep the user in control: once after questions, once after the proposed structure. Splits into multiple issues automatically when a phase exceeds 8 steps.
+Nine-step project scaffolding that turns an idea into a fully tracked GitHub project: asks 3-5 targeted clarifying questions, decomposes work into Phases and Steps with concrete checkboxes, creates issues with labels and milestone, sets up a project board with 7 status columns and Priority/Size custom fields, and creates the feature branch. Optionally consumes `/grill-me` output to skip clarifying questions. Two approval gates keep the user in control: once after questions, once after the proposed structure. Splits into multiple issues automatically when a phase exceeds the step limit from `validate-issue.config.json`.
 
 ## Usage
 
@@ -34,6 +34,7 @@ Also triggered by natural language:
 3. **Ask clarifying questions** — 3-5 targeted questions about platform, stack, scope, key features, and deployment (first approval gate)
 4. **Propose the phase structure** — Decompose into Phases and Steps with checkboxes, TDD order enforced, Agent Teams execution mode if enabled (second approval gate)
 5. **Repo scaffolding** — Create priority labels (P0/P1/P2), type labels, and optional milestone
+5b. **Agent config** — Create `.claude/project-setup.json` with Playwright flags (`headed`, `project`, `workers`) for web projects
 6. **Create the GitHub issues** — Create approved issues sequentially with labels and cross-references
 7. **Create project board** — Set up GitHub Projects board with 7 columns (Backlog through Cancelled), Priority and Size fields, blocker annotations
 8. **Create the feature branch** — Create `feature/<slug>` from main and push upstream
@@ -52,7 +53,7 @@ Three files are copied to `.claude/scripts/` during Phase 1 scaffolding: `valida
 | `## What` section | Required |
 | `## Why` section | Required |
 | `## Acceptance criteria` | Required, ≥1 checkbox |
-| Step count | 2-8 per issue |
+| Step count | Within `min_steps`–`max_steps` from config |
 | Step numbering | Sequential, no gaps or duplicates |
 | Step title format | Must use em dash (`—`), not hyphen |
 
@@ -82,8 +83,8 @@ RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
 | `[AUDIT]` mandatory | error | Every step must end with AUDIT |
 | `[AUDIT]` must be last | error | No tags after AUDIT |
 | Frontend UI → full chain | error | UI work requires E2E + PW + HUMAN |
-| Tag ordering | warning | Must follow the sequence above |
-| `[DOCS]` recommended | warning | Suggested when step has GREEN or WIRE |
+| Tag ordering | warning | Must follow the sequence above (RED/GREEN may alternate) |
+| `[DOCS]` required | error | Mandatory when step has GREEN or WIRE |
 | `[E2E]` without `[RED]` | warning | E2E without unit tests is fragile |
 
 ### Semantic rules per tag
@@ -96,7 +97,7 @@ RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
 | `[GREEN]` writes tests | warning | Shouldn't mention writing tests |
 | `[E2E]` | error | Must mention test/spec/playwright |
 | `[PW]` | warning | Should mention screenshots/verification |
-| `[HUMAN]` | warning | Should mention presenting to user/approval |
+| `[HUMAN]` | warning | Should mention iterate/feedback (user tests the app, not screenshot review) |
 | `[AUDIT]` | warning | Should mention quality.md |
 | `[DOCS]` | warning | Should mention ARCHITECTURE.md |
 | `[INFRA]` writes tests | warning | Shouldn't mention writing tests |
@@ -163,6 +164,7 @@ start-new-project/
     ├── cdp-test-example.ts       # CDP test example with page navigation
     ├── issue-template.md         # Issue body template with Phases/Steps structure
     ├── project-settings.json     # .claude/project-settings.json template with CDP config
+    ├── project-setup.json         # .claude/project-setup.json template (Playwright flags)
     ├── start-chrome.sh           # Chrome launcher script for CDP testing
     ├── validate-issue.sh         # Shell wrapper (delegates to Python validator)
     ├── validate-issue.py         # Data-driven issue validator engine
