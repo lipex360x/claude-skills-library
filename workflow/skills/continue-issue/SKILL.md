@@ -76,9 +76,9 @@ Resume work on an in-progress issue by reconstructing session state from the Git
 3. Current directory is a git repo → if not: "Must run inside a git repo." — stop.
 4. **Read ARCHITECTURE.md** → if exists, read and store. Primary codebase context.
 5. **Read quality.md** → if exists, read and store. Code quality standards for this project.
-6. **Check infrastructure gaps** → read `.claude/project-setup.json` for `dismiss` flags. For each gap, skip if already dismissed:
-   - **Logging:** scan ARCHITECTURE.md for `## Observability` section. If absent and `dismiss.logging` is not true → `AskUserQuestion`: suggest adding structured logging. If declined → set `dismiss.logging: true` in `project-setup.json`.
-   - **Tags:** scan the issue body for checkbox tag format (`` `[RED]` ``, `` `[GREEN]` ``, etc.). If no tags found and `dismiss.tags` is not true → `AskUserQuestion`: suggest updating the issue body with tags (explain: tags drive TDD, E2E, audit gates). If declined → set `dismiss.tags: true` in `project-setup.json`.
+6. **Check infrastructure gaps** → read `.claude/project-setup.json` for the `dismiss` array. Items in the array have been explicitly declined — skip them. Items NOT in the array are applied by default.
+   - **Logging:** scan ARCHITECTURE.md for `## Observability` section. If absent and `"logging"` is not in `dismiss` → `AskUserQuestion`: suggest adding structured logging. If declined → add `"logging"` to the `dismiss` array in `project-setup.json`.
+   - **Tags are mandatory.** Tags are always applied when rewriting the issue body. No AUQ needed — the step template requires tags on every checkbox.
 7. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>

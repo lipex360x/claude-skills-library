@@ -185,22 +185,20 @@ Create `.claude/project-setup.json` with agent behavior settings for this projec
     "workers": 1
   },
   "show-flight-tables": true,
-  "dismiss": {
-    "tags": true
-  }
+  "dismiss": []
 }
 ```
 
 Fields:
 - `playwright` — Playwright runner config (headed mode, browser project, worker count)
 - `show-flight-tables` — Show pre/post-flight check results as a markdown table (default: `true`)
-- `dismiss.tags` — Skip the "add tags?" AUQ in `/start-issue` (tags are always applied when rewriting issues)
+- `dismiss` — Array of declined suggestions. Skills check this before AUQ. If absent or empty, defaults are applied. Valid values: `"logging"` (structured logging infrastructure)
 
 - **`playwright.headed`** — `true` runs E2E with `--headed` (user watches execution), `false` runs headless. Default `true` for new projects.
 - **`playwright.project`** — Playwright project name to use by default (e.g. `chromium`, `firefox`). Maps to `--project=<value>`.
 - **`playwright.workers`** — number of parallel workers. Positive number maps to `--workers=<value>`. `-1` means max parallelism (omit the flag entirely). Use `1` for headed mode to avoid multiple browser windows.
 
-Only include the `playwright` key when the project has a frontend with Playwright configured. For backend-only projects, omit the file entirely.
+Only include the `playwright` key when the project has a frontend with Playwright configured. For backend-only projects, the minimal setup is `{"show-flight-tables": true, "dismiss": []}`.
 
 ### 6. Create the GitHub issues
 
