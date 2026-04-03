@@ -235,10 +235,12 @@ def validate_step_sizing(step: Step, rules: list[dict], r: Reporter, th: dict) -
                     )
                     r.emit(rule["level"], msg)
             case "checkbox_text_length":
+                tag_char_overrides = th.get("tag_char_overrides", {})
                 for cb in step.checkboxes:
-                    if len(cb.text) > max_chars:
+                    limit = tag_char_overrides.get(cb.tag, max_chars)
+                    if len(cb.text) > limit:
                         msg = rule["errorMessage"].format(
-                            max=max_chars, preview=cb.text[:60]
+                            max=limit, preview=cb.text[:60]
                         )
                         r.emit(rule["level"], msg)
             case "checkbox_text_not_empty":
@@ -269,6 +271,11 @@ def validate_step_tag_chains(
             case "tag_must_be_last":
                 if rule["tag"] in tag_set and tags and tags[-1] != rule["tag"]:
                     msg = rule["errorMessage"].format(last=tags[-1])
+                    r.emit(rule["level"], msg)
+
+            case "tag_must_be_first":
+                if rule["tag"] in tag_set and tags and tags[0] != rule["tag"]:
+                    msg = rule["errorMessage"].format(first=tags[0])
                     r.emit(rule["level"], msg)
 
             case "tag_ordering":

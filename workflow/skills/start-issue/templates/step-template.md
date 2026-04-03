@@ -93,22 +93,24 @@ After completing Step [N] (last sequential step):
 
 Every checkbox MUST have a tag prefix: `` `[TAG]` ``. Tags classify the work and enable automated validation via `validate-issue.sh`.
 
-**Valid tags:** `[RED]`, `[GREEN]`, `[INFRA]`, `[WIRE]`, `[E2E]`, `[PW]`, `[HUMAN]`, `[DOCS]`, `[AUDIT]`
+**Valid tags:** `[SPAWN]`, `[RED]`, `[GREEN]`, `[INFRA]`, `[WIRE]`, `[E2E]`, `[REVIEW]`, `[PW]`, `[HUMAN]`, `[DOCS]`, `[LOG]`, `[AUDIT]`
 
-**Tag ordering within each step:** RED → GREEN → INFRA → WIRE → E2E → PW → HUMAN → DOCS → AUDIT
+**Tag ordering within each step:** SPAWN → RED → GREEN → INFRA → WIRE → E2E → REVIEW → PW → HUMAN → DOCS → LOG → AUDIT
 
 **Tag chain rules:**
 - `[GREEN]` requires `[RED]` earlier in the step (otherwise use `[INFRA]`)
 - No consecutive `[GREEN]` without `[RED]` between them — each implementation needs its own failing test first
 - `[E2E]` requires `[PW]` in the same step
 - `[PW]` requires `[HUMAN]` in the same step (visual approval gate)
+- `[SPAWN]` must be the first tag in the step. Requires `[REVIEW]` in same step
+- `[REVIEW]` is recommended when step has `[GREEN]` or `[WIRE]`
 - `[AUDIT]` is mandatory in every step and must be the last checkbox
 - `[DOCS]` is recommended when the step has `[GREEN]` or `[WIRE]`
 - Frontend UI work (components, layouts, pages) requires the full chain: `[E2E]` → `[PW]` → `[HUMAN]`
 
 **Format:** `- [ ] \`[TAG]\` Description of the task`
 
-**Max length:** 200 characters per checkbox text (after the tag). If longer, break into multiple checkboxes with the same tag — never shorten to lose context.
+**Max length:** 200 characters per checkbox text (after the tag), except `[SPAWN]` which allows 400 chars. If longer, break into multiple checkboxes with the same tag — never shorten to lose context.
 
 ### Checkboxes
 - One action per checkbox — avoid "X and Y" (split into two)
@@ -189,7 +191,7 @@ Example:
 
 ### Sizing
 - 2-8 Steps per issue (simple issues: 2-3, complex: 5-8)
-- Checkbox count limits apply to **work checkboxes only** — process gates (`[PW]`, `[HUMAN]`, `[AUDIT]`) are excluded from the count. Limits are configured in `validate-issue.config.json` (`recommended_checkboxes`, `max_checkboxes`, `count_excluded_tags`)
+- Checkbox count limits apply to **work checkboxes only** — process gates (`[SPAWN]`, `[REVIEW]`, `[PW]`, `[HUMAN]`, `[DOCS]`, `[LOG]`, `[AUDIT]`) are excluded from the count. Limits are configured in `validate-issue.config.json` (`recommended_checkboxes`, `max_checkboxes`, `count_excluded_tags`)
 - Max 200 chars per checkbox text — if longer, break into multiple checkboxes (never shorten)
 - If you need 9+ Steps, the issue MUST be split into multiple issues
 - `validate-issue.sh` enforces all sizing and structural rules — run it after editing
