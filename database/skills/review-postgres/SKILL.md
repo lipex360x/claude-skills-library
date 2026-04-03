@@ -57,6 +57,7 @@ Review and optimize Postgres queries, schemas, and configurations using Supabase
 
 1. Input contains SQL, schema definition, migration file, or database-related question → if not: "Please share the SQL, schema, or migration you'd like reviewed." — stop.
 2. Rule reference files are accessible → if not: "Reference files missing at `references/`." — stop.
+3. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

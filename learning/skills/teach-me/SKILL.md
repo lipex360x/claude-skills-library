@@ -69,6 +69,7 @@ Guided TDD teaching loop where Claude acts as instructor — the student writes 
 2. Mode determined → if "replay" but no completed implementation exists: warn and suggest learn mode — wait.
 3. Student's project has source and test directories → if not identifiable: ask for paths — wait.
 4. If study guide requested: `which gh` → if missing: "GitHub CLI required for gist. Install: https://cli.github.com/" — skip gist, continue session.
+5. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

@@ -62,6 +62,7 @@ Generate a continuation prompt the user can paste into a new Claude Code convers
 1. Current directory is a git repo → if not: generate prompt from conversation context only, skip git steps, note this in output.
 2. Git has at least one commit → if fresh repo with no commits: note "fresh repo, no commit history" in prompt.
 3. Current branch has a related issue → if no issue identifiable: skip issue section in prompt.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

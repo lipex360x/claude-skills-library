@@ -67,6 +67,7 @@ Extract a design system from a reference image and create a complete project wit
 1. MCP tools available (`create_project`, `navigate`, `create_artboards`, `get_screenshot`) → if any missing: "MCP tool `{name}` not available. Configure the design system server." — stop.
 2. Reference images exist in `design/` folder → `Glob: design/**/*.{png,jpg,jpeg,webp}` → if none: "No reference images found in `design/`." — stop.
 3. Project slug determined → from $ARGUMENTS, image filename, or AUQ — must resolve before proceeding.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

@@ -69,6 +69,7 @@ Step-by-step guide for building Claude Code hooks. Hooks are bash scripts (or pr
 1. User provided intent (what + when) → if missing: AUQ with concrete examples — stop if no response.
 2. If location is global: verify `~/.brain/config/settings.json` exists → if missing: "Global settings not found. Run sync-claude first." — stop.
 3. If location is local: verify `.claude/` directory exists → if missing: create it.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

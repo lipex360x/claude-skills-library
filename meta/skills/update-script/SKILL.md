@@ -62,6 +62,7 @@ Audit an existing bash script against the operational template standard and upgr
 1. Read `~/.brain/templates/operational-script.sh` to have the skeleton in context.
 2. Script file exists and is readable.
 3. Script is bash (has `#!/usr/bin/env bash` or `#!/bin/bash` shebang).
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

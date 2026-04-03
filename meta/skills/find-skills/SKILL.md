@@ -62,6 +62,7 @@ Discover and install skills from the open agent skills ecosystem.
 
 1. Search intent extractable from arguments or conversation → if not: AUQ "What kind of skill are you looking for?" — stop if no answer.
 2. `npx` is available → if not: "npx required. Install Node.js: https://nodejs.org/" — stop.
+3. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

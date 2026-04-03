@@ -46,6 +46,7 @@ Remove completed tasks from the task list. Keep pending and in-progress tasks un
 <pre_flight>
 
 1. Task list has completed tasks → if none: "No completed tasks to clean." — stop.
+2. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

@@ -61,6 +61,7 @@ Capture learnings during work sessions as structured, project-agnostic entries i
 1. If `$ARGUMENTS` matches remove pattern (`remove <N>` or `remover <N>`) → switch to Remove entry flow.
 2. If `$ARGUMENTS` is empty → AUQ: "What do you want to capture?" — stop if no response.
 3. Run `date "+%H:%M"` for the current timestamp.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

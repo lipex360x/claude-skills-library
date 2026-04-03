@@ -51,6 +51,7 @@ Close the task visibility board, delete all tasks, and disable task tracking for
 <pre_flight>
 
 1. Read `~/.brain/config/behavior.config.json` and check `task-visibility.always-open` → if already `false`: "Board is already closed." — stop.
+2. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

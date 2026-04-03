@@ -76,6 +76,7 @@ Create compelling written content and persuasive copy that sounds like the user 
 2. User provided format, audience, and goal → if missing any: AUQ to gather required inputs.
 3. If marketing copy: user provided page-type, primary-action, and problem → if missing: AUQ to gather.
 4. If product-marketing-context file exists in project root, read it and only ask for gaps.
+5. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

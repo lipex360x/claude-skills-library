@@ -69,6 +69,7 @@ Read `references/output-formats.md` for the exact format of each published file.
 2. At least one `.md` file exists in `drafts/linkedin/` → if none: "No drafts found in drafts/linkedin/." — stop.
 3. If argument provided, that file exists → if not: list available drafts, AUQ to pick one.
 4. Draft file contains valid YAML frontmatter between `---` delimiters with at minimum `title` and `date` fields → if malformed: report the specific parsing error — stop.
+5. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

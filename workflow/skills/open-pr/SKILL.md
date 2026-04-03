@@ -64,6 +64,7 @@ Create a pull request from the current branch, link it to the related issue, res
 1. Current branch is not `main` → if on main: "Cannot create PR from main." — stop.
 2. `which gh` → if missing: "GitHub CLI required. Install: https://cli.github.com/" — stop.
 3. Unpushed commits exist → if any: push with `git push -u origin HEAD` before proceeding.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 
@@ -215,6 +216,7 @@ After presenting the Report, verify external state:
 5. **All checkboxes resolved?** — fetch issue body and verify zero `- [ ]` unchecked items remain.
 
 If any check fails, report the specific failure and the fix command.
+6. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all post-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </post_flight>
 

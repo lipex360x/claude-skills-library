@@ -74,6 +74,7 @@ Transform structured data from any source (Excel, PowerPoint, CSV, JSON, SQLite,
 2. Run `scripts/check-deps.py` → if dependencies missing: install required Python libraries (`openpyxl`, `python-pptx`, `Pillow`) — continue after install.
 3. Source data available → if no data files and no description in $ARGUMENTS: AUQ with options `["Sim, rodar /inspire-me", "Não, vou te passar as infos agora"]` — proceed with whatever the user provides.
 4. Brand identity clarified → if not provided: ask for primary color, font preference, logo via AUQ — use defaults if user skips.
+5. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

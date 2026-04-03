@@ -73,6 +73,7 @@ Flags can be combined: `/push --confirm -nh`
 
 1. Current directory is a git repo → if not: "Must run inside a git repo." — stop.
 2. Working tree has changes (staged, unstaged, or untracked) → if clean: "Nothing to push." — stop.
+3. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 
@@ -191,6 +192,7 @@ After presenting the Report, verify external state:
 4. **Branch tracking set?** — `git rev-parse --abbrev-ref --symbolic-full-name @{u}` must return `origin/<branch>`.
 
 If any check fails, report the specific failure and the fix command. Do not silently retry.
+5. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all post-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </post_flight>
 

@@ -64,6 +64,7 @@ Merge the current branch's PR with a detailed implementation summary, ARCHITECTU
 1. `which gh` → if missing: "GitHub CLI required. Install: https://cli.github.com/" — stop.
 2. Current directory is a git repo → if not: "Must run inside a git repo." — stop.
 3. Open PR exists for the current branch (`gh pr view`) → if not: "No open PR for this branch." — stop.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 
@@ -303,6 +304,7 @@ After presenting the Report, verify external state:
 6. **ARCHITECTURE.md merged?** — if updated during PR, verify `git show HEAD:ARCHITECTURE.md` reflects the changes.
 
 If any check fails, report the specific failure and the fix command.
+7. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all post-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </post_flight>
 

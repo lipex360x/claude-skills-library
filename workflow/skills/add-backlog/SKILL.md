@@ -65,6 +65,7 @@ Create a GitHub issue with structured acceptance criteria and add it to the proj
 1. `which gh` → if missing: "GitHub CLI (`gh`) required. Install: https://cli.github.com/" — stop.
 2. `gh auth status` → if not authenticated: "Run `gh auth login` first." — stop.
 3. Current directory is a git repo with a GitHub remote → if not: "Must run inside a GitHub-linked repo." — stop.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 
@@ -232,6 +233,7 @@ After presenting the Report, verify external state:
 5. **Bidirectional dependencies?** — if blocker annotations were added, verify both source and target issues have matching annotations.
 
 If any check fails, report the specific failure and the fix command.
+6. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all post-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </post_flight>
 

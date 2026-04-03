@@ -62,6 +62,7 @@ Deploy, manage, and develop projects on the Vercel platform using the `vercel` (
 1. `which vercel` → if missing: "Vercel CLI required. Install: `npm i -g vercel`" — stop.
 2. `.vercel/` exists in project directory → if missing: run `vercel link` (single project) or `vercel link --repo` (monorepo).
 3. Correct team confirmed via `vercel whoami` → if wrong team: run `vercel teams switch`.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

@@ -78,6 +78,7 @@ Turn a project idea into a well-structured GitHub issue with phased checkboxes, 
 2. `gh auth status` → if not authenticated: "Run `gh auth login` first." — stop.
 3. Current directory is a git repo → if not: "Must run inside a git repo." — stop.
 4. Remote origin exists → if not: "No remote configured. Set up with `gh repo create`." — stop.
+5. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 
@@ -182,9 +183,14 @@ Create `.claude/project-setup.json` with agent behavior settings for this projec
     "headed": true,
     "project": "chromium",
     "workers": 1
-  }
+  },
+  "show-flight-tables": true
 }
 ```
+
+Fields:
+- `playwright` — Playwright runner config (headed mode, browser project, worker count)
+- `show-flight-tables` — Show pre/post-flight check results as a markdown table (default: `true`)
 
 - **`playwright.headed`** — `true` runs E2E with `--headed` (user watches execution), `false` runs headless. Default `true` for new projects.
 - **`playwright.project`** — Playwright project name to use by default (e.g. `chromium`, `firefox`). Maps to `--project=<value>`.
@@ -260,6 +266,7 @@ After presenting the Report, verify external state:
 6. **If split rule triggered:** verify max 8 steps per issue (count checkboxes in each issue body).
 
 If any check fails, report the specific failure and the fix command.
+7. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all post-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </post_flight>
 

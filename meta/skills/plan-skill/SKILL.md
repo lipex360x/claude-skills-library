@@ -74,6 +74,7 @@ Analyze raw input (document, conversation, verbal idea) and produce a structured
 2. `references/completeness-checklist.md` readable → if missing: "Completeness checklist not found at references/completeness-checklist.md" — stop.
 3. `references/decision-model.md` readable → if missing: "Decision model not found at references/decision-model.md" — stop.
 4. `templates/spec-template.md` readable → if missing: "Spec template not found at templates/spec-template.md" — stop.
+5. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

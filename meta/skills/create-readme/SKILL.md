@@ -60,6 +60,7 @@ Generate or review README.md files that are appealing, informative, and easy to 
 2. Check if `README.md` exists at the target path → determines mode (create vs review).
 3. Scan project for minimum context (source files, package.json, config) → if empty project: AUQ asking what the project is about before continuing.
 4. If monorepo with multiple READMEs and target is root: note sub-READMEs exist, focus on root only.
+5. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

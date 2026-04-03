@@ -72,6 +72,7 @@ Step-by-step factory for building structurally consistent Claude Code skills. Ev
    - Otherwise → **local mode** (skill will live in `<project>/.claude/skills/<name>/`). Confirm target project directory via AUQ.
 2. **Global mode only:** Target plugin directory exists under `skills-library/` → if not: list available plugins via AUQ.
 3. Skill name follows verb-subject pattern (e.g., `create-skill`, `review-postgres`) → if not: suggest correction.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 
@@ -227,6 +228,7 @@ After presenting the Report, verify external state:
 6. **README.md exists?** — `test -f <skill-dir>/README.md` must succeed.
 
 If any check fails, report the specific failure and the fix command.
+7. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all post-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </post_flight>
 

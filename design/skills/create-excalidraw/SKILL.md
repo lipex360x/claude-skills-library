@@ -66,6 +66,7 @@ Generate visually polished Excalidraw diagrams from natural language description
 1. Input is present → if `$ARGUMENTS` is empty or too vague: AUQ to clarify — stop.
 2. Read `references/design-aesthetics.md` for color palettes, spatial composition principles, and anti-patterns to avoid.
 3. Choose a palette and layout strategy that fits the diagram's purpose and audience.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

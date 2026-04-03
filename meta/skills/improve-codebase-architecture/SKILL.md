@@ -57,6 +57,7 @@ Explore a codebase like an agent would, surface architectural friction, and prop
 1. Verify the current directory is a codebase with source files (not an empty or non-code directory)
 2. Count source files — if fewer than 5, inform the user and exit gracefully
 3. Check that `gh` CLI is available and authenticated (`gh auth status`); if not, warn the user that the RFC will be saved as a local markdown file instead
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

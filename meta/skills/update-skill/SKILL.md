@@ -76,6 +76,7 @@ Surgical edits to existing skills — instant context via `skill-meta.json`, sco
 3. Target `SKILL.md` is readable → if not: "SKILL.md not found at expected path." — stop.
 4. Working tree is clean (no uncommitted changes in target skill) → if dirty: warn but continue — the user may have in-progress work.
 5. Skeleton compliance baseline → scan the target SKILL.md for the 13 canonical section headers (read `references/skeleton-template.md` for the expected names and order). If sections are missing or names are non-canonical → AUQ with options `["Migrate with /create-skill first", "Continue anyway"]`. If "Migrate": invoke `Skill("create-skill")` with the target skill name, wait for completion, then resume the update flow. If "Continue": proceed in best-effort mode — the post-edit compliance check (Step 5) will flag remaining gaps.
+6. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

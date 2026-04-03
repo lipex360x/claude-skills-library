@@ -50,6 +50,7 @@ Reopen the task visibility board and resume task tracking for the session.
 
 1. Read `~/.brain/config/behavior.config.json` → if file missing: create it with `{ "task-visibility": { "always-open": true } }` and skip to Step 3.
 2. Check `task-visibility.always-open` → if already `true`: "Board is already open." — stop.
+3. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

@@ -64,6 +64,7 @@ Remove an installed skill from the local project or global skills-library, with 
 
 1. $ARGUMENTS is non-empty → if empty: AUQ "Which skill do you want to uninstall?" — stop if no answer.
 2. Skill exists in at least one location (local `.claude/skills/` or global `skills-library/*/skills/`) → if not found: fuzzy search similar names and present via AUQ; if still no match: "Skill `$ARGUMENTS` not found" — stop.
+3. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

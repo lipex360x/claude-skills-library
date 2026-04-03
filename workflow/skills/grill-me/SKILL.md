@@ -61,6 +61,7 @@ Relentless, structured interview that extracts every decision, constraint, and c
 1. `AskUserQuestion` tool is available → if not: "AskUserQuestion is required for the interview flow." — stop.
 2. Working directory is accessible → if not: "Cannot access working directory." — stop.
 3. Output template exists at `templates/grill-output.md` → if not: warn and use inline structure.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

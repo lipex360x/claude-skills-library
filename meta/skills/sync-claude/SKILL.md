@@ -74,6 +74,7 @@ ls -d ~/www/claude/.brain/ 2>/dev/null && echo ".brain: OK" || echo ".brain: MIS
      - For .brain: `git clone <remote-url> ~/www/claude/.brain/`
    - Detect the remote URL from the other repo if it exists (same GitHub owner), or ask the user.
 3. **Both missing and skipped → stop.** If both directories are missing and the user skipped both, there is nothing to sync.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

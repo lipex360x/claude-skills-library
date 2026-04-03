@@ -88,6 +88,7 @@ Turn an issue with high-level acceptance criteria into a detailed implementation
 7. **Check logging and infrastructure gaps** → read `.claude/project-setup.json` for `dismiss` flags. For each gap detected below, skip if already dismissed:
    - **Logging:** scan ARCHITECTURE.md for `## Observability` section. If absent and `dismiss.logging` is not true → `AskUserQuestion`: suggest adding structured logging (explain: silent failures, errors only visible in browser DevTools). If accepted → include logging setup Step in the plan. If declined → set `dismiss.logging: true` in `project-setup.json`.
    - **Tags:** scan the issue body for checkbox tag format (`` `[RED]` ``, `` `[GREEN]` ``, etc.). If no tags found and `dismiss.tags` is not true → `AskUserQuestion`: suggest rewriting checkboxes with tags (explain: tags drive execution behavior — TDD, E2E, audit gates). If accepted → apply tags during Step 3 plan. If declined → set `dismiss.tags: true` in `project-setup.json`. The `[LOG]` process gate verifies error logging coverage in every step.
+8. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 
@@ -338,6 +339,7 @@ After presenting the Report, verify external state:
 5. **If Agent Teams spawned:** verify Agent output or TeamCreate exists in conversation. If issue body has "Execution strategy" but no agents ran, flag it.
 
 If any check fails, report the specific failure and the fix command.
+6. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all post-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </post_flight>
 

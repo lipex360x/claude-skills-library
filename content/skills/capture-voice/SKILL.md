@@ -65,6 +65,7 @@ Capture the user's **writing voice** from conversations and persist it to a voic
 1. Count user messages with substantive text (exclude single-word responses, tool commands, approvals like "sim", "ok", "approved") → if fewer than 3: "Not enough conversation to analyze — need at least 3 substantive messages." — stop.
 2. Check if another capture-voice agent is running by reading profile frontmatter for `locked: true` → if locked: "Another capture-voice run is in progress." — skip this run.
 3. Voice profile path is resolvable → if file doesn't exist and template `templates/voice-profile.md` is missing: "No profile or template found." — stop.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

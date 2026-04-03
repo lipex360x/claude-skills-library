@@ -76,6 +76,7 @@ Generate professional diagrams through a spec-driven workflow: define the struct
 1. Input is present → if empty: AUQ for diagram description — stop.
 2. `diagram/` directory exists → if not: create it.
 3. Read `templates/diagram-spec.md` for the spec format.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

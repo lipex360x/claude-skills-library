@@ -59,6 +59,7 @@ List all issues in the "Backlog" column of the project board for the current rep
 1. `which gh` → if missing: "GitHub CLI required. Install: https://cli.github.com/" — stop.
 2. Current directory is a git repo → if not: "Must run inside a git repo." — stop.
 3. `gh auth status` succeeds → if not: "Run `gh auth login` first." — stop.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

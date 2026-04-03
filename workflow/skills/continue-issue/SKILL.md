@@ -79,6 +79,7 @@ Resume work on an in-progress issue by reconstructing session state from the Git
 6. **Check infrastructure gaps** → read `.claude/project-setup.json` for `dismiss` flags. For each gap, skip if already dismissed:
    - **Logging:** scan ARCHITECTURE.md for `## Observability` section. If absent and `dismiss.logging` is not true → `AskUserQuestion`: suggest adding structured logging. If declined → set `dismiss.logging: true` in `project-setup.json`.
    - **Tags:** scan the issue body for checkbox tag format (`` `[RED]` ``, `` `[GREEN]` ``, etc.). If no tags found and `dismiss.tags` is not true → `AskUserQuestion`: suggest updating the issue body with tags (explain: tags drive TDD, E2E, audit gates). If declined → set `dismiss.tags: true` in `project-setup.json`.
+7. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 
@@ -216,6 +217,7 @@ After presenting the Report, verify:
 1. **Task count matches step count?** — TaskList count equals number of Steps in the issue.
 2. **Task statuses match issue checkboxes?** — completed tasks correspond to fully-checked steps, in-progress to partially-checked.
 3. **Correct branch checked out?** — `git branch --show-current` matches `feat/<N>-*` or `feature/<N>-*`.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all post-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </post_flight>
 

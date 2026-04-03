@@ -62,6 +62,7 @@ Build bash scripts that are safe, idempotent, and structured — applying the op
 1. Read `~/.brain/templates/operational-script.sh` to have the skeleton in context.
 2. Target directory exists → if `.brain/scripts/`, confirm we're in the `.brain/` working directory (per CLAUDE.md rule). If not, alert.
 3. Script name doesn't conflict with existing files → if it does: AUQ with options `["Sobrescrever", "Escolher outro nome"]`.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

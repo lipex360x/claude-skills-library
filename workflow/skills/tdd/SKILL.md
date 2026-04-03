@@ -64,6 +64,7 @@ Execute the red-green-refactor loop with strict vertical slice discipline. One t
 1. Project has a test framework configured → if not: AUQ suggesting common frameworks for the detected language — stop.
 2. Test runner executes successfully (even with 0 tests) → if not: "Test runner is broken — fix before TDD." — stop.
 3. `$ARGUMENTS` contains a feature description → if not: AUQ: "What feature or behavior do you want to build?" — stop.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

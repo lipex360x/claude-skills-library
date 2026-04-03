@@ -69,6 +69,7 @@ If invoked without an argument, ask for the initial description. If the argument
 2. Verify `references/exploration-branches.md` is readable → if not: "Missing exploration branches reference." — stop.
 3. Verify `templates/inspire-output.md` is readable → if not: "Missing output template." — stop.
 4. Verify `templates/inspire-history-entry.md` is readable → if not: "Missing history entry template." — stop.
+5. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

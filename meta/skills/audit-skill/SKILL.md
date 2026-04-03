@@ -65,6 +65,7 @@ Evaluate one or more existing skills against the review checklist from `/create-
 1. `skills-library/` directory exists and contains plugin directories → if not: "skills-library not found." — stop.
 2. Review checklist exists at `skills-library/meta/skills/create-skill/references/review-checklist.md` → if not: "Review checklist missing — cannot audit without standards." — stop.
 3. Target argument resolves to at least one skill → if not: AUQ with discovered skills/plugins as options.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

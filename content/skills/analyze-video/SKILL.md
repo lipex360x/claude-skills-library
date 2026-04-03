@@ -76,6 +76,7 @@ Extract structured data from YouTube videos by combining subtitle extraction, fr
 3. `which jq` → if missing: "jq required. Install: `brew install jq`" — stop.
 4. URL is a valid YouTube URL → if not: AUQ with prompt for URL.
 5. Output directory is writable → if not: create it.
+6. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 

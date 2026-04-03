@@ -70,6 +70,7 @@ Install a skill from the open skills ecosystem into the local project or global 
 1. `npx` is available → if not: "npx required. Install Node.js: https://nodejs.org/" — stop.
 2. $ARGUMENTS contains a valid npx skills add command → if not: AUQ "Provide the npx skills add command" — stop if no answer.
 3. User specified scope (local/global) → if not: AUQ with options `["Local (this project)", "Global (skills-library/)"]`.
+4. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 
