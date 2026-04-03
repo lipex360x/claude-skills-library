@@ -72,6 +72,7 @@ Turn an issue with high-level acceptance criteria into a detailed implementation
 | TDD methodology | `references/tdd-methodology.md` | R | Markdown |
 | Execution strategy | `references/execution-strategy.md` | R | Markdown |
 | Project setup | `.claude/project-setup.json` | R/W | JSON — `dismiss` section for declined suggestions |
+| Validator config | `.claude/scripts/validate-issue.config.json` | R | JSON — tag rules, checkbox limits, UI patterns |
 
 </external_state>
 
@@ -88,7 +89,8 @@ Turn an issue with high-level acceptance criteria into a detailed implementation
 7. **Check infrastructure gaps** → read `.claude/project-setup.json` for the `dismiss` array. Items in the array have been explicitly declined — skip them. Items NOT in the array are applied by default (no AUQ needed for defaults).
    - **Logging:** scan ARCHITECTURE.md for `## Observability` section. If absent and `"logging"` is not in `dismiss` → `AskUserQuestion`: suggest adding structured logging (explain: silent failures, errors only visible in browser DevTools). If accepted → include logging setup Step in the plan. If declined → add `"logging"` to the `dismiss` array in `project-setup.json`.
    - **Tags are mandatory.** Tags are always applied when rewriting the issue body (Step 3). No AUQ needed — the step template requires tags on every checkbox. The `[LOG]` process gate verifies error logging coverage in every step.
-8. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
+8. **Read validator config** → if `.claude/scripts/validate-issue.config.json` exists, read it NOW and store the rules. This file contains tag chain rules, checkbox limits, UI pattern detection, and TDD ordering constraints. Knowing these rules BEFORE writing the plan (Step 3) prevents validation failures after the issue body is written. Key rules to internalize: `tag_order`, `green_no_consecutive` (no consecutive GREEN without RED), `ui_chain` patterns (words containing "ui" as substring trigger E2E/PW/HUMAN requirement), `max_checkboxes`, `recommended_checkboxes`, and `count_excluded_tags`. If the file doesn't exist, skip — not all projects use the validator.
+9. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present all pre-flight results as a markdown table: **Check** | **Status** | **Detail**. Use ✅ pass, ⚠️ warning, ❌ fail, ⏭️ skipped.
 
 </pre_flight>
 
