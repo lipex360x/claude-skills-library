@@ -1,1 +1,23 @@
-{"name":"workflow","description":"GitHub workflow: issues, branches, PRs, commits","version":"1.0.0"}
+{
+  "name": "workflow",
+  "description": "GitHub workflow: issues, branches, PRs, commits",
+  "version": "1.0.0",
+  "skills": [
+    "add-backlog",
+    "cancel-issue",
+    "close-pr",
+    "continue-issue",
+    "grill-me",
+    "list-backlog",
+    "list-issues",
+    "open-pr",
+    "push",
+    "pw",
+    "review",
+    "start-issue",
+    "start-new-project",
+    "tdd",
+    "update-docs",
+    "validate"
+  ]
+}

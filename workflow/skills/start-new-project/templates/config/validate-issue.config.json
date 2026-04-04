@@ -1,0 +1,373 @@
+{
+  "thresholds": {
+    "min_steps": 2,
+    "max_steps": 8,
+    "max_checkboxes": 8,
+    "recommended_checkboxes": 6,
+    "max_checkbox_chars": 200,
+    "count_excluded_tags": ["SPAWN", "REVIEW", "PW", "HUMAN", "DOCS", "LOG", "AUDIT"],
+    "tag_char_overrides": { "SPAWN": 400 }
+  },
+
+  "tag_order": ["SPAWN", "RED", "GREEN", "INFRA", "WIRE", "E2E", "REVIEW", "PW", "HUMAN", "DOCS", "LOG", "AUDIT"],
+
+  "sections": {
+    "structure": {
+      "description": "Issue body structure",
+      "rules": [
+        {
+          "key": "what_section",
+          "description": "## What section required",
+          "errorMessage": "Missing '## What' section — issue must explain what is being built",
+          "level": "error",
+          "type": "body_match",
+          "pattern": "^## What"
+        },
+        {
+          "key": "why_section",
+          "description": "## Why section required",
+          "errorMessage": "Missing '## Why' section — issue must explain motivation",
+          "level": "error",
+          "type": "body_match",
+          "pattern": "^## Why"
+        },
+        {
+          "key": "acceptance_criteria",
+          "description": "Acceptance criteria with checkboxes",
+          "errorMessage": "Missing acceptance criteria — needs '## Acceptance criteria' with ≥1 checkbox",
+          "level": "error",
+          "type": "section_has_checkboxes",
+          "section": "## Acceptance criteria"
+        },
+        {
+          "key": "step_count",
+          "description": "Step count within allowed range",
+          "errorMessage": "Step count {actual} outside allowed range ({min}-{max})",
+          "level": "error",
+          "type": "step_count"
+        },
+        {
+          "key": "step_numbering",
+          "description": "Sequential step numbering (no gaps or duplicates)",
+          "errorMessage": "Step numbering gap: expected Step {expected}, found Step {actual}",
+          "level": "error",
+          "type": "step_numbering"
+        },
+        {
+          "key": "step_title_em_dash",
+          "description": "Step titles use em dash (—) not hyphen",
+          "errorMessage": "Step {step} title uses hyphen instead of em dash (—)",
+          "level": "error",
+          "type": "step_title_format"
+        }
+      ]
+    },
+
+    "sizing": {
+      "description": "Step and checkbox sizing limits",
+      "rules": [
+        {
+          "key": "empty_step",
+          "description": "No empty steps",
+          "errorMessage": "Empty step — no checkboxes found",
+          "level": "error",
+          "type": "step_not_empty"
+        },
+        {
+          "key": "checkbox_count_error",
+          "description": "Hard checkbox limit per step",
+          "errorMessage": "{count} checkboxes — maximum is {max}, split this step",
+          "level": "error",
+          "type": "checkbox_count_max"
+        },
+        {
+          "key": "checkbox_count_warn",
+          "description": "Recommended checkbox limit per step",
+          "errorMessage": "{count} checkboxes — recommended maximum is {recommended}",
+          "level": "warn",
+          "type": "checkbox_count_recommended"
+        },
+        {
+          "key": "checkbox_length",
+          "description": "Checkbox text length limit",
+          "errorMessage": "Checkbox > {max} chars — break into multiple: {preview}...",
+          "level": "warn",
+          "type": "checkbox_text_length"
+        },
+        {
+          "key": "checkbox_not_empty",
+          "description": "Checkbox must have description after tag",
+          "errorMessage": "Empty checkbox text after [{tag}] — needs a description",
+          "level": "error",
+          "type": "checkbox_text_not_empty"
+        }
+      ]
+    },
+
+    "tag_chains": {
+      "description": "Tag dependency and ordering rules",
+      "rules": [
+        {
+          "key": "green_requires_red",
+          "description": "[GREEN] requires [RED] in same step",
+          "errorMessage": "[GREEN] without [RED] — needs a failing test first (or should be [INFRA])",
+          "level": "error",
+          "type": "tag_requires",
+          "tag": "GREEN",
+          "requires": "RED"
+        },
+        {
+          "key": "e2e_requires_pw",
+          "description": "[E2E] requires [PW] in same step",
+          "errorMessage": "[E2E] without [PW] — E2E tests need Playwright verification",
+          "level": "error",
+          "type": "tag_requires",
+          "tag": "E2E",
+          "requires": "PW"
+        },
+        {
+          "key": "pw_requires_human",
+          "description": "[PW] requires [HUMAN] in same step",
+          "errorMessage": "[PW] without [HUMAN] — visual verification needs human approval",
+          "level": "error",
+          "type": "tag_requires",
+          "tag": "PW",
+          "requires": "HUMAN"
+        },
+        {
+          "key": "human_requires_pw",
+          "description": "[HUMAN] requires [PW] in same step",
+          "errorMessage": "[HUMAN] without [PW] — human validation without Playwright verification",
+          "level": "error",
+          "type": "tag_requires",
+          "tag": "HUMAN",
+          "requires": "PW"
+        },
+        {
+          "key": "spawn_must_be_first",
+          "description": "[SPAWN] must be the first tag in the step",
+          "errorMessage": "[SPAWN] must be the first checkbox (found [{first}] before it)",
+          "level": "error",
+          "type": "tag_must_be_first",
+          "tag": "SPAWN"
+        },
+        {
+          "key": "spawn_requires_review",
+          "description": "[SPAWN] requires [REVIEW] in same step",
+          "errorMessage": "[SPAWN] without [REVIEW] — delegated work must be reviewed before gates",
+          "level": "error",
+          "type": "tag_requires",
+          "tag": "SPAWN",
+          "requires": "REVIEW"
+        },
+        {
+          "key": "review_recommended",
+          "description": "[REVIEW] recommended when step has [GREEN] or [WIRE]",
+          "errorMessage": "Missing [REVIEW] — manager should validate sub-agent output before gates",
+          "level": "warn",
+          "type": "tag_recommended_with",
+          "tag": "REVIEW",
+          "when_any": ["GREEN", "WIRE"]
+        },
+        {
+          "key": "audit_mandatory",
+          "description": "[AUDIT] required in every step",
+          "errorMessage": "Missing [AUDIT] — every step needs a quality.md audit",
+          "level": "error",
+          "type": "tag_required",
+          "tag": "AUDIT"
+        },
+        {
+          "key": "audit_must_be_last",
+          "description": "[AUDIT] must be the last tag in the step",
+          "errorMessage": "[AUDIT] must be the last checkbox (found [{last}] after it)",
+          "level": "error",
+          "type": "tag_must_be_last",
+          "tag": "AUDIT"
+        },
+        {
+          "key": "tag_ordering",
+          "description": "Tags must follow defined order",
+          "errorMessage": "Tag order: [{tag}] out of sequence — expected: {order}",
+          "level": "warn",
+          "type": "tag_ordering"
+        },
+        {
+          "key": "docs_recommended",
+          "description": "[DOCS] recommended when step has [GREEN] or [WIRE]",
+          "errorMessage": "No [DOCS] — consider updating ARCHITECTURE.md after implementation",
+          "level": "warn",
+          "type": "tag_recommended_with",
+          "tag": "DOCS",
+          "when_any": ["GREEN", "WIRE"]
+        },
+        {
+          "key": "e2e_without_red",
+          "description": "[E2E] without [RED] is fragile coverage",
+          "errorMessage": "[E2E] without [RED] — E2E tests without unit tests is fragile coverage",
+          "level": "error",
+          "type": "tag_recommended_with",
+          "tag": "RED",
+          "when_any": ["E2E"]
+        },
+        {
+          "key": "ui_chain",
+          "description": "Frontend UI work requires E2E + PW + HUMAN",
+          "errorMessage": "Frontend UI work without [{missing}] — visible components need {reason}",
+          "level": "error",
+          "type": "ui_chain",
+          "required_tags": ["E2E", "PW", "HUMAN"],
+          "ui_patterns": ["component", "page", "layout", "frontend", "sidebar", "chat.*interface", "ui", "streaming.*display", "message.*display"]
+        }
+      ]
+    },
+
+    "tag_semantics": {
+      "description": "Per-tag content validation",
+      "rules": [
+        {
+          "key": "red_mentions_test",
+          "description": "[RED] must mention test/spec",
+          "errorMessage": "[RED] doesn't mention a test — RED is for writing failing tests",
+          "level": "error",
+          "type": "tag_content_match",
+          "tag": "RED",
+          "pattern": "test|spec|_test|\\.test"
+        },
+        {
+          "key": "red_no_consecutive",
+          "description": "No consecutive [RED] without [GREEN]",
+          "errorMessage": "[RED] after [RED] without [GREEN] — horizontal TDD (write one test, implement, repeat)",
+          "level": "error",
+          "type": "tag_no_consecutive",
+          "tag": "RED",
+          "separator": "GREEN"
+        },
+        {
+          "key": "green_before_red",
+          "description": "[GREEN] can't appear before any [RED]",
+          "errorMessage": "[GREEN] appears before [RED] — test must come first",
+          "level": "error",
+          "type": "tag_requires_before",
+          "tag": "GREEN",
+          "requires": "RED"
+        },
+        {
+          "key": "green_writes_tests",
+          "description": "[GREEN] shouldn't mention writing tests",
+          "errorMessage": "[GREEN] mentions writing tests — should this be [RED]?",
+          "level": "warn",
+          "type": "tag_content_reject",
+          "tag": "GREEN",
+          "pattern": "\\bwrite\\b.*\\btest\\b|\\bcreate\\b.*\\btest\\b"
+        },
+        {
+          "key": "e2e_mentions_test",
+          "description": "[E2E] must mention test/spec/playwright",
+          "errorMessage": "[E2E] doesn't mention a test — E2E is for writing Playwright tests",
+          "level": "error",
+          "type": "tag_content_match",
+          "tag": "E2E",
+          "pattern": "test|spec|\\.spec|playwright"
+        },
+        {
+          "key": "pw_mentions_visual",
+          "description": "[PW] should mention screenshots/verification",
+          "errorMessage": "[PW] doesn't mention screenshots or visual verification",
+          "level": "warn",
+          "type": "tag_content_match",
+          "tag": "PW",
+          "pattern": "screenshot|run.*test|verify|visual"
+        },
+        {
+          "key": "human_mentions_user",
+          "description": "[HUMAN] should mention presenting to user",
+          "errorMessage": "[HUMAN] doesn't mention presenting to user or waiting for approval",
+          "level": "warn",
+          "type": "tag_content_match",
+          "tag": "HUMAN",
+          "pattern": "screenshot|approval|user|present|wait"
+        },
+        {
+          "key": "audit_mentions_quality",
+          "description": "[AUDIT] should mention quality.md",
+          "errorMessage": "[AUDIT] doesn't mention quality.md or audit",
+          "level": "warn",
+          "type": "tag_content_match",
+          "tag": "AUDIT",
+          "pattern": "quality\\.md|audit|review.*rule"
+        },
+        {
+          "key": "docs_mentions_architecture",
+          "description": "[DOCS] should mention ARCHITECTURE.md",
+          "errorMessage": "[DOCS] doesn't mention ARCHITECTURE.md — DOCS convention is to update it",
+          "level": "warn",
+          "type": "tag_content_match",
+          "tag": "DOCS",
+          "pattern": "architecture\\.md|architecture"
+        },
+        {
+          "key": "log_mentions_logging",
+          "description": "[LOG] should mention logging/error coverage",
+          "errorMessage": "[LOG] doesn't mention logging or error coverage verification",
+          "level": "warn",
+          "type": "tag_content_match",
+          "tag": "LOG",
+          "pattern": "log|error.*coverage|error.*path|structured"
+        },
+        {
+          "key": "infra_writes_tests",
+          "description": "[INFRA] shouldn't mention writing tests",
+          "errorMessage": "[INFRA] mentions writing tests — should this be [RED] or [E2E]?",
+          "level": "warn",
+          "type": "tag_content_reject",
+          "tag": "INFRA",
+          "pattern": "\\bwrite\\b.*\\btest\\b|\\bcreate\\b.*\\btest\\b"
+        },
+        {
+          "key": "wire_mentions_integration",
+          "description": "[WIRE] should mention integration/connection",
+          "errorMessage": "[WIRE] doesn't mention integration/connection between layers",
+          "level": "warn",
+          "type": "tag_content_match",
+          "tag": "WIRE",
+          "pattern": "connect|integrat|endpoint|frontend.*backend|backend.*frontend"
+        },
+        {
+          "key": "last_audit_quality",
+          "description": "Last [AUDIT] in step should reference quality.md",
+          "errorMessage": "Last [AUDIT] doesn't mention quality.md — the final audit should be the quality.md review",
+          "level": "warn",
+          "type": "last_tag_content_match",
+          "tag": "AUDIT",
+          "pattern": "quality\\.md"
+        },
+        {
+          "key": "spawn_mentions_delegation",
+          "description": "[SPAWN] should mention delegation scope",
+          "errorMessage": "[SPAWN] doesn't mention delegation — SPAWN should describe what to delegate and include non-derivable hints",
+          "level": "warn",
+          "type": "tag_content_match",
+          "tag": "SPAWN",
+          "pattern": "delegate|sub-agent|spawn|mechanical"
+        },
+        {
+          "key": "review_mentions_validation",
+          "description": "[REVIEW] should mention review/validate/quality",
+          "errorMessage": "[REVIEW] doesn't mention validation — REVIEW is for verifying sub-agent output quality",
+          "level": "warn",
+          "type": "tag_content_match",
+          "tag": "REVIEW",
+          "pattern": "review|validat|quality|fix|verif"
+        },
+        {
+          "key": "no_duplicate_checkboxes",
+          "description": "No duplicate checkbox text in same step",
+          "errorMessage": "Duplicate checkbox: {text}",
+          "level": "error",
+          "type": "no_duplicates"
+        }
+      ]
+    }
+  }
+}
