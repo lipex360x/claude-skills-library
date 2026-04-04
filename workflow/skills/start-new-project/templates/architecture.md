@@ -2,6 +2,12 @@
 
 Codebase knowledge cache — avoids expensive exploration on every new conversation/phase. Read this first; explore only when something looks stale or missing.
 
+## At a glance
+
+- **Type:** [project type — e.g., web app, CLI, API, library, monorepo]
+- **Framework:** [primary framework — e.g., Next.js 15, Hono, FastAPI]
+- **Entry points:** [main entry files — e.g., `src/app/layout.tsx`, `src/index.ts`, `cmd/main.go`]
+
 ## Stack & dependencies
 
 [Key deps with their purpose — not the full package.json, just the ones that inform architectural decisions]
@@ -14,6 +20,19 @@ Codebase knowledge cache — avoids expensive exploration on every new conversat
 - Application: `src/application/<entity>/` — use cases, orchestration
 - Infrastructure: `src/infrastructure/` — database, auth, external APIs
 - Presentation: `src/app/` — routes, server actions, UI components
+
+## Key flows
+
+[2-3 numbered sequences showing how data moves through layers — the "trace this" reference for debugging and onboarding.]
+
+1. **[Flow name — e.g., Create entity]**
+   Request → [Presentation layer entry] → [Validation] → [Domain/Application logic] → [Infrastructure persistence] → Response
+
+2. **[Flow name — e.g., Authenticated action]**
+   Request → [Auth check] → [Permission gate] → [Business logic] → [Side effects] → Response
+
+3. **[Flow name — e.g., Background job]**
+   Trigger → [Queue/scheduler] → [Worker] → [Domain logic] → [Notification/cleanup] → Done
 
 ## Patterns (by example)
 
@@ -73,6 +92,20 @@ Log levels: `silent` (test), `debug` (dev), `info` (prod). Debug/trace logs must
 
 [List of routes with purpose and access level — living document, update when routes change]
 
+## Config
+
+[Environment variables that affect runtime behavior — not secrets, just the knobs.]
+
+| Variable | Purpose | Required | Default |
+|----------|---------|----------|---------|
+
+## Scripts
+
+[Dev scripts and their purpose — quick reference for common operations.]
+
+| Script | Purpose | When to use |
+|--------|---------|-------------|
+
 ---
 
 ## What NOT to include
@@ -82,3 +115,8 @@ Log levels: `silent` (test), `debug` (dev), `info` (prod). Debug/trace logs must
 - Configuration values — document the pattern, not the value
 - Full code examples — point to a canonical file
 - Git history or changelog — `git log` is authoritative
+
+---
+
+<!-- arch-hash: <hash> -->
+<!-- last-updated: <date> -->

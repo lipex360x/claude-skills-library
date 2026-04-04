@@ -9,9 +9,6 @@
 - **Local/absolute paths in issue content.** `~/.brain/`, `/Users/...` in issue body — because issue content is public and portable. Always use project-relative paths.
 - **Workarounds or hacks.** Hardcoded values, temporary flags, `any` casts — because if it needs a TODO comment, the step is incomplete.
 - **Comments that restate code.** Self-documenting code replaces narration — because comments that say what the code does add noise, not clarity.
-- **Skipping Agent Teams check.** Proposing a plan without checking `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` first — because if enabled, the Execution mode section at the top is mandatory, not optional.
-- **Placing Agent Teams section at bottom.** The agent reads top-down and will default to isolated worktree agents if it doesn't see the execution mode first — because placement determines behavior.
-- **Multiple agents editing the same issue body.** Last `gh issue edit --body` wins, earlier edits silently lost — because GitHub's issue API has no merge. Use internal tasks for parallel progress tracking.
-- **Full context in TeamCreate prompts.** Duplicates content, causes drift between approved plan and actual execution — because the issue is the single source of truth, not the prompt.
-- **Using Teammate for independent templated work.** TeamCreate + shutdown protocol + internal tasks for work that is fire-and-forget (same pattern repeated on independent targets) — because Agent with `run_in_background` is simpler, cheaper, and produces the same result without coordination overhead.
-- **Duplicating tracking systems.** Creating internal tasks (`TaskCreate`) that mirror GitHub issue checkboxes — because two trackers for the same work diverge silently. Agent strategy uses issue checkboxes only; Teammate strategy uses internal tasks only (lead syncs to issue).
+- **Horizontal TDD.** Writing all tests first, then all implementations — because vertical slices (RED→GREEN→RED→GREEN) enforce discipline and catch design issues early.
+- **Using sed/regex on GitHub issue body.** sed can corrupt markdown structure, and GitHub's issue API has no merge — last write wins. Always edit `.docs/issues/<N>.md` locally and publish with `gh issue edit <N> --body "$(cat .docs/issues/<N>.md)"`.
+- **Spawning Explore when .docs/architecture.md exists.** An Explore agent costs ~50k tokens. .docs/architecture.md has the same context in ~2k tokens — because it's updated by `/update-docs` after development. Read it first. Only explore areas it doesn't cover.
