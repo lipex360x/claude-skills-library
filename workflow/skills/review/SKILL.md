@@ -21,7 +21,7 @@ allowed-tools:
 
 # /review
 
-Spawn 3 QA sub-agents in parallel to perform static, semantic, and runtime quality checks on all files changed since `main`. Merge results into a single quality report, post as a GitHub issue comment, and manage up to 3 fix-and-re-review cycles.
+Spawn 3 QA sub-agents in parallel to perform static, semantic, and runtime quality checks on all files changed since the base branch. Merge results into a single quality report, post as a GitHub issue comment, and manage up to 3 fix-and-re-review cycles.
 
 **IMPORTANT:** Read the entire Pre-flight section before taking any action. Every failure scenario has a defined recovery path — never improvise.
 
@@ -30,7 +30,7 @@ Spawn 3 QA sub-agents in parallel to perform static, semantic, and runtime quali
 1. `which gh` — if missing: "GitHub CLI required. Install: https://cli.github.com/" — stop.
 2. `gh auth status` — if not authenticated: "Run `gh auth login` first." — stop.
 3. Current directory is a git repo — if not: "Must run inside a git repo." — stop.
-4. **Non-empty diff.** `git diff main..HEAD --name-only` must return at least one file. If empty: "No changes to review — nothing to do." — stop.
+4. **Non-empty diff.** Detect the base branch (`main` or `master` — check which exists). `git diff <base-branch>..HEAD --name-only` must return at least one file. If empty: "No changes to review — nothing to do." — stop.
 5. **Detect issue number.** Parse current branch name (`feat/<N>-*`). If not on a feature branch, ask the user with `AskUserQuestion`.
 6. **Parse flags.**
    - `--final` — delta-only review: scope to files changed since `last_review_commit_sha` in `.claude/review-state.json`. Only static + semantic (no runtime). Single cycle, no iteration. If no state file or no prior review SHA: "No prior review found — run `/review` without `--final` first." — stop.
@@ -48,7 +48,7 @@ Spawn 3 QA sub-agents in parallel to perform static, semantic, and runtime quali
    - `.docs/architecture.md` — architecture context for runtime review.
    - `.docs/project.md` — domain context for semantic review.
    - `.claude/review-config.json` — custom config overrides.
-10. **Collect changed files.** `git diff main..HEAD --name-only` (or `git diff <last_review_sha>..HEAD --name-only` for `--final`). Store as the file scope for all sub-agents.
+10. **Collect changed files.** Detect the base branch (`main` or `master`). `git diff <base-branch>..HEAD --name-only` (or `git diff <last_review_sha>..HEAD --name-only` for `--final`). For `--step N`: cross-reference with `.docs/issues/<N>.md` checkboxes to identify which files belong to that step — only those files are in scope. Store as the file scope for all sub-agents.
 11. **Read prior cycle report.** If `.docs/reviews/<issue>-cycle-<N-1>.md` exists, read it. Extract open items to scope re-review. On cycle 2+, sub-agents only re-check: (a) items still `open` from prior cycle, (b) newly changed files since last review SHA.
 
 **Inputs:** `$ARGUMENTS` for flags (`--final`, `--step N`, `--rerun <agent>`). Issue number from branch name.
@@ -67,9 +67,11 @@ Build 3 role-based briefing packets. Each sub-agent receives ONLY the context it
 
 | Sub-agent | Model | Context packet | Approximate tokens |
 |-----------|-------|---------------|-------------------|
-| **QA-static** | sonnet | quality-audit config path + lint/type-check commands + changed file list | ~400 |
-| **QA-semantic** | opus | `.docs/project.md` content + `.docs/quality.md` content + changed file contents | ~900 + file contents |
-| **QA-runtime** | sonnet | `.docs/architecture.md` scripts/config section + test commands + port info | ~600 |
+| **QA-static** | sonnet* | quality-audit config path + lint/type-check commands + changed file list | ~400 |
+| **QA-semantic** | opus* | `.docs/project.md` content + `.docs/quality.md` content + changed file contents | ~900 + file contents |
+| **QA-runtime** | sonnet* | `.docs/architecture.md` scripts/config section + test commands + port info | ~600 |
+
+*Model column is aspirational — pass `model: "sonnet"` or `model: "opus"` in the Agent tool call, but sub-agents may inherit the session model if override is not supported. Design briefings assuming the target model's capabilities regardless.
 
 For `--final`: skip QA-runtime entirely (only static + semantic).
 For `--rerun <agent>`: build only the specified agent's briefing.
@@ -108,6 +110,8 @@ Re-enable `"skill-active": true` in `.claude/project-setup.json`.
 
 As each sub-agent completes, parse its `<review-result>` XML output. Extract structured items with: `id`, `rule`, `file`, `line`, `status` (FAIL/WARN/PASS), `detail`, `reasoning` (semantic only).
 
+**Intermediate state writes.** After parsing each sub-agent's results, immediately append them to `.claude/review-state.json` (update the `items` array and `skipped_agents`). This protects against context compaction — if the session compacts mid-review, the coordinator can recover from the state file instead of losing completed sub-agent results.
+
 Read `references/quality-report-format.md` for the report template.
 
 **Merge logic:**
@@ -121,13 +125,15 @@ Read `references/quality-report-format.md` for the report template.
 
 ### 4. Write report and update state
 
-**Write the report file:** `.docs/reviews/<issue>-cycle-<N>.md` using the format from `references/quality-report-format.md`.
+**Write the report file first (local-first):** `.docs/reviews/<issue>-cycle-<N>.md` using the format from `references/quality-report-format.md`. The local file is the source of truth — git history is the backup.
 
-**Post as GitHub issue comment.** Always create a NEW comment — never edit a previous one (immutable audit trail).
+**Then post as GitHub issue comment.** Always create a NEW comment — never edit a previous one (immutable audit trail). Post from the local file:
 
 ```bash
 gh issue comment <number> --body "$(cat .docs/reviews/<issue>-cycle-<N>.md)"
 ```
+
+If the post fails, the local report still exists — warn the user to post manually or let `/push` sync it later.
 
 **Update `.claude/review-state.json`:**
 
@@ -189,7 +195,7 @@ Present a summary table to the user:
 | Sub-agent timeout (runtime) | SKIPPED in report, suggest `--rerun runtime` |
 | Docker won't start | QA-runtime posts SKIPPED with error detail |
 | Ports in use | QA-runtime reuses running app or reports conflict |
-| No `.docs/quality.md` | Semantic review skipped (tier degrades to Minimum) |
+| No `.docs/quality.md` | Semantic review runs with general best-practices fallback (clean code, error handling, no magic numbers, single responsibility). Tier degrades to Minimum but QA-semantic still spawns — see `references/sub-agent-prompts.md` for the fallback prompt |
 | No quality-audit scripts | Static review limited to lint + type-check |
 | No test runner found | Runtime review skips test execution, checks logs only |
 | GitHub comment post fails | Write report to local file, warn user to post manually |

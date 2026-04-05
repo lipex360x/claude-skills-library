@@ -6,7 +6,6 @@ description: >-
   when the user says "validate", "test it", "check the UI", "user test", "let me
   see it", "does it work", or wants to validate the running app — even if they
   don't explicitly say "validate."
-disable-model-invocation: true
 model: sonnet
 effort: medium
 allowed-tools:
@@ -21,7 +20,7 @@ allowed-tools:
 
 # /validate
 
-Present a concrete testing guide for the running app, collect user feedback, and iterate fixes until the user approves. Runs after `/review` and `/pw`.
+Present a concrete testing guide for the running app, collect user feedback, and iterate fixes until the user approves. Runs after `/review` and `/pw`. **Only for issues with UI changes** — skip for backend-only or infrastructure work.
 
 ## Pre-flight
 
@@ -62,7 +61,7 @@ After applying fixes, run **REVIEW-LITE** inline:
 
 This is NOT a separate skill invocation. It is a lightweight, single-pass inline check scoped to changed files only (~10k tokens):
 
-1. **Get changed files:** `git diff --name-only HEAD~1` (files changed by the fix commit).
+1. **Get changed files:** `git diff --name-only HEAD~<N>` where N is the number of commits since the last validation cycle (all fix commits, not just the last one). If unsure, use the SHA from before the fix started. The goal is: all files modified after the user's feedback, nothing more.
 2. **Static check:** Run linter and type-checker if configured (e.g., detect from `package.json` scripts). Report any errors.
 3. **Semantic check:** Read each changed file. Verify against `.docs/quality.md` if it exists (DON'Ts list). Check for: hardcoded values, skipped error handling, commented-out code, debug leftovers.
 4. **Fix issues found** by REVIEW-LITE before proceeding. Do not present REVIEW-LITE results to the user -- fix silently and move on.
@@ -71,12 +70,12 @@ This is NOT a separate skill invocation. It is a lightweight, single-pass inline
 
 After fixes + REVIEW-LITE pass:
 
-1. If the project has Playwright, suggest the user run `/pw` to re-verify E2E tests on modified pages.
+1. If the project has Playwright, run `/pw` to re-verify E2E tests on modified pages. This is a mandatory pipeline step, not optional — visual regressions introduced by feedback fixes must be caught before re-presenting to the user.
 2. Re-present the testing guide (updated if the fix changed behavior) via `AskUserQuestion`.
 3. Collect feedback again (same as Step 2).
 4. If approved, proceed to Step 5. If more issues, return to Step 3.
 
-There is **no hard limit** on iteration cycles. The loop runs until the user approves. Layout iteration is naturally convergent -- each cycle addresses fewer issues.
+There is **no hard limit** on iteration cycles by default. The loop runs until the user approves. Layout iteration is naturally convergent -- each cycle addresses fewer issues. If `.claude/review-config.json` defines `max_human_cycles`, respect that limit and warn the user when approaching it.
 
 ### 5. Finalize
 

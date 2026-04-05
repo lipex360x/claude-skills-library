@@ -6,6 +6,8 @@ description: >-
   creates branch and tasks. Use this skill when the user says "start issue",
   "work on issue #N", "pull from backlog", "start #N", or wants to begin
   implementing an issue — even if they don't explicitly say "issue."
+model: opus
+effort: high
 user-invocable: true
 allowed-tools:
   - Read
@@ -97,14 +99,13 @@ Scan comments for: file paths, scope transfers from `/open-pr` or `/close-pr`, p
 
 **Playwright detection (web projects).** Check for `playwright.config.ts`. If found, store project names and baseURL. Check for frontend framework signals (react, vue, svelte, next, etc.).
 
-**Enforce development standards before planning:**
+**Enforce development standards before planning.** Read `references/guidelines.md` for the full set of standards. Key rules to internalize for plan generation:
 
 1. **TDD is mandatory.** Enforce test-first checkboxes in every behavioral Step. Read `references/tdd-methodology.md`.
 2. **No workarounds.** Plan must solve problems at root. Hardcoded values, temporary flags, monkey-patches signal the Step is incomplete.
-3. **No unnecessary code comments.** Only for genuinely non-obvious logic. Never include "add comments" checkboxes.
-4. **Test isolation for database/stateful projects.** Scan for database signals (docker-compose, ORM configs, migrations/, BaaS references). Store `has_database` flag. When true and no existing test isolation exists, plan MUST include a test environment Step. Read `references/development-guidelines.md` § 1.
-5. **Linter ignore audit in final Step.** Every plan's last Step must include: `- [ ] [INFRA] Audit linter ignore rules — review knip.json ignores, eslint-disable, noqa; remove if unneeded, justify if required`.
-6. **Dev startup/teardown scripts for multi-service projects.** Check for `scripts/dev-start.sh` and `scripts/dev-stop.sh`. When missing and project has infrastructure signals, include a Step to create them.
+3. **Test isolation for database/stateful projects.** Scan for database signals (docker-compose, ORM configs, migrations/, BaaS references). When true and no existing test isolation exists, plan MUST include a test environment Step.
+4. **Linter ignore audit in final Step.** Every plan's last Step must include: `- [ ] [INFRA] Audit linter ignore rules — review knip.json ignores, eslint-disable, noqa; remove if unneeded, justify if required`.
+5. **Dev startup/teardown scripts for multi-service projects.** Check for `scripts/dev-start.sh` and `scripts/dev-stop.sh`. When missing and project has infrastructure signals, include a Step to create them.
 
 ### 3. Propose the detailed plan
 
@@ -177,9 +178,9 @@ Find the project board. If none exists, offer to create via `references/project-
 
 **Validate board structure.** Query Status field options and compare against expected 7 columns (Backlog, Todo, Ready, In Progress, In review, Done, Cancelled). If columns are missing, run the `updateProjectV2Field` mutation from `references/project-board-setup.md` § 2. After updating, re-assign items with null/empty status to "Backlog".
 
-**Check for blockers.** Scan issue body for `> Blocked by #N`. If blocking issue is still open, flag with AUQ.
+**Check for blockers.** Scan issue body for `> **Blocked by** #N` (bold markdown format). If blocking issue is still open, flag with AUQ.
 
-**Move card to "Ready"** → then after plan approval, **move to "In Progress"**.
+**Move card to "In Progress"** (plan is already approved at this point — skip "Ready" intermediate state).
 
 Check if Priority and Size are set. If missing, infer from plan (P0/P1/P2 and S/M/L/XL based on step count). Set with `gh project item-edit`.
 

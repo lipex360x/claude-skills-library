@@ -21,6 +21,8 @@ allowed-tools:
   - AskUserQuestion
   - TaskCreate
   - TaskUpdate
+  - WebSearch
+  - WebFetch
 ---
 
 # Continue Issue
@@ -35,7 +37,7 @@ Resume work on an in-progress issue by reconstructing session state from the iss
 
 **Inputs:** `$ARGUMENTS` → issue number (positive integer, accepts `#N` or `N`). If absent, auto-detect from branch name (`feat/<N>-*` or `feature/<N>-*`).
 
-**Reads:** `.docs/issues/<N>.md` (local issue body), `.docs/architecture.md`, `.docs/quality.md`, CLAUDE.md, `.claude/project-setup.json`.
+**Reads:** `.docs/issues/<N>.md` (local issue body), `.docs/architecture.md`, `.docs/project.md`, `.docs/quality.md`, CLAUDE.md, `.claude/project-setup.json`.
 
 **Checks:**
 
@@ -43,7 +45,11 @@ Resume work on an in-progress issue by reconstructing session state from the iss
 2. `gh auth status` → if not authenticated: "Run `gh auth login` first." — stop.
 3. Current directory is a git repo → if not: "Must run inside a git repo." — stop.
 4. **Read `.docs/architecture.md`** → if exists, read and store. Primary codebase context.
-5. **Read `.docs/quality.md`** → if exists, read and store. Code quality standards for this project.
+5. **Read `.docs/project.md`** → if exists, read and store. Domain context (terms, business rules, boundaries).
+6. **Read `.docs/quality.md`** → if exists, read and store. Code quality standards for this project.
+7. **Read `.claude/scripts/validate-issue.config.json`** → if exists, internalize tag rules (`tag_order`, `max_checkboxes`, etc.) so you can fix validation errors efficiently in Step 2b.
+8. **Working tree clean?** `git status --porcelain` → if not clean: warn "Uncommitted changes detected — consider committing or stashing before continuing." Continue (warning, not a block).
+9. **Read development references.** Before starting implementation, read `references/guidelines.md` for development standards (TDD, Playwright, DDD). Read `references/tdd-methodology.md` when executing `[RED]`/`[GREEN]` steps.
 
 </pre_flight>
 

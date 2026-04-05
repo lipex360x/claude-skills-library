@@ -28,7 +28,7 @@ Run Playwright E2E tests against the live app, capture screenshots + browser con
 1. **Playwright config exists?** Glob for `playwright.config.*` at project root. If missing: "No Playwright config found. Set up Playwright first or skip /pw." — stop.
 2. **Read `.claude/project-setup.json`** for project-specific flags: `headed` (run with browser visible), `project` (Playwright project name to use, e.g. "chromium", "mobile"). Store for Step 2.
 3. **Dev server running?** Check if the `baseURL` from the Playwright config is reachable (`curl -s -o /dev/null -w "%{http_code}"` the URL). If not reachable: warn user the dev server may be down — the `webServer` config may auto-start it, but if tests fail with connection errors, the server needs attention.
-4. **Identify changed pages.** Run `git diff main --name-only` and filter for files that affect UI (components, pages, routes, layouts, styles). Store as `changed_scope` — used to decide which tests to run.
+4. **Identify changed pages.** Detect the base branch (`main` or `master` — check which exists) and run `git diff <base-branch> --name-only`. Filter for files that affect UI (components, pages, routes, layouts, styles). Store as `changed_scope` — used to decide which tests to run.
 5. **Locate test files.** Read the `testDir` from the Playwright config and list available test files. Match against `changed_scope` to determine which tests are relevant.
 
 ## Steps
@@ -53,7 +53,7 @@ If no console capture exists in the test infrastructure, add it to a shared fixt
 
 ### 2. Analyze results
 
-**If tests pass:** Read all captured screenshots using the Read tool. Visually inspect each one for:
+**If tests pass:** Check if tests generated screenshots (look in `test-results/` or the path configured in the Playwright config). If screenshots exist, read them using the Read tool and visually inspect each one for:
 - Layout breakage (overlapping elements, broken grids, overflow)
 - Missing or misaligned content
 - Dark/light mode rendering issues
@@ -74,7 +74,14 @@ These are bugs even if the screenshot looks fine — fix before proceeding.
 
 ### 3. Fix and re-run
 
-Fix the **application code** (not the test infrastructure, unless the test itself is wrong). After each fix:
+Classify the problem and fix accordingly:
+
+- **App bug** (wrong behavior, broken layout, missing element) → fix the application code.
+- **Stale test** (selector outdated after UI change, wrong expected text, timing issue) → fix the existing test. Never mask an app bug by loosening assertions — only fix the test when the app behavior is confirmed correct.
+- **Missing test infrastructure** (no console capture fixture, no shared setup) → add to shared fixtures or relevant test files.
+- **Uncovered bug** (visual issue found via screenshots that no test catches) → fix the app bug first, then add a focused test for the regression. Keep the new test minimal — cover the discovered bug, don't expand scope.
+
+After each fix:
 
 1. Re-run only the failing tests
 2. Capture new screenshots
@@ -96,7 +103,7 @@ Report:
 - **Browser console** — clean or errors found and fixed
 - **Cycles** — how many fix-and-rerun iterations were needed
 
-**CRITICAL RULE: E2E tests must navigate like a human.** Tests must reach pages through UI interactions — clicking links, menus, sidebar items, buttons. A human does not type URLs into the address bar to navigate an app. The ONLY acceptable `page.goto()` is for the initial entry point (login page or home page). All subsequent navigation must happen through clicks. Read `references/playwright-practices.md` for the full rationale and patterns.
+**CRITICAL RULE: E2E tests must navigate like a human.** Tests must reach pages through UI interactions — clicking links, menus, sidebar items, buttons. A human does not type URLs into the address bar to navigate an app. The ONLY acceptable `page.goto()` is for the initial entry point (login page or home page). All subsequent navigation must happen through clicks. Read `references/playwright-practices.md` for the full rationale and patterns. Read `references/test-authoring-rules.md` for the distinction between [E2E] steps (writing tests) and /pw (running/validating), fix cycle discipline, and scope decisions.
 
 ## Error handling
 
@@ -104,7 +111,7 @@ Report:
 |---------|----------|
 | No Playwright config | Stop — tell user to set up Playwright first |
 | Dev server unreachable | Warn — Playwright `webServer` may auto-start it. If tests fail with ECONNREFUSED, ask user to start the server |
-| All tests fail on first run | Check if this is a fresh setup (no prior passing state). If so, focus on getting one test green first |
+| All tests fail on first run | Check if this is a fresh setup (no prior passing state). If so, focus on getting one test green first — fix app code, not tests. Never loosen assertions even on fresh setup |
 | Screenshot read fails | Verify file path from test output. Screenshots may be in `test-results/` or a custom path from config |
 | Browser console errors but tests pass | These are still bugs. Fix before declaring clean |
 | Persistent failures after 5 cycles | Stop, report remaining issues, ask user for direction |

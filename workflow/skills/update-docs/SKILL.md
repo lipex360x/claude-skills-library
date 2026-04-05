@@ -5,7 +5,6 @@ description: >-
   Use when the user says "update docs", "update architecture", "sync
   documentation", "document changes", or wants docs current — even if they
   don't explicitly say "docs."
-disable-model-invocation: true
 model: sonnet
 effort: medium
 allowed-tools:
@@ -20,17 +19,19 @@ allowed-tools:
 
 # Update Docs
 
-Update `.docs/architecture.md` and `.docs/project.md` with changes from the current branch. Scoped to `git diff main..HEAD` — only documents what changed, never rewrites entire files.
+Update `.docs/architecture.md` and `.docs/project.md` with changes from the current branch. Scoped to `git diff <base-branch>..HEAD` — only documents what changed, never rewrites entire files.
 
 ## Pre-flight
 
 <pre_flight>
 
 1. Current directory is a git repo → if not: "Must run inside a git repo." — stop.
-2. `.docs/architecture.md` exists → if not: "No `.docs/architecture.md` found. Run `/start-new-project` to scaffold `.docs/`." — stop.
-3. `.docs/project.md` exists → if not: warn "`.docs/project.md` not found — will only update architecture.md."
-4. Branch is not `main` → if on main: "Nothing to document — you're on main." — stop.
-5. Diff is not empty → `git diff main..HEAD --stat` → if empty: "No changes to document." — stop.
+2. **Detect base branch.** Check which exists: `main` or `master`. Store for diff commands.
+3. `.docs/architecture.md` exists → if not: "No `.docs/architecture.md` found. Run `/start-new-project` to scaffold `.docs/`." — stop.
+4. `.docs/project.md` exists → if not: warn "`.docs/project.md` not found — will only update architecture.md."
+5. Branch is not the base branch → if on main/master: "Nothing to document — you're on the base branch." — stop.
+6. Diff is not empty → `git diff <base-branch>..HEAD --stat` → if empty: "No changes to document." — stop.
+7. **Check issue checkboxes** (warning). If `.docs/issues/<N>.md` exists, check if all step checkboxes are ticked. If not: warn "Some steps may be incomplete — documentation may be premature." Continue (warning, not a block).
 6. **Flight table.** Read `.claude/project-setup.json` for `show-flight-tables` (defaults to `true` when absent). If enabled, present pre-flight results as a markdown table: **Check** | **Status** | **Detail**.
 
 </pre_flight>
@@ -42,8 +43,8 @@ Update `.docs/architecture.md` and `.docs/project.md` with changes from the curr
 Read the full diff and changed file list:
 
 ```bash
-git diff main..HEAD --stat
-git diff main..HEAD --name-only
+git diff <base-branch>..HEAD --stat
+git diff <base-branch>..HEAD --name-only
 ```
 
 Read the current `.docs/architecture.md`. If `.docs/project.md` exists, read it too.
@@ -87,8 +88,10 @@ Scan the diff for:
 Compute a hash of the directory structure and update the footer of `.docs/architecture.md`:
 
 ```bash
-find . -type f -not -path './.git/*' -not -path './node_modules/*' -not -path './.docs/*' | sort | sha256sum | cut -c1-12
+find . -type f -not -path './.git/*' -not -path './node_modules/*' -not -path './.docs/*' | sort | shasum -a 256 | cut -c1-12
 ```
+
+Note: uses `shasum -a 256` (available on macOS and Linux) instead of `sha256sum` (Linux-only).
 
 Update or add at the bottom of architecture.md:
 
@@ -123,6 +126,10 @@ Present concisely:
 - **Adding implementation details that will be stale next commit.** Document patterns and structure, not specific line numbers, variable names, or temporary states. "Auth uses JWT middleware" is good. "Token validation is on line 47 of auth.ts" is bad.
 - **Skipping the drift detector hash update.** The hash is how other skills detect staleness. Without it, `/start-issue` cannot know if architecture.md is current, leading to unnecessary codebase exploration (~50k tokens wasted).
 - **Deleting sections not touched by the diff.** A section might look outdated, but if the diff didn't change it, leave it. The next `/update-docs` run for the relevant branch will handle it.
+
+## Post-flight
+
+Set `"skill-active": false` and remove `"skill-active-name"` from `.claude/project-setup.json`.
 
 ## Next action
 
